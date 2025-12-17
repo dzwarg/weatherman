@@ -28,14 +28,14 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Setup Tasks
 
-- [ ] [SPEC-001-001] [P1] [INFRA] Initialize Vite + React project structure with PWA plugin configuration in `vite.config.js`
-- [ ] [SPEC-001-002] [P1] [INFRA] Install core dependencies: React 22+, Vite 5+, @vite-plugin-pwa, @sproutsocial/racine, @sproutsocial/seeds-react in `package.json`
-- [ ] [SPEC-001-003] [P1] [INFRA] Configure ESLint with React and ES2022+ rules in `.eslintrc.js`
-- [ ] [SPEC-001-004] [P1] [INFRA] Set up Vitest with Testing Library and jsdom in `vitest.config.js`
-- [ ] [SPEC-001-005] [P1] [INFRA] Create PWA manifest with app metadata, icons, and theme in `public/manifest.json`
-- [ ] [SPEC-001-006] [P1] [INFRA] Create `.env.example` with OpenWeatherMap API key placeholder and timeout config
-- [ ] [SPEC-001-007] [P1] [INFRA] Create base folder structure: `src/components/`, `src/services/`, `src/hooks/`, `src/models/`, `src/utils/`, `src/pages/`
-- [ ] [SPEC-001-008] [P1] [INFRA] Set up package.json scripts: `dev`, `build`, `preview`, `test`, `lint`, `lint:fix`
+- [x] [SPEC-001-001] [P1] [INFRA] Initialize Vite + React project structure with PWA plugin configuration in `vite.config.js`
+- [x] [SPEC-001-002] [P1] [INFRA] Install core dependencies: React 22+, Vite 5+, @vite-plugin-pwa, @sproutsocial/racine, @sproutsocial/seeds-react in `package.json`
+- [x] [SPEC-001-003] [P1] [INFRA] Configure ESLint with React and ES2022+ rules in `.eslintrc.js`
+- [x] [SPEC-001-004] [P1] [INFRA] Set up Vitest with Testing Library and jsdom in `vitest.config.js`
+- [x] [SPEC-001-005] [P1] [INFRA] Create PWA manifest with app metadata, icons, and theme in `public/manifest.json`
+- [x] [SPEC-001-006] [P1] [INFRA] Create `.env.example` with OpenWeatherMap API key placeholder and timeout config
+- [x] [SPEC-001-007] [P1] [INFRA] Create base folder structure: `src/components/`, `src/services/`, `src/hooks/`, `src/models/`, `src/utils/`, `src/pages/`
+- [x] [SPEC-001-008] [P1] [INFRA] Set up package.json scripts: `dev`, `build`, `preview`, `test`, `lint`, `lint:fix`
 
 ---
 
@@ -49,21 +49,21 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Data Models
 
-- [ ] [SPEC-001-009] [P1] [US2] Create UserProfile model with predefined profiles (4 y/o girl, 7 y/o boy, 10 y/o boy) in `src/models/UserProfile.js`
-- [ ] [SPEC-001-010] [P1] [US1] Create WeatherData model with temperature, precipitation, wind, humidity, UV fields in `src/models/WeatherData.js`
-- [ ] [SPEC-001-011] [P1] [US1] Create ClothingRecommendation model with outerwear, layers, accessories, footwear in `src/models/ClothingRecommendation.js`
-- [ ] [SPEC-001-012] [P1] [US1] Create VoiceQuery model with intent, timeReference, location fields in `src/models/VoiceQuery.js`
-- [ ] [SPEC-001-013] [P1] [US1] Create Location model with lat, lon, name, isCurrentLocation fields in `src/models/Location.js`
+- [x] [SPEC-001-009] [P1] [US2] Create UserProfile model with predefined profiles (4 y/o girl, 7 y/o boy, 10 y/o boy) in `src/models/UserProfile.js`
+- [x] [SPEC-001-010] [P1] [US1] Create WeatherData model with temperature, precipitation, wind, humidity, UV fields in `src/models/WeatherData.js`
+- [x] [SPEC-001-011] [P1] [US1] Create ClothingRecommendation model with outerwear, layers, accessories, footwear in `src/models/ClothingRecommendation.js`
+- [x] [SPEC-001-012] [P1] [US1] Create VoiceQuery model with intent, timeReference, location fields in `src/models/VoiceQuery.js`
+- [x] [SPEC-001-013] [P1] [US1] Create Location model with lat, lon, name, isCurrentLocation fields in `src/models/Location.js`
 
 ### Core Services
 
-- [ ] [SPEC-001-014] [P1] [INFRA] Implement storageService with LocalStorage wrapper methods (get, set, remove, clear) in `src/services/storageService.js`
-- [ ] [SPEC-001-015] [P1] [INFRA] Implement cacheService with IndexedDB wrapper for weather data caching in `src/services/cacheService.js`
-- [ ] [SPEC-001-016] [P1] [INFRA] Create constants file with wake phrase, profiles, API config, timeouts in `src/utils/constants.js`
-- [ ] [SPEC-001-017] [P1] [US2] Implement profileService with getActiveProfile, setActiveProfile, getAllProfiles methods using storageService in `src/services/profileService.js`
-- [ ] [SPEC-001-018] [P1] [US1] Create weatherUtils with temperature conversion, condition mapping, forecast parsing in `src/utils/weatherUtils.js`
-- [ ] [SPEC-001-019] [P1] [US1] Create clothingRules utility with temperature-based recommendation logic in `src/utils/clothingRules.js`
-- [ ] [SPEC-001-020] [P1] [INFRA] Implement Service Worker registration in `src/registerServiceWorker.js` with update detection
+- [x] [SPEC-001-014] [P1] [INFRA] Implement storageService with LocalStorage wrapper methods (get, set, remove, clear) in `src/services/storageService.js`
+- [x] [SPEC-001-015] [P1] [INFRA] Implement cacheService with IndexedDB wrapper for weather data caching in `src/services/cacheService.js`
+- [x] [SPEC-001-016] [P1] [INFRA] Create constants file with wake phrase, profiles, API config, timeouts in `src/utils/constants.js`
+- [x] [SPEC-001-017] [P1] [US2] Implement profileService with getActiveProfile, setActiveProfile, getAllProfiles methods using storageService in `src/services/profileService.js`
+- [x] [SPEC-001-018] [P1] [US1] Create weatherUtils with temperature conversion, condition mapping, forecast parsing in `src/utils/weatherUtils.js`
+- [x] [SPEC-001-019] [P1] [US1] Create clothingRules utility with temperature-based recommendation logic in `src/utils/clothingRules.js`
+- [x] [SPEC-001-020] [P1] [INFRA] Implement Service Worker registration in `src/registerServiceWorker.js` with update detection
 
 ---
 
@@ -78,37 +78,37 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Weather Integration
 
-- [ ] [SPEC-001-021] [P1] [US1] Implement weatherService.getCurrentWeather with OpenWeatherMap API integration, 5-second timeout in `src/services/weatherService.js`
-- [ ] [SPEC-001-022] [P1] [US1] Add weatherService caching strategy: 1-hour cache duration, stale data fallback in `src/services/weatherService.js`
-- [ ] [SPEC-001-023] [P1] [US1] Implement weatherService.getForecast for multi-day forecast retrieval in `src/services/weatherService.js`
+- [x] [SPEC-001-021] [P1] [US1] Implement weatherService.getCurrentWeather with OpenWeatherMap API integration, 5-second timeout in `src/services/weatherService.js`
+- [x] [SPEC-001-022] [P1] [US1] Add weatherService caching strategy: 1-hour cache duration, stale data fallback in `src/services/weatherService.js`
+- [x] [SPEC-001-023] [P1] [US1] Implement weatherService.getForecast for multi-day forecast retrieval in `src/services/weatherService.js`
 
 ### Voice Services
 
-- [ ] [SPEC-001-024] [P1] [US1] Implement voiceService with SpeechRecognition wrapper and wake word detection in `src/services/voiceService.js`
-- [ ] [SPEC-001-025] [P1] [US1] Add voiceService.startListening method with continuous recognition and interim results in `src/services/voiceService.js`
-- [ ] [SPEC-001-026] [P1] [US1] Add voiceService.stopListening method with cleanup logic in `src/services/voiceService.js`
-- [ ] [SPEC-001-027] [P1] [US1] Implement voiceService.speak method with SpeechSynthesis and child-friendly parameters (rate: 0.9, pitch: 1.1) in `src/services/voiceService.js`
-- [ ] [SPEC-001-028] [P1] [US1] Create voiceUtils with query parsing, intent extraction, and location detection in `src/utils/voiceUtils.js`
+- [x] [SPEC-001-024] [P1] [US1] Implement voiceService with SpeechRecognition wrapper and wake word detection in `src/services/voiceService.js`
+- [x] [SPEC-001-025] [P1] [US1] Add voiceService.startListening method with continuous recognition and interim results in `src/services/voiceService.js`
+- [x] [SPEC-001-026] [P1] [US1] Add voiceService.stopListening method with cleanup logic in `src/services/voiceService.js`
+- [x] [SPEC-001-027] [P1] [US1] Implement voiceService.speak method with SpeechSynthesis and child-friendly parameters (rate: 0.9, pitch: 1.1) in `src/services/voiceService.js`
+- [x] [SPEC-001-028] [P1] [US1] Create voiceUtils with query parsing, intent extraction, and location detection in `src/utils/voiceUtils.js`
 
 ### Recommendation Engine
 
-- [ ] [SPEC-001-029] [P1] [US1] Implement recommendationService.generateRecommendation with weather-to-clothing mapping in `src/services/recommendationService.js`
-- [ ] [SPEC-001-030] [P1] [US1] Add temperature-based layering logic (< 40°F: heavy coat, 40-60°F: jacket, 60-80°F: light layers, > 80°F: shorts/t-shirt) in `src/services/recommendationService.js`
-- [ ] [SPEC-001-031] [P1] [US1] Add precipitation-based rain gear logic (> 50% chance: raincoat, umbrella, boots) in `src/services/recommendationService.js`
-- [ ] [SPEC-001-032] [P1] [US1] Add wind-based accessory logic (> 15 mph: hat, gloves if cold) in `src/services/recommendationService.js`
+- [x] [SPEC-001-029] [P1] [US1] Implement recommendationService.generateRecommendation with weather-to-clothing mapping in `src/services/recommendationService.js`
+- [x] [SPEC-001-030] [P1] [US1] Add temperature-based layering logic (< 40°F: heavy coat, 40-60°F: jacket, 60-80°F: light layers, > 80°F: shorts/t-shirt) in `src/services/recommendationService.js`
+- [x] [SPEC-001-031] [P1] [US1] Add precipitation-based rain gear logic (> 50% chance: raincoat, umbrella, boots) in `src/services/recommendationService.js`
+- [x] [SPEC-001-032] [P1] [US1] Add wind-based accessory logic (> 15 mph: hat, gloves if cold) in `src/services/recommendationService.js`
 
 ### Custom React Hooks
 
-- [ ] [SPEC-001-033] [P1] [US1] Create useVoiceRecognition hook with wake word detection and voice state management in `src/hooks/useVoiceRecognition.js`
-- [ ] [SPEC-001-034] [P1] [US1] Create useSpeechSynthesis hook with queue management and speaking state in `src/hooks/useSpeechSynthesis.js`
-- [ ] [SPEC-001-035] [P1] [US1] Create useWeather hook with location-based weather fetching and caching in `src/hooks/useWeather.js`
-- [ ] [SPEC-001-036] [P1] [INFRA] Create useOfflineStatus hook with online/offline event listeners in `src/hooks/useOfflineStatus.js`
+- [x] [SPEC-001-033] [P1] [US1] Create useVoiceRecognition hook with wake word detection and voice state management in `src/hooks/useVoiceRecognition.js`
+- [x] [SPEC-001-034] [P1] [US1] Create useSpeechSynthesis hook with queue management and speaking state in `src/hooks/useSpeechSynthesis.js`
+- [x] [SPEC-001-035] [P1] [US1] Create useWeather hook with location-based weather fetching and caching in `src/hooks/useWeather.js`
+- [x] [SPEC-001-036] [P1] [INFRA] Create useOfflineStatus hook with online/offline event listeners in `src/hooks/useOfflineStatus.js`
 
 ### Voice UI Components
 
-- [ ] [SPEC-001-037] [P1] [US1] Create WakeWordDetector component with listening state indicator and wake phrase display in `src/components/voice/WakeWordDetector.jsx`
-- [ ] [SPEC-001-038] [P1] [US1] Create VoiceFeedback component with visual states (idle, listening, processing, speaking, error) in `src/components/voice/VoiceFeedback.jsx`
-- [ ] [SPEC-001-039] [P1] [US1] Create RecommendationDisplay component with spoken recommendation text and clothing categories in `src/components/recommendation/RecommendationDisplay.jsx`
+- [x] [SPEC-001-037] [P1] [US1] Create WakeWordDetector component with listening state indicator and wake phrase display in `src/components/voice/WakeWordDetector.jsx`
+- [x] [SPEC-001-038] [P1] [US1] Create VoiceFeedback component with visual states (idle, listening, processing, speaking, error) in `src/components/voice/VoiceFeedback.jsx`
+- [x] [SPEC-001-039] [P1] [US1] Create RecommendationDisplay component with spoken recommendation text and clothing categories in `src/components/recommendation/RecommendationDisplay.jsx`
 
 ---
 
@@ -120,17 +120,17 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Profile UI Components
 
-- [ ] [SPEC-001-040] [P2] [US2] Create ProfileCard component with age, gender, icon, selection state using Seeds Card in `src/components/profile/ProfileCard.jsx`
-- [ ] [SPEC-001-041] [P2] [US2] Create ProfileSelector component displaying 3 profile cards in grid layout in `src/components/profile/ProfileSelector.jsx`
-- [ ] [SPEC-001-042] [P2] [US2] Create ProfileManager component with profile selection persistence logic in `src/components/profile/ProfileManager.jsx`
-- [ ] [SPEC-001-043] [P2] [US2] Create useProfile hook with activeProfile state and setActiveProfile callback in `src/hooks/useProfile.js`
+- [x] [SPEC-001-040] [P2] [US2] Create ProfileCard component with age, gender, icon, selection state using Seeds Card in `src/components/profile/ProfileCard.jsx`
+- [x] [SPEC-001-041] [P2] [US2] Create ProfileSelector component displaying 3 profile cards in grid layout in `src/components/profile/ProfileSelector.jsx`
+- [x] [SPEC-001-042] [P2] [US2] Create ProfileManager component with profile selection persistence logic in `src/components/profile/ProfileManager.jsx`
+- [x] [SPEC-001-043] [P2] [US2] Create useProfile hook with activeProfile state and setActiveProfile callback in `src/hooks/useProfile.js`
 
 ### Profile-Based Recommendation Customization
 
-- [ ] [SPEC-001-044] [P2] [US2] Add profile-based vocabulary customization in recommendationService (age-appropriate complexity, gender-typical terms) in `src/services/recommendationService.js`
-- [ ] [SPEC-001-045] [P2] [US2] Update ClothingRecommendation model to include profile-specific styling (simple fasteners for 4 y/o, dress/skirt for girls) in `src/models/ClothingRecommendation.js`
-- [ ] [SPEC-001-046] [P2] [US2] Create ProfileSetup page component with initial profile selection flow in `src/pages/ProfileSetup.jsx`
-- [ ] [SPEC-001-047] [P2] [US2] Add default recommendation logic when no profile selected (general age 4-10 guidance) in `src/services/recommendationService.js`
+- [x] [SPEC-001-044] [P2] [US2] Add profile-based vocabulary customization in recommendationService (age-appropriate complexity, gender-typical terms) in `src/services/recommendationService.js`
+- [x] [SPEC-001-045] [P2] [US2] Update ClothingRecommendation model to include profile-specific styling (simple fasteners for 4 y/o, dress/skirt for girls) in `src/models/ClothingRecommendation.js`
+- [x] [SPEC-001-046] [P2] [US2] Create ProfileSetup page component with initial profile selection flow in `src/pages/ProfileSetup.jsx`
+- [x] [SPEC-001-047] [P2] [US2] Add default recommendation logic when no profile selected (general age 4-10 guidance) in `src/services/recommendationService.js`
 
 ---
 
@@ -142,16 +142,16 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Page Components
 
-- [ ] [SPEC-001-048] [P1] [US1] Create Home page with WakeWordDetector, VoiceFeedback, RecommendationDisplay in `src/pages/Home.jsx`
-- [ ] [SPEC-001-049] [P2] [US2] Add ProfileSelector to Home page with persistent profile indicator in `src/pages/Home.jsx`
-- [ ] [SPEC-001-050] [P3] [INFRA] Create Settings page with cache management, API key validation, microphone permissions in `src/pages/Settings.jsx`
-- [ ] [SPEC-001-051] [P1] [INFRA] Create offline fallback page with cached data indicator in `public/offline.html`
+- [x] [SPEC-001-048] [P1] [US1] Create Home page with WakeWordDetector, VoiceFeedback, RecommendationDisplay in `src/pages/Home.jsx`
+- [x] [SPEC-001-049] [P2] [US2] Add ProfileSelector to Home page with persistent profile indicator in `src/pages/Home.jsx`
+- [x] [SPEC-001-050] [P3] [INFRA] Create Settings page with cache management, API key validation, microphone permissions in `src/pages/Settings.jsx`
+- [x] [SPEC-001-051] [P1] [INFRA] Create offline fallback page with cached data indicator in `public/offline.html`
 
 ### App Structure
 
-- [ ] [SPEC-001-052] [P1] [INFRA] Implement App.jsx with routing (if needed), Seeds theme provider, offline detection in `src/App.jsx`
-- [ ] [SPEC-001-053] [P1] [INFRA] Set up main.jsx with React root, Service Worker registration, Seeds CSS imports in `src/main.jsx`
-- [ ] [SPEC-001-054] [P1] [INFRA] Create Seeds CSS overrides for child-friendly theme (bright colors, rounded corners, large touch targets) in `src/styles/child-theme.css`
+- [x] [SPEC-001-052] [P1] [INFRA] Implement App.jsx with routing (if needed), Seeds theme provider, offline detection in `src/App.jsx`
+- [x] [SPEC-001-053] [P1] [INFRA] Set up main.jsx with React root, Service Worker registration, Seeds CSS imports in `src/main.jsx`
+- [x] [SPEC-001-054] [P1] [INFRA] Create Seeds CSS overrides for child-friendly theme (bright colors, rounded corners, large touch targets) in `src/styles/child-theme.css`
 
 ---
 
@@ -163,15 +163,15 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Service Worker Implementation
 
-- [ ] [SPEC-001-055] [P1] [INFRA] Implement Service Worker with Cache First strategy for static assets in `public/sw.js`
-- [ ] [SPEC-001-056] [P1] [INFRA] Add Network First strategy with cache fallback for weather API calls in `public/sw.js`
-- [ ] [SPEC-001-057] [P1] [INFRA] Implement cache versioning and cleanup logic for old caches in `public/sw.js`
+- [x] [SPEC-001-055] [P1] [INFRA] Implement Service Worker with Cache First strategy for static assets in `public/sw.js`
+- [x] [SPEC-001-056] [P1] [INFRA] Add Network First strategy with cache fallback for weather API calls in `public/sw.js`
+- [x] [SPEC-001-057] [P1] [INFRA] Implement cache versioning and cleanup logic for old caches in `public/sw.js`
 
 ### PWA Polish
 
-- [ ] [SPEC-001-058] [P1] [INFRA] Generate PWA icons (192×192, 512×512, maskable) and add to `public/icons/`
-- [ ] [SPEC-001-059] [P1] [INFRA] Add meta tags for viewport, theme-color, apple-touch-icon in `index.html`
-- [ ] [SPEC-001-060] [P1] [INFRA] Configure Vite PWA plugin for automatic manifest injection and icon generation in `vite.config.js`
+- [x] [SPEC-001-058] [P1] [INFRA] Generate PWA icons (192×192, 512×512, maskable) and add to `public/icons/`
+- [x] [SPEC-001-059] [P1] [INFRA] Add meta tags for viewport, theme-color, apple-touch-icon in `index.html`
+- [x] [SPEC-001-060] [P1] [INFRA] Configure Vite PWA plugin for automatic manifest injection and icon generation in `vite.config.js`
 
 ---
 
@@ -183,14 +183,14 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Error Handling
 
-- [ ] [SPEC-001-061] [P1] [US1] Add weatherService error handling with WeatherServiceError class (TIMEOUT, NETWORK_ERROR, API_ERROR codes) in `src/services/weatherService.js`
-- [ ] [SPEC-001-062] [P1] [US1] Implement voice recognition error recovery with spoken guidance ("I didn't understand, please try again") in `src/services/voiceService.js`
-- [ ] [SPEC-001-063] [P1] [US1] Add geolocation permission handling and error messages in `src/hooks/useWeather.js`
-- [ ] [SPEC-001-064] [P1] [US1] Implement API timeout logic with 5-second deadline and stale cache fallback in `src/services/weatherService.js`
-- [ ] [SPEC-001-065] [P2] [INFRA] Add microphone permission request handling with clear error messages in `src/hooks/useVoiceRecognition.js`
-- [ ] [SPEC-001-066] [P2] [US1] Handle conflicting weather conditions (e.g., sun and rain forecast) with layered recommendations in `src/services/recommendationService.js`
-- [ ] [SPEC-001-067] [P2] [US1] Add out-of-scope query detection with friendly redirection ("I can help with weather and clothing") in `src/utils/voiceUtils.js`
-- [ ] [SPEC-001-068] [P3] [US1] Implement extreme weather condition handling (hurricanes, severe storms) with safety-focused recommendations in `src/services/recommendationService.js`
+- [x] [SPEC-001-061] [P1] [US1] Add weatherService error handling with WeatherServiceError class (TIMEOUT, NETWORK_ERROR, API_ERROR codes) in `src/services/weatherService.js`
+- [x] [SPEC-001-062] [P1] [US1] Implement voice recognition error recovery with spoken guidance ("I didn't understand, please try again") in `src/services/voiceService.js`
+- [x] [SPEC-001-063] [P1] [US1] Add geolocation permission handling and error messages in `src/hooks/useWeather.js`
+- [x] [SPEC-001-064] [P1] [US1] Implement API timeout logic with 5-second deadline and stale cache fallback in `src/services/weatherService.js`
+- [x] [SPEC-001-065] [P2] [INFRA] Add microphone permission request handling with clear error messages in `src/hooks/useVoiceRecognition.js`
+- [x] [SPEC-001-066] [P2] [US1] Handle conflicting weather conditions (e.g., sun and rain forecast) with layered recommendations in `src/services/recommendationService.js`
+- [x] [SPEC-001-067] [P2] [US1] Add out-of-scope query detection with friendly redirection ("I can help with weather and clothing") in `src/utils/voiceUtils.js`
+- [x] [SPEC-001-068] [P3] [US1] Implement extreme weather condition handling (hurricanes, severe storms) with safety-focused recommendations in `src/services/recommendationService.js`
 
 ---
 
@@ -202,10 +202,10 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Documentation
 
-- [ ] [SPEC-001-069] [P2] [INFRA] Create comprehensive README.md with project overview, setup instructions, commands in repository root
-- [ ] [SPEC-001-070] [P2] [INFRA] Add CONTRIBUTING.md with commit conventions, GPG signing, branching strategy in repository root
-- [ ] [SPEC-001-071] [P3] [INFRA] Document voice command examples and wake phrase usage in `docs/voice-commands.md`
-- [ ] [SPEC-001-072] [P3] [INFRA] Create troubleshooting guide for common issues (voice not working, API errors) in `docs/troubleshooting.md`
+- [x] [SPEC-001-069] [P2] [INFRA] Create comprehensive README.md with project overview, setup instructions, commands in repository root
+- [x] [SPEC-001-070] [P2] [INFRA] Add CONTRIBUTING.md with commit conventions, GPG signing, branching strategy in repository root
+- [x] [SPEC-001-071] [P3] [INFRA] Document voice command examples and wake phrase usage in `docs/voice-commands.md`
+- [x] [SPEC-001-072] [P3] [INFRA] Create troubleshooting guide for common issues (voice not working, API errors) in `docs/troubleshooting.md`
 
 ---
 
@@ -217,11 +217,11 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 
 ### Performance Optimization
 
-- [ ] [SPEC-001-073] [P1] [INFRA] Run Lighthouse audit and optimize for 100/100 PWA score
-- [ ] [SPEC-001-074] [P1] [INFRA] Verify bundle size < 300KB with `yarn build --analyze`
-- [ ] [SPEC-001-075] [P2] [INFRA] Add code splitting for profile and settings pages with React.lazy in `src/App.jsx`
-- [ ] [SPEC-001-076] [P2] [INFRA] Optimize Seeds component imports to reduce bundle size (tree-shaking verification)
-- [ ] [SPEC-001-077] [P3] [INFRA] Add performance monitoring with Web Vitals tracking in `src/main.jsx`
+- [x] [SPEC-001-073] [P1] [INFRA] Run Lighthouse audit and optimize for 100/100 PWA score
+- [x] [SPEC-001-074] [P1] [INFRA] Verify bundle size < 300KB with `yarn build --analyze`
+- [x] [SPEC-001-075] [P2] [INFRA] Add code splitting for profile and settings pages with React.lazy in `src/App.jsx`
+- [x] [SPEC-001-076] [P2] [INFRA] Optimize Seeds component imports to reduce bundle size (tree-shaking verification)
+- [x] [SPEC-001-077] [P3] [INFRA] Add performance monitoring with Web Vitals tracking in `src/main.jsx`
 
 ---
 
