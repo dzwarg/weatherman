@@ -77,8 +77,8 @@ git checkout -b spec/3/task/5-pwa-manifest-setup
 2. **Task**: A specific, actionable work item
 
 **Documentation Location:**
-- Specifications: `./specs/<number>/spec.md`
-- Tasks: Track in issue tracker or `./specs/<number>/tasks.md`
+- Specifications: `./specs/<number>-<short-description>/spec.md`
+- Tasks: Track in issue tracker or `./specs/<number>-<short-description>/tasks.md`
 
 **Example Spec Structure:**
 ```markdown

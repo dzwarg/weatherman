@@ -1,0 +1,594 @@
+openapi: 3.0.3
+info:
+  title: OpenWeatherMap One Call API 3.0
+  description: |
+    API contract for OpenWeatherMap One Call API 3.0 integration.
+    Used by Weatherman app for retrieving weather data to generate clothing recommendations.
+
+    **Implementation Notes**:
+    - API Key stored in environment variable: `VITE_OPENWEATHER_API_KEY`
+    - Cache responses for 1 hour (constitutional requirement)
+    - Timeout after 5 seconds (FR-015, constitutional constraint)
+    - Fallback to stale cache on failure
+  version: 3.0.0
+  contact:
+    name: OpenWeatherMap
+    url: https://openweathermap.org/api/one-call-3
+
+servers:
+  - url: https://api.openweathermap.org/data/3.0
+    description: Production API
+
+paths:
+  /onecall:
+    get:
+      summary: Get current and forecast weather data
+      description: |
+        Returns current weather, hourly forecast (48 hours), daily forecast (8 days),
+        and weather alerts for a given location.
+      operationId: getWeatherData
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          description: Latitude of location (-90 to 90)
+          schema:
+            type: number
+            format: float
+            minimum: -90
+            maximum: 90
+          example: 42.3601
+
+        - name: lon
+          in: query
+          required: true
+          description: Longitude of location (-180 to 180)
+          schema:
+            type: number
+            format: float
+            minimum: -180
+            maximum: 180
+          example: -71.0589
+
+        - name: appid
+          in: query
+          required: true
+          description: API key for authentication
+          schema:
+            type: string
+          example: "YOUR_API_KEY"
+
+        - name: units
+          in: query
+          required: false
+          description: Units of measurement (use 'imperial' for Fahrenheit)
+          schema:
+            type: string
+            enum: [standard, metric, imperial]
+            default: imperial
+          example: imperial
+
+        - name: exclude
+          in: query
+          required: false
+          description: Exclude parts of weather data (comma-separated)
+          schema:
+            type: string
+            enum: [current, minutely, hourly, daily, alerts]
+          example: minutely
+
+        - name: lang
+          in: query
+          required: false
+          description: Language for weather descriptions
+          schema:
+            type: string
+            default: en
+          example: en
+
+      responses:
+        '200':
+          description: Successful response with weather data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+              example:
+                lat: 42.3601
+                lon: -71.0589
+                timezone: "America/New_York"
+                timezone_offset: -18000
+                current:
+                  dt: 1702749600
+                  sunrise: 1702731420
+                  sunset: 1702763820
+                  temp: 38
+                  feels_like: 32
+                  pressure: 1015
+                  humidity: 65
+                  dew_point: 27
+                  uvi: 2
+                  clouds: 40
+                  visibility: 10000
+                  wind_speed: 12
+                  wind_deg: 270
+                  wind_gust: 18
+                  weather:
+                    - id: 802
+                      main: "Clouds"
+                      description: "scattered clouds"
+                      icon: "03d"
+                daily:
+                  - dt: 1702742400
+                    sunrise: 1702731420
+                    sunset: 1702763820
+                    moonrise: 1702754400
+                    moonset: 1702721400
+                    moon_phase: 0.25
+                    temp:
+                      day: 42
+                      min: 28
+                      max: 45
+                      night: 32
+                      eve: 38
+                      morn: 30
+                    feels_like:
+                      day: 36
+                      night: 26
+                      eve: 32
+                      morn: 24
+                    pressure: 1015
+                    humidity: 65
+                    dew_point: 27
+                    wind_speed: 10
+                    wind_deg: 270
+                    wind_gust: 16
+                    weather:
+                      - id: 802
+                        main: "Clouds"
+                        description: "scattered clouds"
+                        icon: "03d"
+                    clouds: 40
+                    pop: 0.2
+                    uvi: 2
+
+        '400':
+          description: Bad request (invalid parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                cod: "400"
+                message: "wrong latitude"
+
+        '401':
+          description: Unauthorized (invalid API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                cod: 401
+                message: "Invalid API key. Please see http://openweathermap.org/faq#error401 for more info."
+
+        '429':
+          description: Too many requests (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                cod: 429
+                message: "Your account has exceeded the daily API call limit"
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    WeatherResponse:
+      type: object
+      required:
+        - lat
+        - lon
+        - timezone
+        - timezone_offset
+        - current
+        - daily
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Latitude of location
+        lon:
+          type: number
+          format: float
+          description: Longitude of location
+        timezone:
+          type: string
+          description: IANA timezone name
+          example: "America/New_York"
+        timezone_offset:
+          type: integer
+          description: Shift in seconds from UTC
+          example: -18000
+        current:
+          $ref: '#/components/schemas/CurrentWeather'
+        minutely:
+          type: array
+          description: Minute-by-minute forecast for 1 hour (excluded in our implementation)
+          items:
+            $ref: '#/components/schemas/MinutelyForecast'
+        hourly:
+          type: array
+          description: Hourly forecast for 48 hours
+          items:
+            $ref: '#/components/schemas/HourlyForecast'
+        daily:
+          type: array
+          description: Daily forecast for 8 days
+          items:
+            $ref: '#/components/schemas/DailyForecast'
+        alerts:
+          type: array
+          description: Weather alerts (if any)
+          items:
+            $ref: '#/components/schemas/WeatherAlert'
+
+    CurrentWeather:
+      type: object
+      required:
+        - dt
+        - temp
+        - feels_like
+        - humidity
+        - uvi
+        - wind_speed
+        - weather
+      properties:
+        dt:
+          type: integer
+          description: Current time (Unix timestamp, UTC)
+          example: 1702749600
+        sunrise:
+          type: integer
+          description: Sunrise time (Unix timestamp, UTC)
+        sunset:
+          type: integer
+          description: Sunset time (Unix timestamp, UTC)
+        temp:
+          type: number
+          format: float
+          description: Temperature (°F)
+          example: 38
+        feels_like:
+          type: number
+          format: float
+          description: "Feels like" temperature (°F)
+          example: 32
+        pressure:
+          type: integer
+          description: Atmospheric pressure (hPa)
+        humidity:
+          type: integer
+          description: Humidity percentage
+          minimum: 0
+          maximum: 100
+          example: 65
+        dew_point:
+          type: number
+          format: float
+          description: Dew point (°F)
+        uvi:
+          type: number
+          format: float
+          description: UV index
+          minimum: 0
+          example: 2
+        clouds:
+          type: integer
+          description: Cloudiness percentage
+          minimum: 0
+          maximum: 100
+        visibility:
+          type: integer
+          description: Visibility (meters)
+        wind_speed:
+          type: number
+          format: float
+          description: Wind speed (mph)
+          example: 12
+        wind_deg:
+          type: integer
+          description: Wind direction (degrees)
+          minimum: 0
+          maximum: 360
+        wind_gust:
+          type: number
+          format: float
+          description: Wind gust (mph)
+        weather:
+          type: array
+          description: Weather conditions
+          items:
+            $ref: '#/components/schemas/Weather Condition'
+
+    HourlyForecast:
+      type: object
+      description: Hourly forecast data (same structure as current weather)
+      properties:
+        dt:
+          type: integer
+          description: Forecast time (Unix timestamp, UTC)
+        temp:
+          type: number
+          format: float
+          description: Temperature (°F)
+        feels_like:
+          type: number
+          format: float
+          description: "Feels like" temperature (°F)
+        pressure:
+          type: integer
+          description: Atmospheric pressure (hPa)
+        humidity:
+          type: integer
+          description: Humidity percentage
+        dew_point:
+          type: number
+          format: float
+          description: Dew point (°F)
+        uvi:
+          type: number
+          format: float
+          description: UV index
+        clouds:
+          type: integer
+          description: Cloudiness percentage
+        visibility:
+          type: integer
+          description: Visibility (meters)
+        wind_speed:
+          type: number
+          format: float
+          description: Wind speed (mph)
+        wind_deg:
+          type: integer
+          description: Wind direction (degrees)
+        wind_gust:
+          type: number
+          format: float
+          description: Wind gust (mph)
+        pop:
+          type: number
+          format: float
+          description: Probability of precipitation (0-1)
+          minimum: 0
+          maximum: 1
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherCondition'
+
+    DailyForecast:
+      type: object
+      required:
+        - dt
+        - temp
+        - weather
+      properties:
+        dt:
+          type: integer
+          description: Forecast date (Unix timestamp, UTC)
+        sunrise:
+          type: integer
+          description: Sunrise time (Unix timestamp, UTC)
+        sunset:
+          type: integer
+          description: Sunset time (Unix timestamp, UTC)
+        moonrise:
+          type: integer
+          description: Moonrise time (Unix timestamp, UTC)
+        moonset:
+          type: integer
+          description: Moonset time (Unix timestamp, UTC)
+        moon_phase:
+          type: number
+          format: float
+          description: Moon phase (0-1)
+        temp:
+          type: object
+          description: Temperature readings
+          required:
+            - day
+            - min
+            - max
+            - night
+            - eve
+            - morn
+          properties:
+            day:
+              type: number
+              format: float
+              description: Daytime temperature (°F)
+            min:
+              type: number
+              format: float
+              description: Minimum temperature (°F)
+            max:
+              type: number
+              format: float
+              description: Maximum temperature (°F)
+            night:
+              type: number
+              format: float
+              description: Nighttime temperature (°F)
+            eve:
+              type: number
+              format: float
+              description: Evening temperature (°F)
+            morn:
+              type: number
+              format: float
+              description: Morning temperature (°F)
+        feels_like:
+          type: object
+          description: "Feels like" temperature readings
+          properties:
+            day:
+              type: number
+              format: float
+            night:
+              type: number
+              format: float
+            eve:
+              type: number
+              format: float
+            morn:
+              type: number
+              format: float
+        pressure:
+          type: integer
+          description: Atmospheric pressure (hPa)
+        humidity:
+          type: integer
+          description: Humidity percentage
+        dew_point:
+          type: number
+          format: float
+          description: Dew point (°F)
+        wind_speed:
+          type: number
+          format: float
+          description: Wind speed (mph)
+        wind_deg:
+          type: integer
+          description: Wind direction (degrees)
+        wind_gust:
+          type: number
+          format: float
+          description: Wind gust (mph)
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherCondition'
+        clouds:
+          type: integer
+          description: Cloudiness percentage
+        pop:
+          type: number
+          format: float
+          description: Probability of precipitation (0-1)
+        uvi:
+          type: number
+          format: float
+          description: UV index
+        rain:
+          type: number
+          format: float
+          description: Precipitation volume (mm)
+        snow:
+          type: number
+          format: float
+          description: Snow volume (mm)
+
+    WeatherCondition:
+      type: object
+      required:
+        - id
+        - main
+        - description
+        - icon
+      properties:
+        id:
+          type: integer
+          description: Weather condition ID
+          example: 802
+        main:
+          type: string
+          description: Weather group (Rain, Snow, Clouds, etc.)
+          example: "Clouds"
+        description:
+          type: string
+          description: Weather condition description
+          example: "scattered clouds"
+        icon:
+          type: string
+          description: Weather icon code
+          example: "03d"
+
+    MinutelyForecast:
+      type: object
+      description: Minute-by-minute precipitation forecast
+      properties:
+        dt:
+          type: integer
+          description: Forecast time (Unix timestamp, UTC)
+        precipitation:
+          type: number
+          format: float
+          description: Precipitation volume (mm)
+
+    WeatherAlert:
+      type: object
+      required:
+        - sender_name
+        - event
+        - start
+        - end
+        - description
+      properties:
+        sender_name:
+          type: string
+          description: Name of the alert source
+          example: "NWS Boston"
+        event:
+          type: string
+          description: Alert event name
+          example: "Winter Storm Warning"
+        start:
+          type: integer
+          description: Alert start time (Unix timestamp, UTC)
+        end:
+          type: integer
+          description: Alert end time (Unix timestamp, UTC)
+        description:
+          type: string
+          description: Full alert description
+        tags:
+          type: array
+          description: Alert categories
+          items:
+            type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - cod
+        - message
+      properties:
+        cod:
+          type: integer
+          description: Error code
+        message:
+          type: string
+          description: Error message
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: appid
+      description: API key for OpenWeatherMap
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Weather
+    description: Weather data operations

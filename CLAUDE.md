@@ -26,3 +26,9 @@ When implementing features or fixing issues, ensure alignment with the product o
 Refer to './docs/technical-details.md' for technical considerations, including mobile-first design and weather API integration.
 
 When writing code, ensure adherence to best practices for progressive web applications (PWAs) and voice recognition technologies as described in the documentation. Update the documentation to align with code as necessary.
+
+## Active Technologies
+- JavaScript (ES2022+) with React 22+, Node 22+ (001-voice-weather-clothing)
+
+## Recent Changes
+- 001-voice-weather-clothing: Added JavaScript (ES2022+) with React 22+, Node 22+
