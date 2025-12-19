@@ -1,0 +1,399 @@
+openapi: 3.0.3
+info:
+  title: Weather Proxy API
+  description: |
+    Proxy service for weather API requests. Secures API credentials on the server
+    and manages rate limiting for external weather API calls.
+  version: 1.0.0
+  contact:
+    name: Weatherman Development Team
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://api.weatherman.app
+    description: Production server (example)
+
+paths:
+  /weather/current:
+    post:
+      summary: Get current weather for location
+      description: |
+        Retrieves current weather conditions for the specified geographic coordinates.
+        Proxies request to external weather API with server-stored credentials.
+      operationId: getCurrentWeather
+      tags:
+        - Weather
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeatherRequest'
+            examples:
+              boston:
+                summary: Boston, MA weather
+                value:
+                  lat: 42.3601
+                  lon: -71.0589
+                  units: imperial
+      responses:
+        '200':
+          description: Weather data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCoordinates:
+                  summary: Invalid latitude/longitude
+                  value:
+                    error:
+                      code: INVALID_REQUEST
+                      message: Latitude must be between -90 and 90
+                    timestamp: '2025-12-19T10:30:00.000Z'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimitExceeded:
+                  summary: Too many requests
+                  value:
+                    error:
+                      code: RATE_LIMIT_EXCEEDED
+                      message: Too many requests to weather API. Please try again later.
+                      details:
+                        retryAfter: 60
+                    timestamp: '2025-12-19T10:30:00.000Z'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Weather API unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                timeout:
+                  summary: Weather API timeout
+                  value:
+                    error:
+                      code: WEATHER_API_TIMEOUT
+                      message: Weather service did not respond within 5 seconds
+                      details:
+                        timeout: 5000
+                    timestamp: '2025-12-19T10:30:00.000Z'
+
+  /weather/forecast:
+    post:
+      summary: Get weather forecast for location
+      description: |
+        Retrieves multi-day weather forecast for the specified geographic coordinates.
+        Includes hourly and daily forecasts.
+      operationId: getWeatherForecast
+      tags:
+        - Weather
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeatherRequest'
+      responses:
+        '200':
+          description: Forecast data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check if the weather proxy service is operational
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  services:
+                    type: object
+                    properties:
+                      weatherApi:
+                        type: string
+                        enum: [connected, degraded, unavailable]
+
+components:
+  schemas:
+    WeatherRequest:
+      type: object
+      required:
+        - lat
+        - lon
+      properties:
+        lat:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Latitude coordinate
+          example: 42.3601
+        lon:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Longitude coordinate
+          example: -71.0589
+        units:
+          type: string
+          enum: [imperial, metric]
+          default: imperial
+          description: Unit system for temperature and other measurements
+
+    WeatherResponse:
+      type: object
+      required:
+        - location
+        - current
+        - dailyForecast
+        - fetchedAt
+        - cacheExpiry
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        current:
+          $ref: '#/components/schemas/CurrentWeather'
+        hourlyForecast:
+          type: array
+          items:
+            $ref: '#/components/schemas/HourlyForecast'
+        dailyForecast:
+          type: array
+          minItems: 5
+          items:
+            $ref: '#/components/schemas/DailyForecast'
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherAlert'
+        fetchedAt:
+          type: string
+          format: date-time
+          description: When the data was retrieved
+        cacheExpiry:
+          type: string
+          format: date-time
+          description: When the cached data expires (1 hour from fetchedAt)
+
+    Location:
+      type: object
+      required:
+        - lat
+        - lon
+      properties:
+        name:
+          type: string
+          example: Boston
+        lat:
+          type: number
+          example: 42.3601
+        lon:
+          type: number
+          example: -71.0589
+        timezone:
+          type: string
+          example: America/New_York
+
+    CurrentWeather:
+      type: object
+      required:
+        - temperature
+        - conditions
+        - timestamp
+      properties:
+        temperature:
+          type: number
+          minimum: -100
+          maximum: 150
+          description: Temperature in °F or °C
+          example: 45
+        feelsLike:
+          type: number
+          description: Perceived temperature
+          example: 38
+        conditions:
+          type: string
+          description: Weather condition description
+          example: Clear
+        precipitationProbability:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Chance of precipitation (percentage)
+          example: 20
+        windSpeed:
+          type: number
+          minimum: 0
+          description: Wind speed in mph or km/h
+          example: 12
+        humidity:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Relative humidity (percentage)
+          example: 65
+        uvIndex:
+          type: number
+          minimum: 0
+          description: UV index
+          example: 3
+        timestamp:
+          type: string
+          format: date-time
+
+    HourlyForecast:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        temperature:
+          type: number
+        precipitationProbability:
+          type: number
+          minimum: 0
+          maximum: 100
+        conditions:
+          type: string
+
+    DailyForecast:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        temperatureHigh:
+          type: number
+        temperatureLow:
+          type: number
+        precipitationProbability:
+          type: number
+          minimum: 0
+          maximum: 100
+        conditions:
+          type: string
+
+    WeatherAlert:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [minor, moderate, severe, extreme]
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - timestamp
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - INVALID_REQUEST
+                - WEATHER_API_ERROR
+                - WEATHER_API_TIMEOUT
+                - RATE_LIMIT_EXCEEDED
+                - INTERNAL_ERROR
+                - SERVICE_UNAVAILABLE
+            message:
+              type: string
+            details:
+              type: object
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ServiceUnavailable:
+      description: Weather API unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Weather
+    description: Weather data proxy operations
+  - name: System
+    description: System health and status

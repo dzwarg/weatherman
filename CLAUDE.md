@@ -29,6 +29,7 @@ When writing code, ensure adherence to best practices for progressive web applic
 
 ## Active Technologies
 - JavaScript (ES2022+) with React 22+, Node 22+ (001-voice-weather-clothing)
+- JavaScript ES2022+ with Node 22+ (002-monorepo-server)
 
 ## Recent Changes
 - 001-voice-weather-clothing: Added JavaScript (ES2022+) with React 22+, Node 22+

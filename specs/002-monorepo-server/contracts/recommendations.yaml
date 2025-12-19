@@ -1,0 +1,450 @@
+openapi: 3.0.3
+info:
+  title: Clothing Recommendations API
+  description: |
+    Dynamic clothing recommendation service that generates personalized outfit suggestions
+    based on user profile (age, gender), current weather conditions, and voice prompt context.
+
+    Uses locally hosted Ollama LLM service (mistral:latest) to generate contextually-aware,
+    age-appropriate recommendations. Replaces hardcoded frontend logic with AI-powered
+    recommendation engine that considers:
+    - Age-appropriate complexity and vocabulary
+    - Gender-specific wardrobe styles
+    - Activity context from voice prompts (playground, party, school, etc.)
+    - Weather conditions (temperature, precipitation, wind, UV)
+
+    Falls back to rule-based recommendations if Ollama service is unavailable.
+  version: 1.0.0
+  contact:
+    name: Weatherman Development Team
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://api.weatherman.app
+    description: Production server (example)
+
+paths:
+  /recommendations:
+    post:
+      summary: Generate clothing recommendations
+      description: |
+        Generates age-appropriate, weather-suitable clothing recommendations for a child
+        based on their profile, current weather conditions, and optional voice prompt context.
+
+        Considers:
+        - Age (4, 7, or 10 years) for complexity appropriateness
+        - Gender for wardrobe vocabulary and style suggestions
+        - Temperature, precipitation, wind, UV index
+        - Time of day (morning, afternoon, evening)
+        - Voice prompt context (activities, occasions, locations)
+      operationId: generateRecommendations
+      tags:
+        - Recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+            examples:
+              coldRainy4yoGirl:
+                summary: Cold rainy day for 4yo girl
+                value:
+                  profile:
+                    id: 4yo-girl
+                    age: 4
+                    gender: girl
+                  weather:
+                    temperature: 35
+                    feelsLike: 28
+                    conditions: Rain
+                    precipitationProbability: 80
+                    windSpeed: 12
+                    uvIndex: 2
+                  prompt: What should I wear to the playground today?
+                  timeframe: morning
+              hotSunny10yoBoy:
+                summary: Hot sunny day for 10yo boy
+                value:
+                  profile:
+                    id: 10yo-boy
+                    age: 10
+                    gender: boy
+                  weather:
+                    temperature: 85
+                    feelsLike: 88
+                    conditions: Clear
+                    precipitationProbability: 5
+                    windSpeed: 5
+                    uvIndex: 8
+                  prompt: I'm going to a birthday party
+                  timeframe: afternoon
+      responses:
+        '200':
+          description: Recommendations generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+              examples:
+                coldRainyExample:
+                  summary: Cold rainy recommendations
+                  value:
+                    id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                    profileId: 4yo-girl
+                    weatherData:
+                      temperature: 35
+                      feelsLike: 28
+                      conditions: Rain
+                      precipitationProbability: 80
+                      windSpeed: 12
+                      uvIndex: 2
+                    recommendations:
+                      baseLayers:
+                        - item: Long-sleeve t-shirt
+                          reason: To stay warm
+                      outerwear:
+                        - item: Warm winter coat
+                          reason: It's cold and rainy
+                        - item: Raincoat or poncho
+                          reason: To stay dry
+                      bottoms:
+                        - item: Pull-on pants or leggings
+                          reason: Easy to put on and warm
+                      accessories:
+                        - item: Warm hat
+                          reason: To keep your head warm
+                        - item: Gloves or mittens
+                          reason: To keep your hands warm
+                        - item: Umbrella
+                          reason: To stay dry in the rain
+                      footwear:
+                        - item: Rain boots
+                          reason: To keep your feet dry
+                    spokenResponse: It's cold and rainy today! You should wear a long-sleeve shirt, warm coat, and rain boots. Don't forget your umbrella, hat, and mittens to stay warm and dry!
+                    confidence: 0.95
+                    createdAt: '2025-12-19T10:30:00.000Z'
+                    feedbackProvided: false
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidProfile:
+                  summary: Invalid profile ID
+                  value:
+                    error:
+                      code: INVALID_REQUEST
+                      message: Profile ID must be one of 4yo-girl, 7yo-boy, 10yo-boy
+                      details:
+                        field: profile.id
+                        providedValue: 5yo-girl
+                    timestamp: '2025-12-19T10:30:00.000Z'
+                invalidTemperature:
+                  summary: Temperature out of range
+                  value:
+                    error:
+                      code: INVALID_REQUEST
+                      message: Temperature must be between -100 and 150
+                      details:
+                        field: weather.temperature
+                        providedValue: 200
+                    timestamp: '2025-12-19T10:30:00.000Z'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /recommendations/profiles:
+    get:
+      summary: Get available user profiles
+      description: |
+        Returns the list of supported user profiles with their characteristics.
+        Useful for frontend to display profile selection options.
+      operationId: getProfiles
+      tags:
+        - Recommendations
+      responses:
+        '200':
+          description: List of available profiles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profiles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProfileInfo'
+              example:
+                profiles:
+                  - id: 4yo-girl
+                    age: 4
+                    gender: girl
+                    description: 4 year old girl - simple clothing, easy fasteners
+                  - id: 7yo-boy
+                    age: 7
+                    gender: boy
+                    description: 7 year old boy - moderate complexity
+                  - id: 10yo-boy
+                    age: 10
+                    gender: boy
+                    description: 10 year old boy - more complex clothing options
+
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check if the recommendation service and Ollama LLM service are operational
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok, degraded]
+                    description: Overall service status
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  services:
+                    type: object
+                    description: Individual service health status
+                    properties:
+                      ollama:
+                        type: string
+                        enum: [available, unavailable, degraded]
+                        description: Ollama LLM service status
+                        example: available
+              examples:
+                healthy:
+                  summary: All services operational
+                  value:
+                    status: ok
+                    timestamp: '2025-12-19T10:30:00.000Z'
+                    services:
+                      ollama: available
+                degraded:
+                  summary: Ollama unavailable (fallback active)
+                  value:
+                    status: degraded
+                    timestamp: '2025-12-19T10:30:00.000Z'
+                    services:
+                      ollama: unavailable
+
+components:
+  schemas:
+    RecommendationRequest:
+      type: object
+      required:
+        - profile
+        - weather
+      properties:
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+        weather:
+          $ref: '#/components/schemas/WeatherSnapshot'
+        prompt:
+          type: string
+          maxLength: 500
+          description: |
+            Optional user voice input for contextual recommendations.
+            Examples: "What should I wear to the playground?", "I'm going to a party", "School day outfit"
+
+            The server analyzes this for context clues about:
+            - Activities (playground, school, sports, indoor/outdoor)
+            - Occasions (party, formal event, casual day)
+            - Locations (park, beach, mall, home)
+
+            If omitted or empty, general recommendations are provided based on weather and profile only.
+          example: What should I wear to the playground today?
+        timeframe:
+          type: string
+          enum: [morning, afternoon, evening, today]
+          default: today
+          description: Time of day for recommendations
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - age
+        - gender
+      properties:
+        id:
+          type: string
+          enum: [4yo-girl, 7yo-boy, 10yo-boy]
+          description: Unique profile identifier
+        age:
+          type: integer
+          enum: [4, 7, 10]
+          description: Child's age in years
+        gender:
+          type: string
+          enum: [girl, boy]
+          description: Child's gender for wardrobe vocabulary
+
+    ProfileInfo:
+      allOf:
+        - $ref: '#/components/schemas/UserProfile'
+        - type: object
+          properties:
+            description:
+              type: string
+              description: Human-readable profile description
+
+    WeatherSnapshot:
+      type: object
+      required:
+        - temperature
+        - conditions
+      properties:
+        temperature:
+          type: number
+          minimum: -100
+          maximum: 150
+          description: Current temperature in °F
+        feelsLike:
+          type: number
+          description: Perceived temperature
+        conditions:
+          type: string
+          description: Weather condition (Clear, Rain, Snow, etc.)
+        precipitationProbability:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Chance of precipitation (percentage)
+        windSpeed:
+          type: number
+          minimum: 0
+          description: Wind speed in mph
+        uvIndex:
+          type: number
+          minimum: 0
+          description: UV index
+
+    RecommendationResponse:
+      type: object
+      required:
+        - id
+        - profileId
+        - weatherData
+        - recommendations
+        - spokenResponse
+        - confidence
+        - createdAt
+        - feedbackProvided
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique recommendation ID
+        profileId:
+          type: string
+          description: Profile ID used for generation
+        weatherData:
+          $ref: '#/components/schemas/WeatherSnapshot'
+        recommendations:
+          $ref: '#/components/schemas/ClothingRecommendations'
+        spokenResponse:
+          type: string
+          description: Child-friendly natural language summary of recommendations
+          example: It's cold and rainy today! You should wear a long-sleeve shirt, warm coat, and rain boots.
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Confidence score for recommendations (0.0 to 1.0)
+        createdAt:
+          type: string
+          format: date-time
+          description: When recommendations were generated
+        feedbackProvided:
+          type: boolean
+          description: Whether user feedback has been provided (always false from server)
+
+    ClothingRecommendations:
+      type: object
+      description: Categorized clothing recommendations
+      properties:
+        baseLayers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClothingItem'
+        outerwear:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClothingItem'
+        bottoms:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClothingItem'
+        accessories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClothingItem'
+        footwear:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClothingItem'
+
+    ClothingItem:
+      type: object
+      required:
+        - item
+        - reason
+      properties:
+        item:
+          type: string
+          description: Clothing item name (age and gender appropriate)
+          example: Pull-on pants
+        reason:
+          type: string
+          description: Child-friendly explanation for this item
+          example: Easy to put on and warm
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - timestamp
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - INVALID_REQUEST
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: object
+              description: Additional error context
+        timestamp:
+          type: string
+          format: date-time
+
+tags:
+  - name: Recommendations
+    description: Clothing recommendation generation
+  - name: System
+    description: System health and status
