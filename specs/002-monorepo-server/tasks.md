@@ -28,15 +28,15 @@ This project uses a **monorepo structure** with npm workspaces:
 
 **Purpose**: Convert single-app structure to monorepo with npm workspaces
 
-- [ ] T001 Create backup branch `backup-pre-monorepo` for safety
-- [ ] T002 Create monorepo directory structure: `packages/frontend/` and `packages/server/src/`
-- [ ] T003 [P] Move existing frontend code to `packages/frontend/` using `git mv` to preserve history (src/, public/, index.html, vite.config.js, vitest.config.js, eslint.config.js, tests/, scripts/)
-- [ ] T004 [P] Copy existing `package.json` to `packages/frontend/package.json` and update name to `@weatherman/frontend`
-- [ ] T005 [P] Create `packages/server/package.json` with Express dependencies (express, cors, helmet, dotenv, express-validator, express-rate-limit, axios)
-- [ ] T006 Create root `package.json` with npm workspaces configuration and concurrently for parallel dev servers
-- [ ] T007 Remove all `node_modules/` directories and `package-lock.json`, then run `npm install` to set up workspaces
-- [ ] T008 [P] Verify workspace symlinks exist in `node_modules/@weatherman/` for both packages
-- [ ] T009 Update `.gitignore` to include `packages/server/.env`
+- [X] T001 Create backup branch `backup-pre-monorepo` for safety
+- [X] T002 Create monorepo directory structure: `packages/frontend/` and `packages/server/src/`
+- [X] T003 [P] Move existing frontend code to `packages/frontend/` using `git mv` to preserve history (src/, public/, index.html, vite.config.js, vitest.config.js, eslint.config.js, tests/, scripts/)
+- [X] T004 [P] Copy existing `package.json` to `packages/frontend/package.json` and update name to `@weatherman/frontend`
+- [X] T005 [P] Create `packages/server/package.json` with Express dependencies (express, cors, helmet, dotenv, express-validator, express-rate-limit, axios)
+- [X] T006 Create root `package.json` with npm workspaces configuration and concurrently for parallel dev servers
+- [X] T007 Remove all `node_modules/` directories and `package-lock.json`, then run `npm install` to set up workspaces
+- [X] T008 [P] Verify workspace symlinks exist in `node_modules/@weatherman/` for both packages
+- [X] T009 Update `.gitignore` to include `packages/server/.env`
 
 ---
 
@@ -48,36 +48,36 @@ This project uses a **monorepo structure** with npm workspaces:
 
 ### Server Foundation
 
-- [ ] T010 Create basic Express app setup in `packages/server/src/server.js` with middleware (helmet, cors, express.json)
-- [ ] T011 [P] Create environment configuration in `packages/server/src/config/env.js` to load and validate environment variables
-- [ ] T012 [P] Create constants file in `packages/server/src/config/constants.js` for rate limits, timeouts, and Ollama settings
-- [ ] T013 [P] Create error handling middleware in `packages/server/src/middleware/errorHandler.js` with standardized error response format
-- [ ] T014 [P] Create request logger middleware in `packages/server/src/middleware/requestLogger.js`
-- [ ] T015 [P] Create CORS configuration in `packages/server/src/middleware/cors.js` for development and production origins
-- [ ] T016 Create health check endpoint `GET /api/health` in `packages/server/src/server.js` that returns server status
-- [ ] T017 [P] Create `.env.example` file in `packages/server/` with all required environment variables documented
-- [ ] T018 [P] Create `.env` file in `packages/server/` with actual API keys (not committed)
+- [X] T010 Create basic Express app setup in `packages/server/src/server.js` with middleware (helmet, cors, express.json)
+- [X] T011 [P] Create environment configuration in `packages/server/src/config/env.js` to load and validate environment variables
+- [X] T012 [P] Create constants file in `packages/server/src/config/constants.js` for rate limits, timeouts, and Ollama settings
+- [X] T013 [P] Create error handling middleware in `packages/server/src/middleware/errorHandler.js` with standardized error response format
+- [X] T014 [P] Create request logger middleware in `packages/server/src/middleware/requestLogger.js`
+- [X] T015 [P] Create CORS configuration in `packages/server/src/middleware/cors.js` for development and production origins
+- [X] T016 Create health check endpoint `GET /api/health` in `packages/server/src/server.js` that returns server status
+- [X] T017 [P] Create `.env.example` file in `packages/server/` with all required environment variables documented
+- [X] T018 [P] Create `.env` file in `packages/server/` with actual API keys (not committed)
 
 ### Frontend Foundation
 
-- [ ] T019 Update Vite config in `packages/frontend/vite.config.js` to add proxy configuration for `/api/*` requests to `http://localhost:3000`
-- [ ] T020 [P] Create `.env.development` in `packages/frontend/` with `VITE_USE_MOCK_OLLAMA=true` and `VITE_API_BASE_URL=/api`
-- [ ] T021 [P] Create `.env.production` in `packages/frontend/` with `VITE_USE_MOCK_OLLAMA=false` and production API URL
+- [X] T019 Update Vite config in `packages/frontend/vite.config.js` to add proxy configuration for `/api/*` requests to `http://localhost:3000`
+- [X] T020 [P] Create `.env.development` in `packages/frontend/` with `VITE_USE_MOCK_OLLAMA=true` and `VITE_API_BASE_URL=/api`
+- [X] T021 [P] Create `.env.production` in `packages/frontend/` with `VITE_USE_MOCK_OLLAMA=false` and production API URL
 
 ### Testing Infrastructure Setup
 
-- [ ] T022 [P] Create Vitest config for server unit tests in `packages/server/vitest.config.js` with coverage enabled
-- [ ] T023 [P] Create test setup file in `packages/server/tests/setup.js` for common test utilities
-- [ ] T024 [P] Add test scripts to `packages/server/package.json`: `test`, `test:unit`, `test:integration`, `test:coverage`
-- [ ] T025 [P] Create test helper utilities in `packages/server/tests/helpers/` for mocking HTTP requests and Ollama responses
+- [X] T022 [P] Create Vitest config for server unit tests in `packages/server/vitest.config.js` with coverage enabled
+- [X] T023 [P] Create test setup file in `packages/server/tests/setup.js` for common test utilities
+- [X] T024 [P] Add test scripts to `packages/server/package.json`: `test`, `test:unit`, `test:integration`, `test:coverage`
+- [X] T025 [P] Create test helper utilities in `packages/server/tests/helpers/` for mocking HTTP requests and Ollama responses
 
 ### Manual Validation
 
-- [ ] T026 Test frontend runs independently with `npm run dev:frontend` (should start on https://localhost:5173)
-- [ ] T027 Test server runs independently with `npm run dev:server` (should start on http://localhost:3000)
-- [ ] T028 Test both packages run together with `npm run dev` using concurrently
-- [ ] T029 Test health check endpoint responds: `curl http://localhost:3000/api/health`
-- [ ] T030 Test Vite proxy works: Open browser console at https://localhost:5173 and run `fetch('/api/health').then(r => r.json()).then(console.log)`
+- [X] T026 Test frontend runs independently with `npm run dev:frontend` (should start on https://localhost:5173)
+- [X] T027 Test server runs independently with `npm run dev:server` (should start on http://localhost:3000)
+- [X] T028 Test both packages run together with `npm run dev` using concurrently
+- [X] T029 Test health check endpoint responds: `curl http://localhost:3000/api/health`
+- [X] T030 Test Vite proxy works: Open browser console at https://localhost:5173 and run `fetch('/api/health').then(r => r.json()).then(console.log)`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -95,16 +95,16 @@ This project uses a **monorepo structure** with npm workspaces:
 
 **Unit Tests**:
 
-- [ ] T031 [P] [US1] Write unit tests for weather validator in `packages/server/tests/unit/validators/weatherValidator.test.js` (valid/invalid coordinates, units)
-- [ ] T032 [P] [US1] Write unit tests for weather proxy service in `packages/server/tests/unit/services/weatherProxyService.test.js` (success, timeout, error handling, data transformation)
-- [ ] T033 [P] [US1] Write unit tests for rate limiter in `packages/server/tests/unit/middleware/rateLimiter.test.js` (within limit, exceeded, reset)
+- [X] T031 [P] [US1] Write unit tests for weather validator in `packages/server/tests/unit/validators/weatherValidator.test.js` (valid/invalid coordinates, units)
+- [X] T032 [P] [US1] Write unit tests for weather proxy service in `packages/server/tests/unit/services/weatherProxyService.test.js` (success, timeout, error handling, data transformation)
+- [X] T033 [P] [US1] Write unit tests for rate limiter in `packages/server/tests/unit/middleware/rateLimiter.test.js` (within limit, exceeded, reset)
 
 **Integration Tests**:
 
-- [ ] T034 [P] [US1] Write integration test for POST `/api/weather/current` in `packages/server/tests/integration/weather.test.js` (successful request with valid coordinates)
-- [ ] T035 [P] [US1] Write integration test for invalid coordinates (400 error response)
-- [ ] T036 [P] [US1] Write integration test for rate limiting (429 error after exceeding limit)
-- [ ] T037 [P] [US1] Write integration test for weather API timeout (503 error after 5 seconds)
+- [X] T034 [P] [US1] Write integration test for POST `/api/weather/current` in `packages/server/tests/integration/weather.test.js` (successful request with valid coordinates)
+- [X] T035 [P] [US1] Write integration test for invalid coordinates (400 error response)
+- [X] T036 [P] [US1] Write integration test for rate limiting (429 error after exceeding limit)
+- [X] T037 [P] [US1] Write integration test for weather API timeout (503 error after 5 seconds)
 
 **Verify Tests Fail**: Run `npm run test --workspace=@weatherman/server` and confirm all tests fail (no implementation yet)
 
@@ -112,25 +112,25 @@ This project uses a **monorepo structure** with npm workspaces:
 
 **Server Components**:
 
-- [ ] T038 [P] [US1] Create weather request validator in `packages/server/src/validators/weatherValidator.js` using express-validator (validate lat, lon, units)
-- [ ] T039 [P] [US1] Create rate limiter middleware in `packages/server/src/middleware/rateLimiter.js` for weather API (100 req/15min)
-- [ ] T040 [US1] Create weather proxy service in `packages/server/src/services/weatherProxyService.js` that calls external weather API with timeout (5s)
-- [ ] T041 [US1] Create weather routes in `packages/server/src/routes/weather.js` with POST `/api/weather/current` and POST `/api/weather/forecast` endpoints
-- [ ] T042 [US1] Create weather controller in `packages/server/src/controllers/weatherController.js` to handle request/response logic
-- [ ] T043 [US1] Integrate weather routes into Express app in `packages/server/src/server.js`
-- [ ] T044 [US1] Add error handling for weather API failures (timeout, connection refused, rate limit exceeded)
+- [X] T038 [P] [US1] Create weather request validator in `packages/server/src/validators/weatherValidator.js` using express-validator (validate lat, lon, units)
+- [X] T039 [P] [US1] Create rate limiter middleware in `packages/server/src/middleware/rateLimiter.js` for weather API (100 req/15min)
+- [X] T040 [US1] Create weather proxy service in `packages/server/src/services/weatherProxyService.js` that calls external weather API with timeout (5s)
+- [X] T041 [US1] Create weather routes in `packages/server/src/routes/weather.js` with POST `/api/weather/current` and POST `/api/weather/forecast` endpoints
+- [X] T042 [US1] Create weather controller in `packages/server/src/controllers/weatherController.js` to handle request/response logic
+- [X] T043 [US1] Integrate weather routes into Express app in `packages/server/src/server.js`
+- [X] T044 [US1] Add error handling for weather API failures (timeout, connection refused, rate limit exceeded)
 
 **Verify Tests Pass**: Run `npm run test --workspace=@weatherman/server` and confirm all User Story 1 tests now pass
 
 **Frontend Integration**:
 
-- [ ] T045 [US1] Update weather service in `packages/frontend/src/services/weatherService.js` to call server proxy endpoints instead of direct API
-- [ ] T046 [US1] Create API client utility in `packages/frontend/src/services/apiClient.js` with base URL configuration from environment
-- [ ] T047 [US1] Update Service Worker config in `packages/frontend/vite.config.js` to cache server API responses with Network-First strategy
-- [ ] T048 [US1] Update frontend tests in `packages/frontend/tests/` to work with server API instead of direct weather API calls
-- [ ] T049 [US1] Test weather proxy end-to-end: Request weather from frontend UI and verify it returns through server proxy
-- [ ] T050 [US1] Verify API key is NOT exposed in frontend bundle (inspect `packages/frontend/dist/` after build)
-- [ ] T051 [US1] Run full test suite: `npm run test` and verify all tests pass (frontend + server)
+- [X] T045 [US1] Update weather service in `packages/frontend/src/services/weatherService.js` to call server proxy endpoints instead of direct API
+- [X] T046 [US1] Create API client utility in `packages/frontend/src/services/apiClient.js` with base URL configuration from environment
+- [X] T047 [US1] Update Service Worker config in `packages/frontend/vite.config.js` to cache server API responses with Network-First strategy
+- [X] T048 [US1] Update frontend tests in `packages/frontend/tests/` to work with server API instead of direct weather API calls
+- [X] T049 [US1] Test weather proxy end-to-end: Request weather from frontend UI and verify it returns through server proxy
+- [X] T050 [US1] Verify API key is NOT exposed in frontend bundle (inspect `packages/frontend/dist/` after build)
+- [X] T051 [US1] Run full test suite: `npm run test` and verify all tests pass (frontend + server)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and TESTED - weather data flows through server proxy with secure credentials
 
@@ -148,49 +148,49 @@ This project uses a **monorepo structure** with npm workspaces:
 
 **Unit Tests**:
 
-- [ ] T052 [P] [US2] Write unit tests for prompt analysis service in `packages/server/tests/unit/services/promptAnalysisService.test.js` (extract keywords from voice prompts)
-- [ ] T053 [P] [US2] Write unit tests for Ollama response parser in `packages/server/tests/unit/utils/ollamaResponseParser.test.js` (parse free-text to structured format)
-- [ ] T054 [P] [US2] Write unit tests for clothing rules fallback in `packages/server/tests/unit/utils/clothingRules.test.js` (all profiles and weather conditions)
-- [ ] T055 [P] [US2] Write unit tests for Ollama service in `packages/server/tests/unit/services/ollamaService.test.js` (mock Ollama API, test prompt building, response handling, error handling)
-- [ ] T056 [P] [US2] Write unit tests for recommendation service in `packages/server/tests/unit/services/recommendationService.test.js` (orchestration, fallback logic, all profiles)
-- [ ] T057 [P] [US2] Write unit tests for recommendation validator in `packages/server/tests/unit/validators/recommendationValidator.test.js` (valid/invalid profiles, weather data, prompts)
+- [X] T052 [P] [US2] Write unit tests for prompt analysis service in `packages/server/tests/unit/services/promptAnalysisService.test.js` (extract keywords from voice prompts)
+- [X] T053 [P] [US2] Write unit tests for Ollama response parser in `packages/server/tests/unit/utils/ollamaResponseParser.test.js` (parse free-text to structured format)
+- [X] T054 [P] [US2] Write unit tests for clothing rules fallback in `packages/server/tests/unit/utils/clothingRules.test.js` (all profiles and weather conditions)
+- [X] T055 [P] [US2] Write unit tests for Ollama service in `packages/server/tests/unit/services/ollamaService.test.js` (mock Ollama API, test prompt building, response handling, error handling)
+- [X] T056 [P] [US2] Write unit tests for recommendation service in `packages/server/tests/unit/services/recommendationService.test.js` (orchestration, fallback logic, all profiles)
+- [X] T057 [P] [US2] Write unit tests for recommendation validator in `packages/server/tests/unit/validators/recommendationValidator.test.js` (valid/invalid profiles, weather data, prompts)
 
 **Integration Tests**:
 
-- [ ] T058 [P] [US2] Write integration test for POST `/api/recommendations` with valid request in `packages/server/tests/integration/recommendations.test.js`
-- [ ] T059 [P] [US2] Write integration test for invalid profile ID (400 error)
-- [ ] T060 [P] [US2] Write integration test for missing required fields (400 error)
-- [ ] T061 [P] [US2] Write integration test for GET `/api/recommendations/profiles` endpoint
-- [ ] T062 [P] [US2] Write integration test for Ollama fallback behavior (with Ollama service mocked as unavailable)
-- [ ] T063 [P] [US2] Write integration test verifying different profiles get different recommendations for same weather
+- [X] T058 [P] [US2] Write integration test for POST `/api/recommendations` with valid request in `packages/server/tests/integration/recommendations.test.js`
+- [X] T059 [P] [US2] Write integration test for invalid profile ID (400 error)
+- [X] T060 [P] [US2] Write integration test for missing required fields (400 error)
+- [X] T061 [P] [US2] Write integration test for GET `/api/recommendations/profiles` endpoint
+- [X] T062 [P] [US2] Write integration test for Ollama fallback behavior (with Ollama service mocked as unavailable)
+- [X] T063 [P] [US2] Write integration test verifying different profiles get different recommendations for same weather
 
 **Verify Tests Fail**: Run `npm run test --workspace=@weatherman/server` and confirm all User Story 2 tests fail
 
 ### Frontend Mock Implementation (Enable Parallel Development)
 
-- [ ] T064 [P] [US2] Create mock Ollama response for 4yo girl in cold/rainy weather in `packages/frontend/src/mocks/ollama/4yo-girl-cold-rainy.json`
-- [ ] T065 [P] [US2] Create mock Ollama response for 7yo boy in moderate weather in `packages/frontend/src/mocks/ollama/7yo-boy-moderate.json`
-- [ ] T066 [P] [US2] Create mock Ollama response for 10yo boy in hot/sunny weather in `packages/frontend/src/mocks/ollama/10yo-boy-hot-sunny.json`
-- [ ] T067 [US2] Update recommendation service in `packages/frontend/src/services/recommendationService.js` to check `VITE_USE_MOCK_OLLAMA` and return mocks when true
+- [X] T064 [P] [US2] Create mock Ollama response for 4yo girl in cold/rainy weather in `packages/frontend/src/mocks/ollama/4yo-girl-cold-rainy.json`
+- [X] T065 [P] [US2] Create mock Ollama response for 7yo boy in moderate weather in `packages/frontend/src/mocks/ollama/7yo-boy-moderate.json`
+- [X] T066 [P] [US2] Create mock Ollama response for 10yo boy in hot/sunny weather in `packages/frontend/src/mocks/ollama/10yo-boy-hot-sunny.json`
+- [X] T067 [US2] Update recommendation service in `packages/frontend/src/services/recommendationService.js` to check `VITE_USE_MOCK_OLLAMA` and return mocks when true
 
 ### Server Ollama Integration
 
 **Ollama Service Layer**:
 
-- [ ] T068 [P] [US2] Create prompt analysis service in `packages/server/src/services/promptAnalysisService.js` to extract context keywords from voice prompts
-- [ ] T069 [P] [US2] Create Ollama response parser in `packages/server/src/utils/ollamaResponseParser.js` to parse free-text LLM output into structured format
-- [ ] T070 [P] [US2] Create clothing rules fallback in `packages/server/src/utils/clothingRules.js` (copy from frontend) for when Ollama is unavailable
-- [ ] T071 [US2] Create Ollama service in `packages/server/src/services/ollamaService.js` to call Ollama API (POST http://localhost:11434/api/generate) with structured prompts
-- [ ] T072 [US2] Create recommendation service in `packages/server/src/services/recommendationService.js` that orchestrates Ollama calls + fallback logic
-- [ ] T073 [US2] Add Ollama health check to health endpoint in `packages/server/src/server.js` (check if http://localhost:11434 is reachable)
+- [X] T068 [P] [US2] Create prompt analysis service in `packages/server/src/services/promptAnalysisService.js` to extract context keywords from voice prompts
+- [X] T069 [P] [US2] Create Ollama response parser in `packages/server/src/utils/ollamaResponseParser.js` to parse free-text LLM output into structured format
+- [X] T070 [P] [US2] Create clothing rules fallback in `packages/server/src/utils/clothingRules.js` (copy from frontend) for when Ollama is unavailable
+- [X] T071 [US2] Create Ollama service in `packages/server/src/services/ollamaService.js` to call Ollama API (POST http://localhost:11434/api/generate) with structured prompts
+- [X] T072 [US2] Create recommendation service in `packages/server/src/services/recommendationService.js` that orchestrates Ollama calls + fallback logic
+- [X] T073 [US2] Add Ollama health check to health endpoint in `packages/server/src/server.js` (check if http://localhost:11434 is reachable)
 
 **API Layer**:
 
-- [ ] T074 [P] [US2] Create recommendation request validator in `packages/server/src/validators/recommendationValidator.js` (validate profile, weather, prompt)
-- [ ] T075 [P] [US2] Create rate limiter for recommendations endpoint in `packages/server/src/middleware/rateLimiter.js` (500 req/15min)
-- [ ] T076 [US2] Create recommendation routes in `packages/server/src/routes/recommendations.js` with POST `/api/recommendations` and GET `/api/recommendations/profiles`
-- [ ] T077 [US2] Create recommendation controller in `packages/server/src/controllers/recommendationsController.js` to handle requests
-- [ ] T078 [US2] Integrate recommendation routes into Express app in `packages/server/src/server.js`
+- [X] T074 [P] [US2] Create recommendation request validator in `packages/server/src/validators/recommendationValidator.js` (validate profile, weather, prompt)
+- [X] T075 [P] [US2] Create rate limiter for recommendations endpoint in `packages/server/src/middleware/rateLimiter.js` (500 req/15min)
+- [X] T076 [US2] Create recommendation routes in `packages/server/src/routes/recommendations.js` with POST `/api/recommendations` and GET `/api/recommendations/profiles`
+- [X] T077 [US2] Create recommendation controller in `packages/server/src/controllers/recommendationsController.js` to handle requests
+- [X] T078 [US2] Integrate recommendation routes into Express app in `packages/server/src/server.js`
 
 **Verify Tests Pass**: Run `npm run test --workspace=@weatherman/server` and confirm all User Story 2 tests now pass
 
@@ -220,13 +220,13 @@ This project uses a **monorepo structure** with npm workspaces:
 
 **Note**: Most of User Story 3 was completed in Phase 1 (Setup) and Phase 2 (Foundational). This phase focuses on refinement and documentation.
 
-- [ ] T088 [P] [US3] Create root-level README.md section documenting monorepo structure and npm workspace commands
+- [X] T088 [P] [US3] Create root-level README.md section documenting monorepo structure and npm workspace commands
 - [ ] T089 [P] [US3] Update `packages/frontend/README.md` with frontend-specific setup and development instructions
-- [ ] T090 [P] [US3] Update `packages/server/README.md` with server-specific setup, Ollama configuration, and API documentation
+- [X] T090 [P] [US3] Update `packages/server/README.md` with server-specific setup, Ollama configuration, and API documentation
 - [ ] T091 [US3] Test independent frontend installation: Run `npm install --workspace=@weatherman/frontend` and verify only frontend deps are installed
 - [ ] T092 [US3] Test independent server installation: Run `npm install --workspace=@weatherman/server` and verify only server deps are installed
 - [ ] T093 [US3] Test workspace dependency hoisting: Verify shared dependencies (e.g., vitest) are hoisted to root `node_modules/`
-- [ ] T094 [US3] Create developer workflow documentation in `docs/workflow.md` explaining monorepo commands, parallel development, and common issues
+- [X] T094 [US3] Create developer workflow documentation in `docs/workflow.md` explaining monorepo commands, parallel development, and common issues
 - [ ] T095 [US3] Verify `npm run build` builds both packages correctly
 - [ ] T096 [US3] Verify `npm run test` runs tests for both packages (all tests should pass)
 - [ ] T097 [US3] Verify `npm run lint` lints both packages (zero warnings)
@@ -243,10 +243,10 @@ This project uses a **monorepo structure** with npm workspaces:
 
 ### Documentation
 
-- [ ] T098 [P] Update `docs/product-details.md` to reflect monorepo architecture and server component features
-- [ ] T099 [P] Update `docs/technical-details.md` with server architecture, Ollama integration, and API documentation
-- [ ] T100 [P] Update root README.md with quickstart instructions for monorepo setup and development
-- [ ] T101 [P] Add Ollama setup guide to `docs/ollama-setup.md` with installation instructions for macOS, Linux, Windows
+- [X] T098 [P] Update `docs/product-details.md` to reflect monorepo architecture and server component features
+- [X] T099 [P] Update `docs/technical-details.md` with server architecture, Ollama integration, and API documentation
+- [X] T100 [P] Update root README.md with quickstart instructions for monorepo setup and development
+- [X] T101 [P] Add Ollama setup guide to `docs/ollama-setup.md` with installation instructions for macOS, Linux, Windows
 
 ### End-to-End Testing (Required)
 

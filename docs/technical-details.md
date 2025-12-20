@@ -2,21 +2,133 @@
 
 ## Architecture Overview
 
-Weatherman is built as a Progressive Web Application (PWA) using modern web technologies to provide a responsive, offline-capable, voice-activated experience for outfit recommendations based on weather data.
+Weatherman is built as a **monorepo application** with a Progressive Web Application (PWA) frontend and an Express.js API server backend, using modern web technologies to provide a responsive, offline-capable, voice-activated experience for outfit recommendations based on weather data.
+
+### Monorepo Structure
+
+The project uses **npm workspaces** to manage two packages:
+
+```
+weatherman/
+├── packages/
+│   ├── frontend/    # @weatherman/frontend - React PWA
+│   └── server/      # @weatherman/server - Express API
+├── package.json     # Root workspace configuration
+└── specs/           # Feature specifications
+```
+
+**Key Benefits:**
+- **Security**: API keys stored server-side, never exposed in client bundle
+- **Rate Limiting**: Centralized control over external API calls
+- **Independent Deployment**: Frontend and server can be deployed separately
+- **Unified Development**: Single repository with shared tooling
+- **Code Reusability**: Potential for shared types and utilities
 
 ### Technology Stack
 
-- **Frontend Framework**: React 22+
-- **Build Tool**: Vite 5+
+#### Frontend (`@weatherman/frontend`)
+- **Framework**: React 18.3+ with Vite 5.4+
+- **Build Tool**: Vite with PWA plugin
 - **Design System**: Racine (Seeds Design System by Sprout Social)
   - URL: https://seeds.sproutsocial.com/
-- **Language**: JavaScript/TypeScript with HTML5 and CSS3
+- **Language**: JavaScript ES2022+ with HTML5 and CSS3
 - **Voice Interface**: Web Speech API
   - SpeechRecognition API for voice input
   - SpeechSynthesis API for voice feedback
 - **Offline Support**: Service Workers with Cache API
-- **State Management**: React Context API / Redux Toolkit (TBD)
-- **Data Fetching**: Native Fetch API with offline fallback
+- **State Management**: React Context API
+- **Data Fetching**: Fetch API calling server endpoints
+- **Development Server**: https://localhost:5173
+
+#### Server (`@weatherman/server`)
+- **Runtime**: Node.js 22+
+- **Framework**: Express.js 4.18+
+- **Security**: Helmet (security headers), CORS configuration
+- **Rate Limiting**: express-rate-limit
+- **HTTP Client**: axios (for external API calls)
+- **Testing**: Vitest + Supertest
+- **Weather API**: OpenWeatherMap (proxied)
+- **Recommendation Engine**: Rule-based with AI-ready architecture
+- **Development Server**: http://localhost:3000
+
+#### Development Flow
+1. **Frontend** makes requests to `/api/*` endpoints
+2. **Vite dev server** proxies requests to `http://localhost:3000`
+3. **Express server** handles requests:
+   - Weather endpoints proxy to OpenWeatherMap
+   - Recommendation endpoints use rule-based engine
+4. **Responses** flow back through the proxy to frontend
+
+### Server Architecture
+
+#### API Endpoints
+
+**Weather Proxying:**
+- `POST /api/weather/current` - Get current weather for coordinates
+- `POST /api/weather/forecast` - Get weather forecast
+- Rate limit: 100 requests per 15 minutes
+
+**Recommendations Service:**
+- `POST /api/recommendations` - Get clothing recommendations
+- `GET /api/recommendations/profiles` - List available user profiles
+- Rate limit: 500 requests per 15 minutes
+
+**Health Check:**
+- `GET /api/health` - Server and service status
+
+#### Middleware Stack
+
+```javascript
+app.use(helmet());           // Security headers
+app.use(corsMiddleware);     // CORS configuration
+app.use(express.json());     // Body parsing
+app.use(requestLogger);      // Request logging
+app.use(rateLimiter);        // Rate limiting (per endpoint)
+app.use(errorHandler);       // Global error handling
+```
+
+#### Service Layer Architecture
+
+```
+Controller → Validator → Service → External API/Rules
+    ↓           ↓           ↓            ↓
+Request    Validate    Business     Weather API
+Handler    Input       Logic        or Rules Engine
+    ↓           ↓           ↓            ↓
+Response ← Error ←── Transform ←── Raw Data
+```
+
+**Error Handling:**
+All errors return standardized JSON responses:
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable message"
+  },
+  "timestamp": "ISO 8601 timestamp"
+}
+```
+
+**Common Error Codes:**
+- `INVALID_REQUEST` (400): Validation failure
+- `RATE_LIMIT_EXCEEDED` (429): Too many requests
+- `WEATHER_API_ERROR` (503): External API unavailable
+- `WEATHER_API_TIMEOUT` (503): External API timeout (5s)
+
+#### Recommendation Engine
+
+**Current Implementation:** Rule-based clothing recommendations
+- Temperature-based layering logic
+- Precipitation handling (rain gear, snow gear)
+- Wind condition adjustments
+- UV index considerations
+- Profile-specific personalization (age, gender)
+
+**Future Enhancement:** Ollama AI Integration
+- Architecture in place for LLM-powered recommendations
+- Prompt analysis service prepared
+- Graceful fallback to rule-based system
 
 ## Progressive Web App Implementation
 
@@ -182,96 +294,138 @@ utterance.volume = 1.0;
 - Notifications (optional, for weather alerts)
 
 **Privacy Considerations:**
-- Voice data is processed in-browser (no server-side transmission)
+- Voice data is processed in-browser (no audio transmitted to server)
+- Voice transcripts may be sent to server for recommendation context
 - User profiles stored locally (localStorage/IndexedDB)
-- Location data used only for weather API calls
-- No voice recordings are saved
+- Location coordinates sent to server for weather proxying
+- Server does not log or store voice transcripts or location data
+- No voice recordings are saved (text-only processing)
+- API keys never exposed in client code (server-side only)
 
 ## Development Environment
 
 ### Prerequisites
 
-- Node.js 22+ and yarn
+- Node.js 22+ with npm 10+
 - Modern browser with PWA support (Chrome, Edge, Safari, Firefox)
 - HTTPS localhost setup (required for Service Workers and microphone access)
+- OpenWeatherMap API key ([sign up](https://openweathermap.org/api))
 
 ### Project Setup
 
 ```bash
-# Initialize project
-yarn create vite@latest weatherman -- --template react
+# Clone repository
+git clone <repository-url>
+cd weatherman
 
-# Install dependencies
-yarn install
+# Install all workspace dependencies
+npm install
 
-# Install Racine Design System
-yarn install @sproutsocial/seeds-react @sproutsocial/seeds-design-tokens
+# Configure server environment
+cd packages/server
+cp .env.example .env
+# Edit .env and add your WEATHER_API_KEY
 
-# Install additional dependencies
-yarn install workbox-window idb # PWA utilities
-yarn install react-router-dom # Routing
-yarn install @testing-library/react vitest # Testing
+# Configure frontend environment (optional)
+cd ../frontend
+cp .env.example .env.development
+# Defaults work for local development
+
+# Return to root and start development
+cd ../..
+npm run dev
 ```
 
 ### Project Structure
 
 ```
 weatherman/
-├── public/
-│   ├── manifest.json
-│   ├── robots.txt
-│   ├── icons/
-│   └── sw.js (generated by Vite PWA plugin)
-├── src/
-│   ├── assets/
-│   │   ├── images/
-│   │   └── icons/
-│   ├── components/
-│   │   ├── VoiceInput.jsx
-│   │   ├── WeatherDisplay.jsx
-│   │   ├── OutfitRecommendations.jsx
-│   │   ├── ProfileSelector.jsx
-│   │   └── OfflineIndicator.jsx
-│   ├── hooks/
-│   │   ├── useSpeechRecognition.js
-│   │   ├── useSpeechSynthesis.js
-│   │   ├── useWeatherData.js
-│   │   ├── useOfflineStatus.js
-│   │   └── useServiceWorker.js
-│   ├── services/
-│   │   ├── weatherAPI.js
-│   │   ├── outfitEngine.js
-│   │   ├── speechProcessor.js
-│   │   └── cacheManager.js
-│   ├── utils/
-│   │   ├── commandParser.js
-│   │   ├── dateHelpers.js
-│   │   └── storageHelpers.js
-│   ├── contexts/
-│   │   ├── UserContext.jsx
-│   │   └── WeatherContext.jsx
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── sw.js (Service Worker source)
+├── packages/
+│   ├── frontend/                    # @weatherman/frontend
+│   │   ├── public/
+│   │   │   ├── manifest.json
+│   │   │   ├── robots.txt
+│   │   │   ├── icons/
+│   │   │   └── offline.html
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── profile/         # Profile selection
+│   │   │   │   ├── recommendation/  # Outfit display
+│   │   │   │   └── voice/           # Voice interface
+│   │   │   ├── hooks/
+│   │   │   │   ├── useSpeechRecognition.js
+│   │   │   │   ├── useSpeechSynthesis.js
+│   │   │   │   ├── useWeatherData.js
+│   │   │   │   └── useOfflineStatus.js
+│   │   │   ├── services/
+│   │   │   │   ├── apiClient.js     # Server API client
+│   │   │   │   ├── weatherService.js
+│   │   │   │   ├── recommendationService.js
+│   │   │   │   └── cacheManager.js
+│   │   │   ├── mocks/               # Mock data for dev
+│   │   │   ├── utils/
+│   │   │   ├── models/
+│   │   │   ├── pages/
+│   │   │   ├── App.jsx
+│   │   │   └── main.jsx
+│   │   ├── tests/                   # Frontend tests
+│   │   ├── vite.config.js           # Vite + proxy config
+│   │   └── package.json
+│   │
+│   └── server/                      # @weatherman/server
+│       ├── src/
+│       │   ├── config/
+│       │   │   ├── env.js
+│       │   │   └── constants.js
+│       │   ├── controllers/
+│       │   │   ├── weatherController.js
+│       │   │   └── recommendationsController.js
+│       │   ├── middleware/
+│       │   │   ├── errorHandler.js
+│       │   │   ├── requestLogger.js
+│       │   │   ├── cors.js
+│       │   │   └── rateLimiter.js
+│       │   ├── routes/
+│       │   │   ├── weather.js
+│       │   │   └── recommendations.js
+│       │   ├── services/
+│       │   │   ├── weatherProxyService.js
+│       │   │   └── recommendationService.js
+│       │   ├── utils/
+│       │   │   └── clothingRules.js
+│       │   ├── validators/
+│       │   │   ├── weatherValidator.js
+│       │   │   └── recommendationValidator.js
+│       │   └── server.js
+│       ├── tests/
+│       │   ├── unit/
+│       │   ├── integration/
+│       │   └── helpers/
+│       ├── vitest.config.js
+│       └── package.json
+│
+├── specs/                           # Feature specifications
 ├── docs/
 │   ├── product-details.md
-│   └── technical-details.md
-├── vite.config.js
-├── package.json
+│   ├── technical-details.md
+│   └── ollama-setup.md
+├── package.json                     # Root workspace config
 └── README.md
 ```
 
-### Vite Configuration
+### Vite Configuration (Frontend)
 
 ```javascript
-// vite.config.js
+// packages/frontend/vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
   plugins: [
     react(),
+    basicSsl(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png', 'robots.txt'],
@@ -282,10 +436,11 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.openweathermap\.org\/.*/i,
+            // Cache server API responses
+            urlPattern: /^https?:\/\/localhost:3000\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'weather-api-v1',
+              cacheName: 'server-api-v1',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60, // 1 hour
@@ -300,8 +455,16 @@ export default defineConfig({
     }),
   ],
   server: {
-    https: true, // Required for Service Workers in development
-    port: 3000,
+    https: true, // Required for Service Workers and microphone
+    port: 5173,
+    proxy: {
+      // Proxy /api requests to Express server
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });
 ```
@@ -342,12 +505,17 @@ import '@sproutsocial/seeds-react/dist/seeds.css';
 
 ## Weather API Integration
 
-### Recommended Provider: OpenWeatherMap
+### Provider: OpenWeatherMap (Server-Side Proxy)
 
-**Endpoints Used:**
+**Architecture:**
+- Frontend requests weather data from server at `POST /api/weather/current`
+- Server proxies request to OpenWeatherMap API
+- API credentials stored server-side only (never exposed to client)
+- Rate limiting applied at server level (100 requests per 15 minutes)
+
+**OpenWeatherMap Endpoints (Server-Side):**
 - Current Weather: `https://api.openweathermap.org/data/2.5/weather`
 - 5-Day Forecast: `https://api.openweathermap.org/data/2.5/forecast`
-- One Call API 3.0: `https://api.openweathermap.org/data/3.0/onecall`
 
 **Data Points Retrieved:**
 - Temperature (current, high, low, feels-like)
@@ -358,14 +526,24 @@ import '@sproutsocial/seeds-react/dist/seeds.css';
 - UV index
 - Sunrise/sunset times
 
-### Geolocation
+### Geolocation (Frontend)
 
 ```javascript
-// Request user location
+// Request user location (browser-side)
 navigator.geolocation.getCurrentPosition(
   (position) => {
     const { latitude, longitude } = position.coords;
-    fetchWeatherData(latitude, longitude);
+
+    // Send coordinates to server for weather data
+    fetch('/api/weather/current', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lat: latitude,
+        lon: longitude,
+        units: 'imperial'
+      })
+    });
   },
   (error) => {
     // Fallback to default location or prompt user
@@ -375,10 +553,16 @@ navigator.geolocation.getCurrentPosition(
 
 ### Caching Strategy
 
-- **Fresh Data**: Fetch new data every 30 minutes when online
+**Frontend (Service Worker):**
+- **Network First**: Try server API first, fallback to cache if offline
+- **Cache Duration**: 1 hour for weather responses
 - **Stale Data**: Display cached data with timestamp when offline
-- **Background Sync**: Update cache when connection is restored
-- **Expiration**: Remove data older than 24 hours
+- **Max Entries**: 50 cached responses
+
+**Server:**
+- No caching currently implemented (stateless)
+- Future: Add Redis for server-side caching layer
+- Timeout: 5 seconds for weather API calls
 
 ## Outfit Recommendation Engine
 

@@ -49,6 +49,29 @@ Weatherman is a voice-activated progressive web application that provides person
 
 ## Technical Considerations
 
+### Architecture
+
+**Monorepo Structure**: The application uses a monorepo architecture with separate packages:
+
+- **Frontend Package** (`@weatherman/frontend`): React-based Progressive Web App
+  - Voice interaction and user interface
+  - Service Worker for offline functionality
+  - Client-side caching (IndexedDB)
+  - Runs on: `https://localhost:5173` (dev)
+
+- **Server Package** (`@weatherman/server`): Express.js API server
+  - Weather data proxying (secure credential management)
+  - Clothing recommendation service
+  - Rate limiting and error handling
+  - Runs on: `http://localhost:3000` (dev)
+
+**Benefits of This Architecture**:
+- API keys never exposed in frontend bundle (security)
+- Centralized rate limiting for external API calls
+- Rule-based recommendations with AI integration architecture
+- Independent deployment of frontend and backend
+- Unified development experience with npm workspaces
+
 ### Mobile-First Design
 
 - Progressive Web App (PWA) architecture for mobile devices
@@ -59,16 +82,31 @@ Weatherman is a voice-activated progressive web application that provides person
 
 ### Weather API Integration
 
-- Integration with reliable weather data providers (e.g., OpenWeatherMap, Weather.gov, AccuWeather)
-- Geolocation services for automatic location detection
-- Caching strategy for offline functionality
-- Regular weather data updates
+- **Server-Side Proxy**: All weather API requests routed through Express server
+- **Provider**: OpenWeatherMap API integration
+- **Security**: API credentials stored server-side only, never in frontend
+- **Rate Limiting**: 100 requests per 15 minutes per endpoint
+- **Caching**: Weather data cached for 1 hour with stale-while-revalidate strategy
+- **Geolocation**: Browser-based location detection, coordinates sent to server
+
+### Recommendation Service
+
+- **Rule-Based Engine**: Intelligent clothing rules based on:
+  - Temperature ranges and feels-like temperature
+  - Precipitation probability and type
+  - Wind conditions
+  - UV index
+  - User profile (age, gender)
+- **Voice Context**: Voice prompts analyzed for additional context
+- **AI-Ready Architecture**: Built with Ollama integration points for future LLM-powered recommendations
+- **Rate Limiting**: 500 requests per 15 minutes
 
 ### User Experience
 
 - **Quick interactions**: Voice activation should be instant and responsive
 - **Visual feedback**: Clear visual indicators when listening for voice commands
 - **Morning routine optimization**: Fast loading for quick morning checks
+- **Graceful Degradation**: Works with rule-based recommendations even if AI service unavailable
 
 ## User Flow
 

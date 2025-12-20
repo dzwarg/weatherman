@@ -1,0 +1,37 @@
+{
+  "name": "@weatherman/server",
+  "version": "0.1.0",
+  "description": "Weatherman API Server",
+  "type": "module",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "vitest run",
+    "test:unit": "vitest run --dir tests/unit",
+    "test:integration": "vitest run --dir tests/integration",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext js --max-warnings 0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "helmet": "^7.1.0",
+    "express-validator": "^7.0.1",
+    "express-rate-limit": "^7.1.5",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.5",
+    "supertest": "^6.3.4",
+    "eslint": "^9.15.0",
+    "@vitest/coverage-v8": "^2.1.5"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=7.0.0"
+  }
+}

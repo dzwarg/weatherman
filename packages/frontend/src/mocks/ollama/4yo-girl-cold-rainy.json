@@ -1,0 +1,60 @@
+{
+  "id": "mock-4yo-girl-cold-rainy",
+  "profileId": "4yo-girl",
+  "weatherData": {
+    "temperature": 35,
+    "feelsLike": 28,
+    "conditions": "Rain",
+    "precipitationProbability": 80,
+    "windSpeed": 12,
+    "uvIndex": 2
+  },
+  "recommendations": {
+    "baseLayers": [
+      {
+        "item": "Long-sleeve t-shirt",
+        "reason": "To stay warm"
+      }
+    ],
+    "outerwear": [
+      {
+        "item": "Warm winter coat",
+        "reason": "It's cold and rainy"
+      },
+      {
+        "item": "Raincoat or poncho",
+        "reason": "To stay dry"
+      }
+    ],
+    "bottoms": [
+      {
+        "item": "Pull-on pants or leggings",
+        "reason": "Easy to put on and warm"
+      }
+    ],
+    "accessories": [
+      {
+        "item": "Warm hat",
+        "reason": "To keep your head warm"
+      },
+      {
+        "item": "Gloves or mittens",
+        "reason": "To keep your hands warm"
+      },
+      {
+        "item": "Umbrella",
+        "reason": "To stay dry in the rain"
+      }
+    ],
+    "footwear": [
+      {
+        "item": "Rain boots",
+        "reason": "To keep your feet dry"
+      }
+    ]
+  },
+  "spokenResponse": "It's cold and rainy today! You should wear a long-sleeve shirt, warm coat, and rain boots. Don't forget your umbrella, hat, and mittens to stay warm and dry!",
+  "confidence": 0.95,
+  "createdAt": "2025-12-19T10:30:00.000Z",
+  "feedbackProvided": false
+}

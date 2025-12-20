@@ -1,0 +1,51 @@
+{
+  "id": "mock-10yo-boy-hot-sunny",
+  "profileId": "10yo-boy",
+  "weatherData": {
+    "temperature": 85,
+    "feelsLike": 88,
+    "conditions": "Clear",
+    "precipitationProbability": 5,
+    "windSpeed": 5,
+    "uvIndex": 9
+  },
+  "recommendations": {
+    "baseLayers": [
+      {
+        "item": "Lightweight t-shirt or tank top",
+        "reason": "To stay cool in the heat"
+      }
+    ],
+    "outerwear": [],
+    "bottoms": [
+      {
+        "item": "Shorts",
+        "reason": "Perfect for hot weather"
+      }
+    ],
+    "accessories": [
+      {
+        "item": "Sunglasses",
+        "reason": "Protect your eyes from bright sun"
+      },
+      {
+        "item": "Hat with brim",
+        "reason": "Sun protection for your face"
+      },
+      {
+        "item": "Sunscreen",
+        "reason": "Very important - the UV index is high!"
+      }
+    ],
+    "footwear": [
+      {
+        "item": "Sandals or breathable sneakers",
+        "reason": "To keep your feet cool"
+      }
+    ]
+  },
+  "spokenResponse": "It's really hot today! Wear a light t-shirt and shorts. Make sure to use sunscreen, wear sunglasses, and a hat. The UV index is high, so sun protection is super important!",
+  "confidence": 0.96,
+  "createdAt": "2025-12-19T10:30:00.000Z",
+  "feedbackProvided": false
+}

@@ -6,7 +6,49 @@
 import { ClothingRecommendation } from '../models/ClothingRecommendation.js';
 import { generateClothingRecommendations } from '../utils/clothingRules.js';
 
+// Import mock data for development/testing
+import mock4yoGirlColdRainy from '../mocks/ollama/4yo-girl-cold-rainy.json';
+import mock7yoBoyModerate from '../mocks/ollama/7yo-boy-moderate.json';
+import mock10yoBoyHotSunny from '../mocks/ollama/10yo-boy-hot-sunny.json';
+
 class RecommendationService {
+  /**
+   * Get mock Ollama response based on profile and weather
+   * @param {Object} weatherData - Weather data snapshot
+   * @param {Object} profile - User profile
+   * @returns {Object|null} Mock recommendation or null
+   */
+  getMockOllamaResponse(weatherData, profile) {
+    // Check if mock mode is enabled
+    if (import.meta.env.VITE_USE_MOCK_OLLAMA !== 'true') {
+      return null;
+    }
+
+    const temp = weatherData.current.temperature;
+    const conditions = weatherData.current.conditions.toLowerCase();
+    const isRainy = conditions.includes('rain') || weatherData.current.precipitationProbability > 60;
+
+    // Match profile and weather to appropriate mock
+    if (profile.id === '4yo-girl' && temp < 40 && isRainy) {
+      return mock4yoGirlColdRainy;
+    }
+
+    if (profile.id === '7yo-boy' && temp >= 40 && temp <= 70) {
+      return mock7yoBoyModerate;
+    }
+
+    if (profile.id === '10yo-boy' && temp > 70) {
+      return mock10yoBoyHotSunny;
+    }
+
+    // Default: return first available mock for matching profile
+    if (profile.id === '4yo-girl') return mock4yoGirlColdRainy;
+    if (profile.id === '7yo-boy') return mock7yoBoyModerate;
+    if (profile.id === '10yo-boy') return mock10yoBoyHotSunny;
+
+    return null;
+  }
+
   /**
    * Generate clothing recommendation
    * @param {Object} weatherData - Weather data snapshot
@@ -14,6 +56,11 @@ class RecommendationService {
    * @returns {ClothingRecommendation} Clothing recommendation
    */
   generateRecommendation(weatherData, profile) {
+    // Check for mock Ollama response
+    const mockResponse = this.getMockOllamaResponse(weatherData, profile);
+    if (mockResponse) {
+      return new ClothingRecommendation(mockResponse);
+    }
     // Extract relevant weather info
     const weatherSnapshot = {
       temperature: weatherData.current.temperature,

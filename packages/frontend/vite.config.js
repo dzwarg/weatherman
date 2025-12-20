@@ -51,27 +51,59 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.openweathermap\.org\/.*/i,
+            // Cache server API responses (weather endpoints)
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/weather'),
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'weather-api-cache',
+              cacheName: 'server-weather-api-cache',
               expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 3600
+                maxEntries: 50,
+                maxAgeSeconds: 3600 // 1 hour
               },
               cacheableResponse: {
                 statuses: [0, 200]
-              }
+              },
+              networkTimeoutSeconds: 10
             }
           },
           {
+            // Cache server API responses (recommendations endpoints)
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/recommendations'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'server-recommendations-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 1800 // 30 minutes
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 10
+            }
+          },
+          {
+            // Cache health check endpoint
+            urlPattern: ({ url }) => url.pathname === '/api/health',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'server-health-cache',
+              expiration: {
+                maxEntries: 1,
+                maxAgeSeconds: 60 // 1 minute
+              },
+              networkTimeoutSeconds: 5
+            }
+          },
+          {
+            // Cache navigation requests
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'CacheFirst',
             options: {
               cacheName: 'pages-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 86400
+                maxAgeSeconds: 86400 // 24 hours
               }
             }
           }
@@ -84,15 +116,13 @@ export default defineConfig({
   ],
   server: {
     // HTTPS required for voice/geolocation APIs in production
-    // For development, you can temporarily use HTTP
-    https: true, // Change to true when testing voice features
+    https: true,
     port: 5173,
     proxy: {
-      // Proxy API requests to avoid CORS issues in development
-      '/api/weather': {
-        target: 'https://api.openweathermap.org/data/3.0',
+      // Proxy all API requests to local server
+      '/api': {
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/weather/, ''),
         secure: false
       }
     }

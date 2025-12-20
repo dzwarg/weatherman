@@ -1,0 +1,48 @@
+{
+  "id": "mock-7yo-boy-moderate",
+  "profileId": "7yo-boy",
+  "weatherData": {
+    "temperature": 60,
+    "feelsLike": 58,
+    "conditions": "Partly Cloudy",
+    "precipitationProbability": 20,
+    "windSpeed": 8,
+    "uvIndex": 5
+  },
+  "recommendations": {
+    "baseLayers": [
+      {
+        "item": "T-shirt",
+        "reason": "It's nice and comfortable"
+      }
+    ],
+    "outerwear": [
+      {
+        "item": "Light jacket or hoodie",
+        "reason": "In case it gets cooler"
+      }
+    ],
+    "bottoms": [
+      {
+        "item": "Jeans or cargo pants",
+        "reason": "Good for playing outside"
+      }
+    ],
+    "accessories": [
+      {
+        "item": "Baseball cap",
+        "reason": "To protect from the sun"
+      }
+    ],
+    "footwear": [
+      {
+        "item": "Sneakers",
+        "reason": "Perfect for running around"
+      }
+    ]
+  },
+  "spokenResponse": "It's a nice day! Wear a t-shirt with jeans and bring a light jacket just in case. Don't forget your sneakers and cap!",
+  "confidence": 0.92,
+  "createdAt": "2025-12-19T10:30:00.000Z",
+  "feedbackProvided": false
+}

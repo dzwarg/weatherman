@@ -1,8 +1,10 @@
 /**
  * Weather Service
- * OpenWeatherMap API integration with caching and error handling
+ * Server API integration with caching and error handling
+ * Calls Express server which proxies to OpenWeatherMap
  */
 
+import apiClient, { APIClientError } from './apiClient.js';
 import cacheService from './cacheService.js';
 import { API_CONFIG } from '../utils/constants.js';
 import { parseWeatherResponse } from '../utils/weatherUtils.js';
@@ -22,9 +24,7 @@ export class WeatherServiceError extends Error {
 
 class WeatherService {
   constructor() {
-    this.apiKey = API_CONFIG.OPENWEATHER_API_KEY;
-    this.baseUrl = API_CONFIG.OPENWEATHER_BASE_URL;
-    this.timeout = API_CONFIG.TIMEOUT;
+    this.units = API_CONFIG.UNITS || 'imperial';
   }
 
   /**
@@ -69,56 +69,30 @@ class WeatherService {
   }
 
   /**
-   * Make API call with timeout
-   * @param {string} url - API URL
+   * Call server API for weather data
+   * @param {number} lat - Latitude
+   * @param {number} lon - Longitude
    * @returns {Promise<Object>} API response
    */
-  async fetchWithTimeout(url) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
+  async fetchWeatherData(lat, lon) {
     try {
-      const response = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+      return await apiClient.getCurrentWeather(lat, lon, this.units);
+    } catch (error) {
+      // Convert APIClientError to WeatherServiceError
+      if (error instanceof APIClientError) {
         throw new WeatherServiceError(
-          `API error: ${response.statusText}`,
-          'API_ERROR',
+          error.message,
+          error.code,
           {
-            statusCode: response.status,
-            statusText: response.statusText,
-            error: errorData,
+            statusCode: error.statusCode,
+            ...error.details,
           }
         );
       }
 
-      return await response.json();
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error.name === 'AbortError') {
-        throw new WeatherServiceError(
-          `API request timed out after ${this.timeout}ms`,
-          'TIMEOUT',
-          { timeout: this.timeout }
-        );
-      }
-
-      if (error instanceof WeatherServiceError) {
-        throw error;
-      }
-
       throw new WeatherServiceError(
-        'Network error occurred',
-        'NETWORK_ERROR',
+        'Failed to fetch weather data',
+        'API_ERROR',
         { originalError: error.message }
       );
     }
@@ -152,10 +126,9 @@ class WeatherService {
       console.warn('Cache read error:', error);
     }
 
-    // Fetch fresh data
+    // Fetch fresh data from server
     try {
-      const apiUrl = this.buildApiUrl(lat, lon);
-      const apiResponse = await this.fetchWithTimeout(apiUrl);
+      const apiResponse = await this.fetchWeatherData(lat, lon);
 
       const locationName = location.name || await this.getLocationName(lat, lon, apiResponse);
       const parsedData = parseWeatherResponse(apiResponse, {
@@ -176,8 +149,8 @@ class WeatherService {
 
       return weatherData;
     } catch (error) {
-      // If API fails, try to use stale cache
-      console.error('API call failed:', error);
+      // If server API fails, try to use stale cache
+      console.error('Server API call failed:', error);
 
       try {
         const cachedData = await cacheService.get(lat, lon);
@@ -212,24 +185,6 @@ class WeatherService {
     }
 
     return weatherData;
-  }
-
-  /**
-   * Build API URL
-   * @param {number} lat - Latitude
-   * @param {number} lon - Longitude
-   * @returns {string} API URL
-   */
-  buildApiUrl(lat, lon) {
-    const params = new URLSearchParams({
-      lat: lat.toString(),
-      lon: lon.toString(),
-      appid: this.apiKey,
-      units: API_CONFIG.UNITS,
-      exclude: 'minutely',
-    });
-
-    return `${this.baseUrl}?${params.toString()}`;
   }
 
   /**

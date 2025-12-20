@@ -265,4 +265,100 @@ describe('recommendationService', () => {
       expect(result).toBe('');
     });
   });
+
+  describe('getMockOllamaResponse', () => {
+    it('should return null when VITE_USE_MOCK_OLLAMA is not enabled', () => {
+      const result = recommendationService.getMockOllamaResponse(weatherData, profile);
+      expect(result).toBeNull();
+    });
+
+    it('should return mock for 4yo-girl in cold rainy weather when enabled', () => {
+      // Mock the environment variable
+      const originalEnv = import.meta.env.VITE_USE_MOCK_OLLAMA;
+      import.meta.env.VITE_USE_MOCK_OLLAMA = 'true';
+
+      const coldRainyWeather = {
+        ...weatherData,
+        current: {
+          ...weatherData.current,
+          temperature: 35,
+          conditions: 'Rain',
+          precipitationProbability: 80,
+        },
+      };
+
+      const girlProfile = {
+        id: '4yo-girl',
+        age: 4,
+        gender: 'girl',
+      };
+
+      const result = recommendationService.getMockOllamaResponse(coldRainyWeather, girlProfile);
+
+      expect(result).toBeDefined();
+      expect(result.profileId).toBe('4yo-girl');
+      expect(result.weatherData.temperature).toBe(35);
+
+      // Restore
+      import.meta.env.VITE_USE_MOCK_OLLAMA = originalEnv;
+    });
+
+    it('should return mock for 7yo-boy in moderate weather when enabled', () => {
+      // Mock the environment variable
+      const originalEnv = import.meta.env.VITE_USE_MOCK_OLLAMA;
+      import.meta.env.VITE_USE_MOCK_OLLAMA = 'true';
+
+      const moderateWeather = {
+        ...weatherData,
+        current: {
+          ...weatherData.current,
+          temperature: 55,
+          conditions: 'Cloudy',
+        },
+      };
+
+      const boyProfile = {
+        id: '7yo-boy',
+        age: 7,
+        gender: 'boy',
+      };
+
+      const result = recommendationService.getMockOllamaResponse(moderateWeather, boyProfile);
+
+      expect(result).toBeDefined();
+      expect(result.profileId).toBe('7yo-boy');
+
+      // Restore
+      import.meta.env.VITE_USE_MOCK_OLLAMA = originalEnv;
+    });
+
+    it('should return mock for 10yo-boy in hot weather when enabled', () => {
+      // Mock the environment variable
+      const originalEnv = import.meta.env.VITE_USE_MOCK_OLLAMA;
+      import.meta.env.VITE_USE_MOCK_OLLAMA = 'true';
+
+      const hotWeather = {
+        ...weatherData,
+        current: {
+          ...weatherData.current,
+          temperature: 85,
+          conditions: 'Sunny',
+        },
+      };
+
+      const boyProfile = {
+        id: '10yo-boy',
+        age: 10,
+        gender: 'boy',
+      };
+
+      const result = recommendationService.getMockOllamaResponse(hotWeather, boyProfile);
+
+      expect(result).toBeDefined();
+      expect(result.profileId).toBe('10yo-boy');
+
+      // Restore
+      import.meta.env.VITE_USE_MOCK_OLLAMA = originalEnv;
+    });
+  });
 });

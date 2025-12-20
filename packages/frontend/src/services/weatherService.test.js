@@ -4,15 +4,14 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import weatherService, { WeatherServiceError } from './weatherService';
+import apiClient from './apiClient';
 import cacheService from './cacheService';
 import { WeatherData } from '../models/WeatherData';
 
 // Mock dependencies
+vi.mock('./apiClient');
 vi.mock('./cacheService');
 vi.mock('../models/WeatherData');
-
-// Mock fetch globally
-global.fetch = vi.fn();
 
 describe('weatherService', () => {
   const mockLocation = {
@@ -40,8 +39,8 @@ describe('weatherService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Reset fetch mock
-    global.fetch.mockReset();
+    // Reset apiClient mocks
+    apiClient.getCurrentWeather = vi.fn();
 
     // Reset cacheService mocks
     cacheService.get.mockResolvedValue(null);
@@ -90,15 +89,25 @@ describe('weatherService', () => {
     });
   });
 
-  describe('buildApiUrl', () => {
-    it('should build correct API URL', () => {
-      const url = weatherService.buildApiUrl(42.36, -71.06);
+  describe('fetchWeatherData', () => {
+    it('should call apiClient with correct parameters', async () => {
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
-      expect(url).toContain('https://api.openweathermap.org');
-      expect(url).toContain('lat=42.36');
-      expect(url).toContain('lon=-71.06');
-      expect(url).toContain('units=imperial');
-      expect(url).toContain('exclude=minutely');
+      const result = await weatherService.fetchWeatherData(42.36, -71.06);
+
+      expect(apiClient.getCurrentWeather).toHaveBeenCalledWith(42.36, -71.06, 'imperial');
+      expect(result).toEqual(mockApiResponse);
+    });
+
+    it('should convert APIClientError to WeatherServiceError', async () => {
+      const apiError = new Error('API Error');
+      apiError.name = 'APIClientError';
+      apiError.code = 'TIMEOUT';
+      apiError.statusCode = 408;
+      apiClient.getCurrentWeather.mockRejectedValueOnce(apiError);
+
+      await expect(weatherService.fetchWeatherData(42.36, -71.06))
+        .rejects.toThrow(WeatherServiceError);
     });
   });
 
@@ -130,37 +139,6 @@ describe('weatherService', () => {
     });
   });
 
-  describe('fetchWithTimeout', () => {
-    it('should fetch successfully', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
-
-      const result = await weatherService.fetchWithTimeout('https://api.test.com');
-
-      expect(result).toEqual(mockApiResponse);
-    });
-
-    it('should throw error for non-ok response', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-        json: async () => ({ error: 'Not found' }),
-      });
-
-      await expect(weatherService.fetchWithTimeout('https://api.test.com'))
-        .rejects.toThrow(WeatherServiceError);
-    });
-
-    it('should handle network errors', async () => {
-      global.fetch.mockRejectedValueOnce(new Error('Network failure'));
-
-      await expect(weatherService.fetchWithTimeout('https://api.test.com'))
-        .rejects.toThrow(WeatherServiceError);
-    });
-  });
 
   describe('getCurrentWeather', () => {
     it('should return fresh cached data', async () => {
@@ -184,7 +162,7 @@ describe('weatherService', () => {
 
       expect(result.isFresh()).toBe(true);
       expect(cacheService.get).toHaveBeenCalledWith(42.36, -71.06);
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(apiClient.getCurrentWeather).not.toHaveBeenCalled();
     });
 
     it('should fetch fresh data when cache is stale', async () => {
@@ -202,10 +180,7 @@ describe('weatherService', () => {
       };
       WeatherData.fromJSON.mockReturnValueOnce(mockStaleInstance);
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
       const mockNewInstance = {
         toJSON: vi.fn().mockReturnValue({}),
@@ -214,17 +189,14 @@ describe('weatherService', () => {
 
       const result = await weatherService.getCurrentWeather(mockLocation);
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(apiClient.getCurrentWeather).toHaveBeenCalledWith(42.36, -71.06, 'imperial');
       expect(cacheService.set).toHaveBeenCalled();
     });
 
     it('should fetch when no cache exists', async () => {
       cacheService.get.mockResolvedValueOnce(null);
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
       const mockInstance = {
         toJSON: vi.fn().mockReturnValue({}),
@@ -233,7 +205,7 @@ describe('weatherService', () => {
 
       const result = await weatherService.getCurrentWeather(mockLocation);
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(apiClient.getCurrentWeather).toHaveBeenCalledWith(42.36, -71.06, 'imperial');
       expect(cacheService.set).toHaveBeenCalled();
     });
 
@@ -253,7 +225,7 @@ describe('weatherService', () => {
       };
       WeatherData.fromJSON.mockReturnValueOnce(mockStaleInstance);
 
-      global.fetch.mockRejectedValueOnce(new Error('API Error'));
+      apiClient.getCurrentWeather.mockRejectedValueOnce(new Error('API Error'));
 
       const result = await weatherService.getCurrentWeather(mockLocation);
 
@@ -262,7 +234,7 @@ describe('weatherService', () => {
 
     it('should throw error when API fails and no cache', async () => {
       cacheService.get.mockResolvedValue(null);
-      global.fetch.mockRejectedValueOnce(new Error('API Error'));
+      apiClient.getCurrentWeather.mockRejectedValueOnce(new Error('API Error'));
 
       await expect(weatherService.getCurrentWeather(mockLocation))
         .rejects.toThrow();
@@ -276,10 +248,7 @@ describe('weatherService', () => {
     it('should handle cache read errors gracefully', async () => {
       cacheService.get.mockRejectedValueOnce(new Error('Cache error'));
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
       const mockInstance = {
         toJSON: vi.fn().mockReturnValue({}),
@@ -289,17 +258,14 @@ describe('weatherService', () => {
       // Should still fetch from API
       const result = await weatherService.getCurrentWeather(mockLocation);
 
-      expect(global.fetch).toHaveBeenCalled();
+      expect(apiClient.getCurrentWeather).toHaveBeenCalled();
     });
 
     it('should handle cache write errors gracefully', async () => {
       cacheService.get.mockResolvedValueOnce(null);
       cacheService.set.mockRejectedValueOnce(new Error('Cache write error'));
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
       const mockInstance = {
         toJSON: vi.fn().mockReturnValue({}),
@@ -316,10 +282,7 @@ describe('weatherService', () => {
     it('should return forecast data', async () => {
       cacheService.get.mockResolvedValueOnce(null);
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
       const mockInstance = {
         dailyForecast: [1, 2, 3, 4, 5, 6, 7, 8],
@@ -335,10 +298,7 @@ describe('weatherService', () => {
     it('should not trim if forecast is shorter than requested', async () => {
       cacheService.get.mockResolvedValueOnce(null);
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockApiResponse,
-      });
+      apiClient.getCurrentWeather.mockResolvedValueOnce(mockApiResponse);
 
       const mockInstance = {
         dailyForecast: [1, 2, 3],

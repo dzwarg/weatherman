@@ -125,7 +125,11 @@ describe('useWeather', () => {
       const { result } = renderHook(() => useWeather());
 
       await act(async () => {
-        await result.current.fetchWeather(mockLocation);
+        try {
+          await result.current.fetchWeather(mockLocation);
+        } catch (err) {
+          // Error is expected and will be set in state
+        }
       });
 
       expect(result.current.error).toBe('API Error');
@@ -185,7 +189,11 @@ describe('useWeather', () => {
       const { result } = renderHook(() => useWeather());
 
       await act(async () => {
-        await result.current.fetchForecast(mockLocation);
+        try {
+          await result.current.fetchForecast(mockLocation);
+        } catch (err) {
+          // Error is expected and will be set in state
+        }
       });
 
       expect(result.current.error).toBe('Forecast failed');
@@ -300,7 +308,11 @@ describe('useWeather', () => {
 
       // First fetch fails
       await act(async () => {
-        await result.current.fetchWeather(mockLocation);
+        try {
+          await result.current.fetchWeather(mockLocation);
+        } catch (err) {
+          // Error is expected
+        }
       });
       expect(result.current.error).toBe('First error');
 
