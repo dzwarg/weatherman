@@ -18,6 +18,12 @@ coverage/
 .env.*.local
 packages/server/.env
 
+# SSL/TLS Certificates
+*.pem
+*.key
+*.crt
+*.cert
+
 # Logs
 *.log
 npm-debug.log*

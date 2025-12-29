@@ -33,3 +33,7 @@ When writing code, ensure adherence to best practices for progressive web applic
 
 ## Recent Changes
 - 001-voice-weather-clothing: Added JavaScript (ES2022+) with React 22+, Node 22+
+
+## Development Guidelines
+
+**EVERY** code change to this repository **MUST** follow the guidelines in './docs/workflow.md' for source hygiene, including testing, committing, and code review.

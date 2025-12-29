@@ -1,55 +1,12 @@
-import express from 'express';
-import helmet from 'helmet';
+/**
+ * Server entry point
+ * Starts the Express server
+ */
+
+import app from './app.js';
 import { config } from './config/env.js';
-import { corsMiddleware } from './middleware/cors.js';
-import { requestLogger } from './middleware/requestLogger.js';
-import { errorHandler } from './middleware/errorHandler.js';
-import { weatherRouter } from './routes/weather.js';
-import { recommendationsRouter } from './routes/recommendations.js';
-import { checkHealth as checkClaudeHealth } from './services/claudeService.js';
 
-const app = express();
 const PORT = config.port;
-
-// Middleware
-app.use(helmet());
-app.use(corsMiddleware);
-app.use(express.json());
-app.use(requestLogger);
-
-// Health check endpoint
-app.get('/api/health', async (req, res) => {
-  try {
-    // Check Claude API health
-    const claudeAvailable = await checkClaudeHealth();
-
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      services: {
-        weatherApi: 'connected',
-        claude: claudeAvailable ? 'connected' : 'unavailable',
-      },
-    });
-  } catch {
-    // Even if health checks fail, the server is still operational
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      services: {
-        weatherApi: 'connected',
-        claude: 'unavailable',
-      },
-    });
-  }
-});
-
-// API routes
-app.use('/api', weatherRouter);
-app.use('/api', recommendationsRouter);
-
-// Error handling middleware (must be last)
-app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {

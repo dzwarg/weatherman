@@ -1,12 +1,18 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
-import basicSsl from '@vitejs/plugin-basic-ssl';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get project root directory (two levels up from packages/frontend)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '../..');
 
 export default defineConfig({
   plugins: [
     react(),
-    basicSsl(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png', 'icons/*.svg'],
@@ -116,7 +122,10 @@ export default defineConfig({
   ],
   server: {
     // HTTPS required for voice/geolocation APIs in production
-    https: true,
+    https: {
+      key: fs.readFileSync(path.join(projectRoot, 'localhost-key.pem')),
+      cert: fs.readFileSync(path.join(projectRoot, 'localhost-cert.pem')),
+    },
     port: 5173,
     proxy: {
       // Proxy all API requests to local server
