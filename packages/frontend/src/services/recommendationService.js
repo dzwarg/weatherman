@@ -7,9 +7,9 @@ import { ClothingRecommendation } from '../models/ClothingRecommendation.js';
 import { generateClothingRecommendations } from '../utils/clothingRules.js';
 
 // Import mock data for development/testing
-import mock4yoGirlColdRainy from '../mocks/ollama/4yo-girl-cold-rainy.json';
-import mock7yoBoyModerate from '../mocks/ollama/7yo-boy-moderate.json';
-import mock10yoBoyHotSunny from '../mocks/ollama/10yo-boy-hot-sunny.json';
+import mock4yoGirlColdRainy from '../mocks/ai/4yo-girl-cold-rainy.json';
+import mock7yoBoyModerate from '../mocks/ai/7yo-boy-moderate.json';
+import mock10yoBoyHotSunny from '../mocks/ai/10yo-boy-hot-sunny.json';
 
 class RecommendationService {
   /**
@@ -18,9 +18,9 @@ class RecommendationService {
    * @param {Object} profile - User profile
    * @returns {Object|null} Mock recommendation or null
    */
-  getMockOllamaResponse(weatherData, profile) {
+  getMockAIResponse(weatherData, profile) {
     // Check if mock mode is enabled
-    if (import.meta.env.VITE_USE_MOCK_OLLAMA !== 'true') {
+    if (import.meta.env.VITE_USE_MOCK_AI !== 'true') {
       return null;
     }
 
@@ -57,7 +57,7 @@ class RecommendationService {
    */
   generateRecommendation(weatherData, profile) {
     // Check for mock Ollama response
-    const mockResponse = this.getMockOllamaResponse(weatherData, profile);
+    const mockResponse = this.getMockAIResponse(weatherData, profile);
     if (mockResponse) {
       return new ClothingRecommendation(mockResponse);
     }
