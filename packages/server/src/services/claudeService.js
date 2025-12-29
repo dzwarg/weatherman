@@ -29,12 +29,19 @@ export async function generateClothingAdvice(request) {
     // Build the prompt
     const { system, userMessage } = buildPrompt(request);
 
-    // Call Claude API
+    // Call Claude API with prompt caching for system prompt
+    // System prompt is static and should be cached (saves 90% on cached tokens)
     const message = await anthropic.messages.create({
       model: CLAUDE_SETTINGS.model,
       max_tokens: CLAUDE_SETTINGS.maxTokens,
       temperature: CLAUDE_SETTINGS.temperature,
-      system,
+      system: [
+        {
+          type: 'text',
+          text: system,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
       messages: [
         {
           role: 'user',
@@ -108,66 +115,31 @@ export async function checkHealth() {
 export function buildPrompt(request) {
   const { profile, weather, prompt: userPrompt, timeframe } = request;
 
-  // Determine age-appropriate language style
-  const languageStyle = getLanguageStyle(profile.age);
+  // Concise system context (reduced from ~70 to ~35 tokens)
+  const system = `Clothing advisor for ${profile.age}yo ${profile.gender}. ${getLanguageStyle(profile.age)} language.${profile.age < 6 ? ' Easy-to-wear items.' : ''}`;
 
-  // System context
-  const systemParts = [];
-  systemParts.push(`You are a helpful clothing advisor for a ${profile.age} year old ${profile.gender}.`);
-  systemParts.push(`Use ${languageStyle} language that is appropriate for this age.`);
-  systemParts.push('Keep recommendations practical and appropriate for the child\'s age.');
-  if (profile.age < 6) {
-    systemParts.push('For young children, prioritize easy-to-wear items with simple fasteners.');
-  }
+  // Build compact weather data (reduced from ~40 to ~25 tokens)
+  const weatherData = [
+    `${weather.temperature}°F`,
+    weather.feelsLike !== undefined && `feels ${weather.feelsLike}°F`,
+    weather.conditions,
+    weather.precipitationProbability !== undefined && `${weather.precipitationProbability}% precip`,
+    weather.windSpeed !== undefined && `${weather.windSpeed}mph wind`,
+    weather.uvIndex !== undefined && `UV${weather.uvIndex}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
-  const system = systemParts.join(' ');
+  // Compact user message (reduced from ~150 to ~60 tokens)
+  const parts = [
+    `Weather: ${weatherData}`,
+    userPrompt && `Activity: ${userPrompt}`,
+    timeframe && `Time: ${timeframe}`,
+    '\nReturn JSON only:',
+    '{"recommendations":{"baseLayers":["..."],"outerwear":["..."],"bottoms":["..."],"accessories":["..."],"footwear":["..."]},"spokenResponse":"..."}',
+  ].filter(Boolean);
 
-  // User message with weather and context
-  const userParts = [];
-
-  userParts.push('Current weather conditions:');
-  userParts.push(`- Temperature: ${weather.temperature}°F`);
-  if (weather.feelsLike !== undefined) {
-    userParts.push(`- Feels like: ${weather.feelsLike}°F`);
-  }
-  userParts.push(`- Conditions: ${weather.conditions}`);
-  if (weather.precipitationProbability !== undefined) {
-    userParts.push(`- Chance of precipitation: ${weather.precipitationProbability}%`);
-  }
-  if (weather.windSpeed !== undefined) {
-    userParts.push(`- Wind speed: ${weather.windSpeed} mph`);
-  }
-  if (weather.uvIndex !== undefined) {
-    userParts.push(`- UV index: ${weather.uvIndex}`);
-  }
-
-  // User context
-  if (userPrompt) {
-    userParts.push(`\nContext: ${userPrompt}`);
-  }
-
-  if (timeframe) {
-    userParts.push(`Timeframe: ${timeframe}`);
-  }
-
-  // Task instructions - request JSON format
-  userParts.push('\nPlease recommend appropriate clothing for this child based on the weather and context.');
-  userParts.push('Respond with ONLY a valid JSON object in this exact format (no markdown, no code blocks):');
-  userParts.push('');
-  userParts.push('{');
-  userParts.push('  "recommendations": {');
-  userParts.push('    "baseLayers": ["item1", "item2"],');
-  userParts.push('    "outerwear": ["item1", "item2"],');
-  userParts.push('    "bottoms": ["item1", "item2"],');
-  userParts.push('    "accessories": ["item1", "item2"],');
-  userParts.push('    "footwear": ["item1", "item2"]');
-  userParts.push('  },');
-  userParts.push('  "spokenResponse": "A friendly, age-appropriate sentence or two explaining the recommendations"');
-  userParts.push('}');
-  userParts.push('');
-  userParts.push('IMPORTANT: Return ONLY the JSON object. Do not include markdown formatting, code blocks, or any other text.');
-
-  const userMessage = userParts.join('\n');
+  const userMessage = parts.join('\n');
 
   return { system, userMessage };
 }

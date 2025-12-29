@@ -81,7 +81,13 @@ describe('claudeService', () => {
           model: expect.any(String),
           max_tokens: expect.any(Number),
           temperature: expect.any(Number),
-          system: expect.any(String),
+          system: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'text',
+              text: expect.any(String),
+              cache_control: expect.objectContaining({ type: 'ephemeral' }),
+            }),
+          ]),
           messages: expect.arrayContaining([
             expect.objectContaining({
               role: 'user',
@@ -106,8 +112,9 @@ describe('claudeService', () => {
       await generateClothingAdvice(mockRequest);
 
       const callArgs = mockCreate.mock.calls[0][0];
-      expect(callArgs.system).toContain('4');
-      expect(callArgs.system).toContain('girl');
+      const systemText = callArgs.system[0].text;
+      expect(systemText).toContain('4');
+      expect(systemText).toContain('girl');
     });
 
     it('should include weather information in prompt', async () => {

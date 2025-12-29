@@ -268,7 +268,7 @@ This project uses a **monorepo structure** with npm workspaces:
 ### Performance Optimization
 
 - [ ] T111 [P] Add response compression middleware in server (e.g., compression package)
-- [ ] T112 [P] Optimize Claude API prompt templates for faster inference (reduce token count)
+- [X] T112 [P] Optimize Claude API prompt templates for faster inference (reduce token count)
 - [ ] T113 Measure and document server response times (weather proxy < 100ms overhead, recommendations < 2s total)
 - [ ] T114 Test concurrent load: Verify server handles 100+ concurrent requests without degradation
 
