@@ -14,6 +14,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis.js';
 import { useWeather } from '../hooks/useWeather.js';
 import { useOfflineStatus } from '../hooks/useOfflineStatus.js';
 import recommendationService from '../services/recommendationService.js';
+import apiClient from '../services/apiClient.js';
 import { isQueryInScope, getOutOfScopeMessage } from '../utils/voiceUtils.js';
 
 export function Home() {
@@ -99,8 +100,21 @@ export function Home() {
 
         setFeedbackMessage('Generating recommendation...');
 
-        // Generate recommendation
-        const rec = recommendationService.generateRecommendation(weatherData, activeProfile);
+        // Generate recommendation from server API
+        let rec;
+        try {
+          // Try to get recommendation from server (Claude API or rules)
+          const apiResponse = await apiClient.getRecommendations(
+            activeProfile,
+            weatherData.current,
+            lastQuery.rawTranscript
+          );
+          rec = apiResponse;
+        } catch (apiError) {
+          console.warn('Server API failed, using local fallback:', apiError);
+          // Fallback to local recommendation service if API fails
+          rec = recommendationService.generateRecommendation(weatherData, activeProfile);
+        }
         setRecommendation(rec);
 
         // Speak recommendation

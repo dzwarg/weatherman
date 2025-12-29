@@ -108,12 +108,12 @@ The codebase is structured as a monorepo with separate packages for the frontend
 - **TR-001**: All server API endpoints MUST have integration tests using Supertest to verify request/response contracts
 - **TR-002**: Weather proxy service MUST have unit tests covering successful responses, error handling, timeout scenarios, and rate limiting
 - **TR-003**: Recommendation service MUST have unit tests covering all user profiles, weather conditions, and voice prompt scenarios
-- **TR-004**: Ollama service MUST have unit tests with mocked responses to verify prompt generation and response parsing
+- **TR-004**: Claude API service MUST have unit tests with mocked responses to verify prompt generation and response parsing
 - **TR-005**: Request validators MUST have unit tests verifying validation logic for valid and invalid inputs
 - **TR-006**: Integration tests MUST verify frontend-to-server communication for both weather and recommendation endpoints
 - **TR-007**: Frontend services MUST have updated tests to work with server API instead of direct API calls
-- **TR-008**: End-to-end test MUST verify complete workflow: voice input → frontend → server → Ollama/fallback → response → voice output
-- **TR-009**: Tests MUST verify graceful fallback when Ollama service is unavailable
+- **TR-008**: End-to-end test MUST verify complete workflow: voice input → frontend → server → Claude API/fallback → response → voice output
+- **TR-009**: Tests MUST verify graceful fallback when Claude API service is unavailable
 - **TR-010**: Tests MUST verify offline functionality with Service Worker caching of server responses
 
 ### Key Entities

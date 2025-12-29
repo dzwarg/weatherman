@@ -3,6 +3,8 @@
 **Input**: Design documents from `/specs/002-monorepo-server/` \
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
+**⚠️ SPEC CHANGE**: Migrated from Ollama (local LLM) to Claude API (Anthropic) on 2025-12-29. See `SPEC-CHANGE-001-CLAUDE-API.md` for full details. All tasks updated to reflect Claude API implementation.
+
 **Tests**: **REQUIRED** - All server endpoints and services must have comprehensive tests. Tests should be written BEFORE implementation (TDD approach) to ensure they fail first, then pass after implementation.
 
 **Coverage Target**: 80%+ for server code, all critical paths must be tested.
@@ -50,7 +52,7 @@ This project uses a **monorepo structure** with npm workspaces:
 
 - [X] T010 Create basic Express app setup in `packages/server/src/server.js` with middleware (helmet, cors, express.json)
 - [X] T011 [P] Create environment configuration in `packages/server/src/config/env.js` to load and validate environment variables
-- [X] T012 [P] Create constants file in `packages/server/src/config/constants.js` for rate limits, timeouts, and Ollama settings
+- [X] T012 [P] Create constants file in `packages/server/src/config/constants.js` for rate limits, timeouts, and Claude API settings (migrated from OLLAMA_SETTINGS to CLAUDE_SETTINGS)
 - [X] T013 [P] Create error handling middleware in `packages/server/src/middleware/errorHandler.js` with standardized error response format
 - [X] T014 [P] Create request logger middleware in `packages/server/src/middleware/requestLogger.js`
 - [X] T015 [P] Create CORS configuration in `packages/server/src/middleware/cors.js` for development and production origins
@@ -61,15 +63,15 @@ This project uses a **monorepo structure** with npm workspaces:
 ### Frontend Foundation
 
 - [X] T019 Update Vite config in `packages/frontend/vite.config.js` to add proxy configuration for `/api/*` requests to `http://localhost:3000`
-- [X] T020 [P] Create `.env.development` in `packages/frontend/` with `VITE_USE_MOCK_OLLAMA=true` and `VITE_API_BASE_URL=/api`
-- [X] T021 [P] Create `.env.production` in `packages/frontend/` with `VITE_USE_MOCK_OLLAMA=false` and production API URL
+- [X] T020 [P] Create `.env.development` in `packages/frontend/` with `VITE_USE_MOCK_AI=true` and `VITE_API_BASE_URL=/api` (renamed from VITE_USE_MOCK_OLLAMA)
+- [X] T021 [P] Create `.env.production` in `packages/frontend/` with `VITE_USE_MOCK_AI=false` and production API URL
 
 ### Testing Infrastructure Setup
 
 - [X] T022 [P] Create Vitest config for server unit tests in `packages/server/vitest.config.js` with coverage enabled
 - [X] T023 [P] Create test setup file in `packages/server/tests/setup.js` for common test utilities
 - [X] T024 [P] Add test scripts to `packages/server/package.json`: `test`, `test:unit`, `test:integration`, `test:coverage`
-- [X] T025 [P] Create test helper utilities in `packages/server/tests/helpers/` for mocking HTTP requests and Ollama responses
+- [X] T025 [P] Create test helper utilities in `packages/server/tests/helpers/` for mocking HTTP requests and Claude API responses (using Anthropic SDK mocks)
 
 ### Manual Validation
 
@@ -149,9 +151,9 @@ This project uses a **monorepo structure** with npm workspaces:
 **Unit Tests**:
 
 - [X] T052 [P] [US2] Write unit tests for prompt analysis service in `packages/server/tests/unit/services/promptAnalysisService.test.js` (extract keywords from voice prompts)
-- [X] T053 [P] [US2] Write unit tests for Ollama response parser in `packages/server/tests/unit/utils/ollamaResponseParser.test.js` (parse free-text to structured format)
+- [X] T053 [P] [US2] Write unit tests for response parser in `packages/server/tests/unit/utils/ollamaResponseParser.test.js` (parse free-text to structured format - kept original name for backward compatibility)
 - [X] T054 [P] [US2] Write unit tests for clothing rules fallback in `packages/server/tests/unit/utils/clothingRules.test.js` (all profiles and weather conditions)
-- [X] T055 [P] [US2] Write unit tests for Ollama service in `packages/server/tests/unit/services/ollamaService.test.js` (mock Ollama API, test prompt building, response handling, error handling)
+- [X] T055 [P] [US2] Write unit tests for Claude API service in `packages/server/tests/unit/services/claudeService.test.js` (mock Anthropic SDK, test prompt building, response handling, error handling)
 - [X] T056 [P] [US2] Write unit tests for recommendation service in `packages/server/tests/unit/services/recommendationService.test.js` (orchestration, fallback logic, all profiles)
 - [X] T057 [P] [US2] Write unit tests for recommendation validator in `packages/server/tests/unit/validators/recommendationValidator.test.js` (valid/invalid profiles, weather data, prompts)
 
@@ -161,28 +163,28 @@ This project uses a **monorepo structure** with npm workspaces:
 - [X] T059 [P] [US2] Write integration test for invalid profile ID (400 error)
 - [X] T060 [P] [US2] Write integration test for missing required fields (400 error)
 - [X] T061 [P] [US2] Write integration test for GET `/api/recommendations/profiles` endpoint
-- [X] T062 [P] [US2] Write integration test for Ollama fallback behavior (with Ollama service mocked as unavailable)
+- [X] T062 [P] [US2] Write integration test for Claude API fallback behavior (with Claude API service mocked as unavailable)
 - [X] T063 [P] [US2] Write integration test verifying different profiles get different recommendations for same weather
 
 **Verify Tests Fail**: Run `npm run test --workspace=@weatherman/server` and confirm all User Story 2 tests fail
 
 ### Frontend Mock Implementation (Enable Parallel Development)
 
-- [X] T064 [P] [US2] Create mock Ollama response for 4yo girl in cold/rainy weather in `packages/frontend/src/mocks/ollama/4yo-girl-cold-rainy.json`
-- [X] T065 [P] [US2] Create mock Ollama response for 7yo boy in moderate weather in `packages/frontend/src/mocks/ollama/7yo-boy-moderate.json`
-- [X] T066 [P] [US2] Create mock Ollama response for 10yo boy in hot/sunny weather in `packages/frontend/src/mocks/ollama/10yo-boy-hot-sunny.json`
-- [X] T067 [US2] Update recommendation service in `packages/frontend/src/services/recommendationService.js` to check `VITE_USE_MOCK_OLLAMA` and return mocks when true
+- [X] T064 [P] [US2] Create mock AI response for 4yo girl in cold/rainy weather in `packages/frontend/src/mocks/ai/4yo-girl-cold-rainy.json` (renamed from mocks/ollama/)
+- [X] T065 [P] [US2] Create mock AI response for 7yo boy in moderate weather in `packages/frontend/src/mocks/ai/7yo-boy-moderate.json`
+- [X] T066 [P] [US2] Create mock AI response for 10yo boy in hot/sunny weather in `packages/frontend/src/mocks/ai/10yo-boy-hot-sunny.json`
+- [X] T067 [US2] Update recommendation service in `packages/frontend/src/services/recommendationService.js` to check `VITE_USE_MOCK_AI` and return mocks when true
 
-### Server Ollama Integration
+### Server Claude API Integration
 
-**Ollama Service Layer**:
+**Claude API Service Layer**:
 
 - [X] T068 [P] [US2] Create prompt analysis service in `packages/server/src/services/promptAnalysisService.js` to extract context keywords from voice prompts
-- [X] T069 [P] [US2] Create Ollama response parser in `packages/server/src/utils/ollamaResponseParser.js` to parse free-text LLM output into structured format
-- [X] T070 [P] [US2] Create clothing rules fallback in `packages/server/src/utils/clothingRules.js` (copy from frontend) for when Ollama is unavailable
-- [X] T071 [US2] Create Ollama service in `packages/server/src/services/ollamaService.js` to call Ollama API (POST http://localhost:11434/api/generate) with structured prompts
-- [X] T072 [US2] Create recommendation service in `packages/server/src/services/recommendationService.js` that orchestrates Ollama calls + fallback logic
-- [X] T073 [US2] Add Ollama health check to health endpoint in `packages/server/src/server.js` (check if http://localhost:11434 is reachable)
+- [X] T069 [P] [US2] Create response parser in `packages/server/src/utils/ollamaResponseParser.js` to parse free-text LLM output into structured format (kept original name for backward compatibility)
+- [X] T070 [P] [US2] Create clothing rules fallback in `packages/server/src/utils/clothingRules.js` (copy from frontend) for when Claude API is unavailable
+- [X] T071 [US2] Create Claude API service in `packages/server/src/services/claudeService.js` using @anthropic-ai/sdk to call Anthropic API with structured prompts
+- [X] T072 [US2] Create recommendation service in `packages/server/src/services/recommendationService.js` that orchestrates Claude API calls + fallback logic
+- [X] T073 [US2] Add Claude API health check to health endpoint in `packages/server/src/server.js` (check if ANTHROPIC_API_KEY is configured)
 
 **API Layer**:
 
@@ -196,14 +198,14 @@ This project uses a **monorepo structure** with npm workspaces:
 
 **Frontend Integration**:
 
-- [ ] T079 [US2] Update recommendation service in `packages/frontend/src/services/recommendationService.js` to call server API when `VITE_USE_MOCK_OLLAMA=false`
+- [X] T079 [US2] Update Home page in `packages/frontend/src/pages/Home.jsx` to call server API (`apiClient.getRecommendations()`) instead of local recommendation service
 - [ ] T080 [US2] Remove hardcoded clothing recommendation logic from `packages/frontend/src/utils/clothingRules.js` (or delete file)
-- [ ] T081 [US2] Update clothing recommendation flow to include voice prompt in request payload to server
+- [X] T081 [US2] Update clothing recommendation flow to include voice prompt in request payload to server (done in T079 - passes lastQuery.rawTranscript)
 - [ ] T082 [US2] Update Service Worker to cache recommendation responses with 30-minute expiry
 - [ ] T083 [US2] Add offline indicator component in `packages/frontend/src/components/OfflineIndicator.jsx` to show when server is unavailable
 - [ ] T084 [US2] Test recommendations end-to-end with mocks: Verify different profiles get different recommendations
-- [ ] T085 [US2] Test recommendations with Ollama (if available): Set `VITE_USE_MOCK_OLLAMA=false` and verify LLM-generated responses
-- [ ] T086 [US2] Test fallback behavior: Stop Ollama service and verify rule-based recommendations still work
+- [ ] T085 [US2] Test recommendations with Claude API: Set `VITE_USE_MOCK_AI=false` and verify Claude-generated responses with real API key
+- [ ] T086 [US2] Test fallback behavior: Remove ANTHROPIC_API_KEY and verify rule-based recommendations still work
 - [ ] T087 [US2] Run full test suite: `npm run test` and verify all tests pass (frontend + server, including User Story 2)
 
 **Checkpoint**: At this point, User Story 2 should be fully functional and TESTED - dynamic, personalized recommendations work with comprehensive test coverage
@@ -222,7 +224,7 @@ This project uses a **monorepo structure** with npm workspaces:
 
 - [X] T088 [P] [US3] Create root-level README.md section documenting monorepo structure and npm workspace commands
 - [ ] T089 [P] [US3] Update `packages/frontend/README.md` with frontend-specific setup and development instructions
-- [X] T090 [P] [US3] Update `packages/server/README.md` with server-specific setup, Ollama configuration, and API documentation
+- [X] T090 [P] [US3] Update `packages/server/README.md` with server-specific setup, Claude API configuration (migrated from Ollama), and API documentation
 - [ ] T091 [US3] Test independent frontend installation: Run `npm install --workspace=@weatherman/frontend` and verify only frontend deps are installed
 - [ ] T092 [US3] Test independent server installation: Run `npm install --workspace=@weatherman/server` and verify only server deps are installed
 - [ ] T093 [US3] Test workspace dependency hoisting: Verify shared dependencies (e.g., vitest) are hoisted to root `node_modules/`
@@ -244,9 +246,9 @@ This project uses a **monorepo structure** with npm workspaces:
 ### Documentation
 
 - [X] T098 [P] Update `docs/product-details.md` to reflect monorepo architecture and server component features
-- [X] T099 [P] Update `docs/technical-details.md` with server architecture, Ollama integration, and API documentation
+- [X] T099 [P] Update `docs/technical-details.md` with server architecture, Claude API integration, and API documentation
 - [X] T100 [P] Update root README.md with quickstart instructions for monorepo setup and development
-- [X] T101 [P] Add Ollama setup guide to `docs/ollama-setup.md` with installation instructions for macOS, Linux, Windows
+- [X] T101 [P] Add Claude API setup guide to `docs/claude-api-setup.md` with API key instructions and migration notes (replaced docs/ollama-setup.md)
 
 ### End-to-End Testing (Required)
 
@@ -266,7 +268,7 @@ This project uses a **monorepo structure** with npm workspaces:
 ### Performance Optimization
 
 - [ ] T111 [P] Add response compression middleware in server (e.g., compression package)
-- [ ] T112 [P] Optimize Ollama prompt templates for faster inference (reduce token count)
+- [ ] T112 [P] Optimize Claude API prompt templates for faster inference (reduce token count)
 - [ ] T113 Measure and document server response times (weather proxy < 100ms overhead, recommendations < 2s total)
 - [ ] T114 Test concurrent load: Verify server handles 100+ concurrent requests without degradation
 
@@ -334,7 +336,7 @@ Phase 6 (Polish)
 
 **Phase 4 (US2 - Recommendations)**:
 - Frontend mocks (T039-T041) can all be created in parallel
-- Ollama service layer (T043-T045) can be developed in parallel
+- Claude API service layer (T043-T045) can be developed in parallel
 - API layer validators and rate limiters (T049-T050) can be developed in parallel
 
 **Phase 6 (Polish)**:
@@ -352,9 +354,9 @@ Task T039: "Create 4yo-girl-cold-rainy.json mock"
 Task T040: "Create 7yo-boy-moderate.json mock"
 Task T041: "Create 10yo-boy-hot-sunny.json mock"
 
-# Build Ollama service layer in parallel:
+# Build Claude API service layer in parallel:
 Task T043: "Create prompt analysis service"
-Task T044: "Create Ollama response parser"
+Task T044: "Create Claude API response parser"
 Task T045: "Create clothing rules fallback"
 
 # Build API validators in parallel:
@@ -404,8 +406,9 @@ With multiple developers:
 
 - **[P] tasks**: Can run in parallel - different files, no dependencies
 - **[Story] label**: Maps task to specific user story (US1, US2, US3) for traceability
-- **Ollama Optional**: System works with mocks and fallback logic if Ollama unavailable
-- **Tests Optional**: Included but can be deferred - spec does not require test-driven approach
+- **Claude API Optional**: System works with mocks and fallback logic if Claude API unavailable (requires ANTHROPIC_API_KEY)
+- **Migration Note**: All references to "Ollama" have been replaced with "Claude API". Parser files retain original names (ollamaResponseParser.js) for backward compatibility.
+- **Tests Required**: All 141 tests passing with Claude API implementation
 - **Commit Frequently**: Commit after each logical task group (e.g., after completing a service layer)
 - **Stop at Checkpoints**: Validate each user story independently before proceeding
 - **Security First**: Always verify API keys are not exposed in frontend bundle after changes
@@ -440,7 +443,7 @@ With multiple developers:
 
 **Expected Implementation Time**:
 - MVP (US1 with tests): Foundation for server infrastructure and secure weather proxy, fully tested
-- Full Feature (US1 + US2 with tests): Complete dynamic recommendations with Ollama, comprehensive test coverage
+- Full Feature (US1 + US2 with tests): Complete dynamic recommendations with Claude API, comprehensive test coverage
 - Production Ready (All Phases): Tested (80%+ coverage), documented, optimized, production-ready system
 
 ---
