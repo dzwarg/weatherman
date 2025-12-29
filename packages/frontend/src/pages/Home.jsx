@@ -15,6 +15,7 @@ import { useWeather } from '../hooks/useWeather.js';
 import { useOfflineStatus } from '../hooks/useOfflineStatus.js';
 import recommendationService from '../services/recommendationService.js';
 import apiClient from '../services/apiClient.js';
+import { OfflineIndicator } from '../components/OfflineIndicator.jsx';
 import { isQueryInScope, getOutOfScopeMessage } from '../utils/voiceUtils.js';
 
 export function Home() {
@@ -211,6 +212,8 @@ export function Home() {
           📵 You&apos;re offline - showing cached data
         </div>
       )}
+
+      <OfflineIndicator />
 
       <div style={styles.section}>
         <ProfileSelector

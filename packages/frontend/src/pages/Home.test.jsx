@@ -12,6 +12,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useWeather } from '../hooks/useWeather';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import recommendationService from '../services/recommendationService';
+import apiClient from '../services/apiClient';
 import { isQueryInScope, getOutOfScopeMessage } from '../utils/voiceUtils';
 
 // Mock all hooks and services
@@ -21,6 +22,7 @@ vi.mock('../hooks/useSpeechSynthesis');
 vi.mock('../hooks/useWeather');
 vi.mock('../hooks/useOfflineStatus');
 vi.mock('../services/recommendationService');
+vi.mock('../services/apiClient');
 vi.mock('../utils/voiceUtils');
 
 describe('Home', () => {
@@ -91,6 +93,9 @@ describe('Home', () => {
     mockClearQuery = vi.fn();
     mockSpeak = vi.fn().mockResolvedValue();
     mockFetchWeather = vi.fn().mockResolvedValue();
+
+    // Mock apiClient
+    apiClient.getRecommendations = vi.fn().mockResolvedValue(mockRecommendation);
 
     // Mock hook return values
     useProfile.mockReturnValue({
