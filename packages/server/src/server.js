@@ -6,7 +6,7 @@ import { requestLogger } from './middleware/requestLogger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { weatherRouter } from './routes/weather.js';
 import { recommendationsRouter } from './routes/recommendations.js';
-import { checkHealth as checkOllamaHealth } from './services/ollamaService.js';
+import { checkHealth as checkClaudeHealth } from './services/claudeService.js';
 
 const app = express();
 const PORT = config.port;
@@ -20,15 +20,15 @@ app.use(requestLogger);
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {
-    // Check Ollama health
-    const ollamaAvailable = await checkOllamaHealth();
+    // Check Claude API health
+    const claudeAvailable = await checkClaudeHealth();
 
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
       services: {
         weatherApi: 'connected',
-        ollama: ollamaAvailable ? 'connected' : 'unavailable',
+        claude: claudeAvailable ? 'connected' : 'unavailable',
       },
     });
   } catch (error) {
@@ -38,7 +38,7 @@ app.get('/api/health', async (req, res) => {
       timestamp: new Date().toISOString(),
       services: {
         weatherApi: 'connected',
-        ollama: 'unavailable',
+        claude: 'unavailable',
       },
     });
   }

@@ -1,16 +1,16 @@
 /**
  * Recommendation service
- * Orchestrates Ollama calls and fallback logic
+ * Orchestrates Claude API calls and fallback logic
  */
 
 import { getClothingRecommendations } from '../utils/clothingRules.js';
-import * as ollamaService from './ollamaService.js';
+import * as claudeService from './claudeService.js';
 import { parseOllamaResponse } from '../utils/ollamaResponseParser.js';
 import crypto from 'crypto';
 
-// Cache for Ollama availability check (5 minute TTL)
-let ollamaAvailableCache = null;
-let ollamaCacheExpiry = 0;
+// Cache for Claude API availability check (5 minute TTL)
+let claudeAvailableCache = null;
+let claudeCacheExpiry = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -22,31 +22,31 @@ export async function generateRecommendations(request) {
   const startTime = Date.now();
 
   try {
-    // Check if Ollama is available (with caching)
-    const ollamaAvailable = await isOllamaAvailable();
+    // Check if Claude API is available (with caching)
+    const claudeAvailable = await isClaudeAvailable();
 
-    if (ollamaAvailable) {
+    if (claudeAvailable) {
       try {
-        // Try to get recommendations from Ollama
-        const ollamaResponse = await ollamaService.generateClothingAdvice(request);
-        const parsed = parseOllamaResponse(ollamaResponse);
+        // Try to get recommendations from Claude API
+        const claudeResponse = await claudeService.generateClothingAdvice(request);
+        const parsed = parseOllamaResponse(claudeResponse);
 
-        // Return structured response with Ollama recommendations
+        // Return structured response with Claude recommendations
         return {
           id: generateId(),
           profileId: request.profile.id,
           weatherData: request.weather,
           recommendations: parsed.recommendations,
           spokenResponse: parsed.spokenResponse,
-          source: 'ollama',
+          source: 'claude',
           confidence: 0.95, // Higher confidence for LLM-generated
           createdAt: new Date().toISOString(),
           processingTime: Date.now() - startTime,
         };
-      } catch (ollamaError) {
-        // Log Ollama error and fall through to rule-based fallback
-        console.warn('Ollama generation failed, falling back to rules:', {
-          error: ollamaError.message,
+      } catch (claudeError) {
+        // Log Claude error and fall through to rule-based fallback
+        console.warn('Claude generation failed, falling back to rules:', {
+          error: claudeError.message,
           profile: request.profile.id,
         });
       }
@@ -74,40 +74,40 @@ export async function generateRecommendations(request) {
 }
 
 /**
- * Check if Ollama service is available (with caching)
+ * Check if Claude API is available (with caching)
  * @returns {Promise<boolean>} True if available
  */
-export async function isOllamaAvailable() {
+export async function isClaudeAvailable() {
   const now = Date.now();
 
   // Return cached result if still valid
-  if (ollamaAvailableCache !== null && now < ollamaCacheExpiry) {
-    return ollamaAvailableCache;
+  if (claudeAvailableCache !== null && now < claudeCacheExpiry) {
+    return claudeAvailableCache;
   }
 
-  // Check Ollama health
+  // Check Claude API health
   try {
-    const available = await ollamaService.checkHealth();
+    const available = await claudeService.checkHealth();
 
     // Cache the result
-    ollamaAvailableCache = available;
-    ollamaCacheExpiry = now + CACHE_TTL;
+    claudeAvailableCache = available;
+    claudeCacheExpiry = now + CACHE_TTL;
 
     return available;
   } catch (error) {
     // On error, cache as unavailable
-    ollamaAvailableCache = false;
-    ollamaCacheExpiry = now + CACHE_TTL;
+    claudeAvailableCache = false;
+    claudeCacheExpiry = now + CACHE_TTL;
     return false;
   }
 }
 
 /**
- * Clear the Ollama availability cache (primarily for testing)
+ * Clear the Claude availability cache (primarily for testing)
  */
-export function clearOllamaCache() {
-  ollamaAvailableCache = null;
-  ollamaCacheExpiry = 0;
+export function clearClaudeCache() {
+  claudeAvailableCache = null;
+  claudeCacheExpiry = 0;
 }
 
 /**
