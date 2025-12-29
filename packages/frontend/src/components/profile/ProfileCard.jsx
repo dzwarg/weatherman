@@ -14,6 +14,7 @@ export function ProfileCard({ profile, isSelected, onSelect }) {
       transition: 'all 0.3s ease',
       textAlign: 'center',
       boxShadow: isSelected ? '0 4px 12px rgba(33, 150, 243, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
+      outline: 'none', // Remove default outline, we'll handle it with box-shadow
     },
     icon: {
       fontSize: '64px',
@@ -47,15 +48,38 @@ export function ProfileCard({ profile, isSelected, onSelect }) {
     return '👦';
   };
 
+  const handleKeyDown = (e) => {
+    // Handle Enter and Space keys for keyboard accessibility
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault(); // Prevent page scroll on Space
+      onSelect(profile.id);
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      aria-label={`Select profile: ${profile.displayName}, age ${profile.age}, ${profile.gender}${isSelected ? ', currently selected' : ''}`}
       style={styles.card}
       onClick={() => onSelect(profile.id)}
+      onKeyDown={handleKeyDown}
       onMouseOver={(e) => {
         e.currentTarget.style.transform = 'scale(1.05)';
       }}
       onMouseOut={(e) => {
         e.currentTarget.style.transform = 'scale(1)';
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.transform = 'scale(1.05)';
+        e.currentTarget.style.boxShadow = '0 0 0 4px rgba(33, 150, 243, 0.5)';
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        e.currentTarget.style.boxShadow = isSelected
+          ? '0 4px 12px rgba(33, 150, 243, 0.3)'
+          : '0 2px 8px rgba(0,0,0,0.1)';
       }}
     >
       <div style={styles.icon}>{getIcon()}</div>
