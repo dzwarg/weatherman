@@ -184,26 +184,26 @@ describe('Recommendations API Integration Tests', () => {
       expect(response.body).toHaveProperty('recommendations');
     });
 
-    it('should use Ollama when available', async () => {
-      const ollamaResponse = {
+    it('should use Claude when available', async () => {
+      const claudeResponse = {
         ...mockRecommendationResponse,
-        source: 'ollama',
+        source: 'claude',
         confidence: 0.95,
       };
 
-      recommendationService.generateRecommendations.mockResolvedValue(ollamaResponse);
-      recommendationService.isOllamaAvailable.mockResolvedValue(true);
+      recommendationService.generateRecommendations.mockResolvedValue(claudeResponse);
+      recommendationService.isClaudeAvailable.mockResolvedValue(true);
 
       const response = await request(app)
         .post('/api/recommendations')
         .send(mockRecommendationRequest)
         .expect(200);
 
-      expect(response.body.source).toBe('ollama');
+      expect(response.body.source).toBe('claude');
       expect(response.body.confidence).toBeGreaterThan(0.8);
     });
 
-    it('should fallback to rules when Ollama is unavailable', async () => {
+    it('should fallback to rules when Claude is unavailable', async () => {
       const rulesResponse = {
         ...mockRecommendationResponse,
         source: 'rules',
@@ -211,7 +211,7 @@ describe('Recommendations API Integration Tests', () => {
       };
 
       recommendationService.generateRecommendations.mockResolvedValue(rulesResponse);
-      recommendationService.isOllamaAvailable.mockResolvedValue(false);
+      recommendationService.isClaudeAvailable.mockResolvedValue(false);
 
       const response = await request(app)
         .post('/api/recommendations')

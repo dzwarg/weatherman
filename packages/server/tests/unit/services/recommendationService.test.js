@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { generateRecommendations, isOllamaAvailable, clearOllamaCache } from '../../../src/services/recommendationService.js';
-import * as ollamaService from '../../../src/services/ollamaService.js';
+import { generateRecommendations, isClaudeAvailable, clearClaudeCache } from '../../../src/services/recommendationService.js';
+import * as claudeService from '../../../src/services/claudeService.js';
 import * as clothingRules from '../../../src/utils/clothingRules.js';
 import * as ollamaResponseParser from '../../../src/utils/ollamaResponseParser.js';
 
 // Mock dependencies
-vi.mock('../../../src/services/ollamaService.js');
+vi.mock('../../../src/services/claudeService.js');
 vi.mock('../../../src/utils/clothingRules.js');
 vi.mock('../../../src/utils/ollamaResponseParser.js');
 
 describe('recommendationService', () => {
   beforeEach(() => {
     // Clear cache and mocks before each test
-    clearOllamaCache();
+    clearClaudeCache();
     vi.clearAllMocks();
   });
   const mockRequest = {
@@ -42,42 +42,42 @@ describe('recommendationService', () => {
   };
 
   describe('generateRecommendations', () => {
-    it('should use Ollama when available', async () => {
-      const mockOllamaResponse = 'Base layers: Thermal shirt\nSpoken: Wear warm clothes!';
+    it('should use Claude when available', async () => {
+      const mockClaudeResponse = 'Base layers: Thermal shirt\nSpoken: Wear warm clothes!';
       const mockParsedResponse = {
         recommendations: mockRuleBasedRecommendations,
         spokenResponse: 'Wear warm clothes!',
       };
 
-      ollamaService.checkHealth.mockResolvedValue(true);
-      ollamaService.generateClothingAdvice.mockResolvedValue(mockOllamaResponse);
+      claudeService.checkHealth.mockResolvedValue(true);
+      claudeService.generateClothingAdvice.mockResolvedValue(mockClaudeResponse);
       ollamaResponseParser.parseOllamaResponse.mockReturnValue(mockParsedResponse);
 
       const result = await generateRecommendations(mockRequest);
 
-      expect(ollamaService.checkHealth).toHaveBeenCalled();
-      expect(ollamaService.generateClothingAdvice).toHaveBeenCalledWith(mockRequest);
+      expect(claudeService.checkHealth).toHaveBeenCalled();
+      expect(claudeService.generateClothingAdvice).toHaveBeenCalledWith(mockRequest);
       expect(result.recommendations).toEqual(mockRuleBasedRecommendations);
       expect(result.spokenResponse).toBe('Wear warm clothes!');
-      expect(result.source).toBe('ollama');
+      expect(result.source).toBe('claude');
     });
 
-    it('should fallback to rules when Ollama is unavailable', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+    it('should fallback to rules when Claude is unavailable', async () => {
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const result = await generateRecommendations(mockRequest);
 
-      expect(ollamaService.checkHealth).toHaveBeenCalled();
-      expect(ollamaService.generateClothingAdvice).not.toHaveBeenCalled();
+      expect(claudeService.checkHealth).toHaveBeenCalled();
+      expect(claudeService.generateClothingAdvice).not.toHaveBeenCalled();
       expect(clothingRules.getClothingRecommendations).toHaveBeenCalledWith(mockRequest);
       expect(result.recommendations).toEqual(mockRuleBasedRecommendations);
       expect(result.source).toBe('rules');
     });
 
-    it('should fallback to rules when Ollama fails', async () => {
-      ollamaService.checkHealth.mockResolvedValue(true);
-      ollamaService.generateClothingAdvice.mockRejectedValue(new Error('Ollama error'));
+    it('should fallback to rules when Claude fails', async () => {
+      claudeService.checkHealth.mockResolvedValue(true);
+      claudeService.generateClothingAdvice.mockRejectedValue(new Error('Claude error'));
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const result = await generateRecommendations(mockRequest);
@@ -87,7 +87,7 @@ describe('recommendationService', () => {
     });
 
     it('should include profile ID in response', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const result = await generateRecommendations(mockRequest);
@@ -96,7 +96,7 @@ describe('recommendationService', () => {
     });
 
     it('should include weather data in response', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const result = await generateRecommendations(mockRequest);
@@ -105,7 +105,7 @@ describe('recommendationService', () => {
     });
 
     it('should generate unique recommendation ID', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const result1 = await generateRecommendations(mockRequest);
@@ -117,7 +117,7 @@ describe('recommendationService', () => {
     });
 
     it('should include timestamp', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const before = new Date().toISOString();
@@ -138,7 +138,7 @@ describe('recommendationService', () => {
           profile: { ...mockRequest.profile, id: profileId },
         };
 
-        ollamaService.checkHealth.mockResolvedValue(false);
+        claudeService.checkHealth.mockResolvedValue(false);
         clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
         const result = await generateRecommendations(request);
@@ -156,7 +156,7 @@ describe('recommendationService', () => {
           weather: { ...mockRequest.weather, conditions: condition },
         };
 
-        ollamaService.checkHealth.mockResolvedValue(false);
+        claudeService.checkHealth.mockResolvedValue(false);
         clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
         const result = await generateRecommendations(request);
@@ -166,7 +166,7 @@ describe('recommendationService', () => {
     });
 
     it('should include confidence score', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const result = await generateRecommendations(mockRequest);
@@ -177,65 +177,65 @@ describe('recommendationService', () => {
       expect(result.confidence).toBeLessThanOrEqual(1);
     });
 
-    it('should set higher confidence for Ollama responses', async () => {
-      const mockOllamaResponse = 'Ollama recommendations';
+    it('should set higher confidence for Claude responses', async () => {
+      const mockClaudeResponse = 'Claude recommendations';
       const mockParsedResponse = {
         recommendations: mockRuleBasedRecommendations,
         spokenResponse: 'Wear warm clothes!',
       };
 
-      ollamaService.checkHealth.mockResolvedValue(true);
-      ollamaService.generateClothingAdvice.mockResolvedValue(mockOllamaResponse);
+      claudeService.checkHealth.mockResolvedValue(true);
+      claudeService.generateClothingAdvice.mockResolvedValue(mockClaudeResponse);
       ollamaResponseParser.parseOllamaResponse.mockReturnValue(mockParsedResponse);
 
-      const ollamaResult = await generateRecommendations(mockRequest);
+      const claudeResult = await generateRecommendations(mockRequest);
 
       // Clear cache so the next call actually checks health again
-      clearOllamaCache();
+      clearClaudeCache();
 
-      ollamaService.checkHealth.mockResolvedValue(false);
+      claudeService.checkHealth.mockResolvedValue(false);
       clothingRules.getClothingRecommendations.mockReturnValue(mockRuleBasedRecommendations);
 
       const rulesResult = await generateRecommendations(mockRequest);
 
-      expect(ollamaResult.confidence).toBeGreaterThan(rulesResult.confidence);
+      expect(claudeResult.confidence).toBeGreaterThan(rulesResult.confidence);
     });
   });
 
-  describe('isOllamaAvailable', () => {
-    it('should return true when Ollama is healthy', async () => {
-      ollamaService.checkHealth.mockResolvedValue(true);
+  describe('isClaudeAvailable', () => {
+    it('should return true when Claude is healthy', async () => {
+      claudeService.checkHealth.mockResolvedValue(true);
 
-      const available = await isOllamaAvailable();
+      const available = await isClaudeAvailable();
 
       expect(available).toBe(true);
-      expect(ollamaService.checkHealth).toHaveBeenCalled();
+      expect(claudeService.checkHealth).toHaveBeenCalled();
     });
 
-    it('should return false when Ollama is unhealthy', async () => {
-      ollamaService.checkHealth.mockResolvedValue(false);
+    it('should return false when Claude is unhealthy', async () => {
+      claudeService.checkHealth.mockResolvedValue(false);
 
-      const available = await isOllamaAvailable();
+      const available = await isClaudeAvailable();
 
       expect(available).toBe(false);
     });
 
     it('should return false when health check fails', async () => {
-      ollamaService.checkHealth.mockRejectedValue(new Error('Health check error'));
+      claudeService.checkHealth.mockRejectedValue(new Error('Health check error'));
 
-      const available = await isOllamaAvailable();
+      const available = await isClaudeAvailable();
 
       expect(available).toBe(false);
     });
 
     it('should cache result for short duration', async () => {
-      ollamaService.checkHealth.mockResolvedValue(true);
+      claudeService.checkHealth.mockResolvedValue(true);
 
-      await isOllamaAvailable();
-      await isOllamaAvailable();
+      await isClaudeAvailable();
+      await isClaudeAvailable();
 
       // Should only call health check once due to caching
-      expect(ollamaService.checkHealth).toHaveBeenCalledTimes(1);
+      expect(claudeService.checkHealth).toHaveBeenCalledTimes(1);
     });
   });
 });

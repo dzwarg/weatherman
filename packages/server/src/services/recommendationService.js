@@ -176,5 +176,5 @@ function getTemperatureDescription(temperature) {
 
 export default {
   generateRecommendations,
-  isOllamaAvailable,
+  isClaudeAvailable,
 };
