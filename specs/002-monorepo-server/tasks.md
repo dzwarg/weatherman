@@ -253,7 +253,7 @@ This project uses a **monorepo structure** with npm workspaces:
 ### End-to-End Testing (Required)
 
 - [X] T102 [P] Write E2E test for complete voice workflow in `packages/frontend/tests/e2e/voice-workflow.test.js` (voice input → frontend → server → response → voice output)
-- [ ] T103 [P] Write E2E test for offline functionality with Service Worker caching
+- [X] T103 [P] Write E2E test for offline functionality with Service Worker caching in `packages/frontend/tests/e2e/offline-functionality.test.js`
 - [X] T104 [P] Write contract tests verifying API responses match OpenAPI specifications in `packages/server/tests/contract/`
 
 ### Production Readiness
