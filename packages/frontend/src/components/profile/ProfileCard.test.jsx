@@ -9,7 +9,7 @@ import { ProfileCard } from './ProfileCard';
 
 describe('ProfileCard', () => {
   const mockProfile = {
-    id: '7-boy',
+    id: '7yo-boy',
     displayName: '7-year-old boy',
     age: 7,
     gender: 'boy',
@@ -48,7 +48,7 @@ describe('ProfileCard', () => {
     const card = screen.getByText('7-year-old boy').closest('div');
     await user.click(card);
 
-    expect(onSelect).toHaveBeenCalledWith('7-boy');
+    expect(onSelect).toHaveBeenCalledWith('7yo-boy');
   });
 
   it('should display correct icon for boy', () => {
@@ -61,7 +61,7 @@ describe('ProfileCard', () => {
   it('should display correct icon for girl', () => {
     const girlProfile = {
       ...mockProfile,
-      id: '4-girl',
+      id: '4yo-girl',
       gender: 'girl',
     };
 

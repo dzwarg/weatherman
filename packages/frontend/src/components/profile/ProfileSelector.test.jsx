@@ -10,7 +10,7 @@ import { ProfileSelector } from './ProfileSelector';
 describe('ProfileSelector', () => {
   const mockProfiles = [
     {
-      id: '4-girl',
+      id: '4yo-girl',
       age: 4,
       gender: 'girl',
       displayName: '4 year old girl',
@@ -18,7 +18,7 @@ describe('ProfileSelector', () => {
       vocabularyStyle: 'girl-typical',
     },
     {
-      id: '7-boy',
+      id: '7yo-boy',
       age: 7,
       gender: 'boy',
       displayName: '7 year old boy',
@@ -26,7 +26,7 @@ describe('ProfileSelector', () => {
       vocabularyStyle: 'boy-typical',
     },
     {
-      id: '10-boy',
+      id: '10yo-boy',
       age: 10,
       gender: 'boy',
       displayName: '10 year old boy',

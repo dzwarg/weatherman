@@ -4,6 +4,50 @@
  */
 
 /**
+ * Strip markdown formatting from text
+ * @param {string} text - Text with markdown formatting
+ * @returns {string} Clean text without markdown
+ */
+function stripMarkdown(text) {
+  if (!text || typeof text !== 'string') {
+    return text;
+  }
+
+  return text
+    // Remove bold (**text** or __text__)
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    // Remove italic (*text* or _text_)
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/_(.+?)_/g, '$1')
+    // Remove strikethrough (~~text~~)
+    .replace(/~~(.+?)~~/g, '$1')
+    // Remove code blocks (```text```)
+    .replace(/```[\s\S]*?```/g, '')
+    // Remove inline code (`text`)
+    .replace(/`(.+?)`/g, '$1')
+    // Remove headers (# text)
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove blockquotes (> text)
+    .replace(/^>\s+/gm, '')
+    // Remove list markers (- text, * text, + text, 1. text)
+    .replace(/^[\s]*[-*+]\s+/gm, '')
+    .replace(/^[\s]*\d+\.\s+/gm, '')
+    // Remove incomplete markdown markers (partial patterns from context extraction)
+    .replace(/\*\*/g, '') // Remove any remaining **
+    .replace(/__/g, '') // Remove any remaining __
+    // Remove leading/trailing markdown artifacts
+    .replace(/^\*+\s*/, '')
+    .replace(/\s*\*+$/, '')
+    .replace(/^_+\s*/, '')
+    .replace(/\s*_+$/, '')
+    // Remove multiple spaces
+    .replace(/\s+/g, ' ')
+    // Trim
+    .trim();
+}
+
+/**
  * Parse Ollama response into structured format
  * @param {string} ollamaOutput - Raw text output from Ollama
  * @returns {Object} Structured recommendations and spoken response
@@ -69,7 +113,7 @@ export function extractRecommendations(text) {
       hasStructuredFormat = true;
       const items = match[1]
         .split(',')
-        .map((item) => item.trim())
+        .map((item) => stripMarkdown(item.trim()))
         .filter((item) => item.length > 0);
       recommendations[category] = items;
     }
@@ -132,7 +176,7 @@ function extractFromNaturalLanguage(text, recommendations) {
           const index = lowerSentence.indexOf(keyword);
           const start = Math.max(0, index - 50);
           const end = Math.min(lowerSentence.length, index + keyword.length + 50);
-          const context = sentence.substring(start, end).trim();
+          const context = stripMarkdown(sentence.substring(start, end).trim());
 
           // Add to recommendations if not already there
           if (!recommendations[category].some((item) => item.toLowerCase().includes(keyword))) {
@@ -162,35 +206,45 @@ export function extractSpokenResponse(text) {
     return '';
   }
 
+  let result = '';
+
   // Look for explicit "Spoken:" section
   const spokenMatch = text.match(/Spoken:\s*(.+?)(?:\n\n|$)/is);
   if (spokenMatch) {
-    return spokenMatch[1].trim();
-  }
+    result = stripMarkdown(spokenMatch[1].trim());
+  } else {
+    // If no explicit spoken section, try to find a conversational paragraph
+    // Look for paragraphs that sound like they're talking to a child
+    const paragraphs = text.split('\n\n').map((p) => p.trim()).filter((p) => p.length > 0);
 
-  // If no explicit spoken section, try to find a conversational paragraph
-  // Look for paragraphs that sound like they're talking to a child
-  const paragraphs = text.split('\n\n').map((p) => p.trim()).filter((p) => p.length > 0);
+    for (const paragraph of paragraphs) {
+      // Skip if it looks like a structured format
+      if (paragraph.match(/^(Base layers?|Outerwear|Bottoms?|Accessories|Footwear):/i)) {
+        continue;
+      }
 
-  for (const paragraph of paragraphs) {
-    // Skip if it looks like a structured format
-    if (paragraph.match(/^(Base layers?|Outerwear|Bottoms?|Accessories|Footwear):/i)) {
-      continue;
+      // If it's conversational (contains "you" or "your"), use it
+      if (paragraph.toLowerCase().includes('you') || paragraph.toLowerCase().includes('your')) {
+        result = stripMarkdown(paragraph);
+        break;
+      }
     }
 
-    // If it's conversational (contains "you" or "your"), use it
-    if (paragraph.toLowerCase().includes('you') || paragraph.toLowerCase().includes('your')) {
-      return paragraph;
+    // Fallback: use the entire text if it's reasonably short
+    if (!result && text.length < 500) {
+      result = stripMarkdown(text.trim());
+    }
+
+    // If all else fails, use the first paragraph
+    if (!result) {
+      result = stripMarkdown(paragraphs[0] || text.trim());
     }
   }
 
-  // Fallback: use the entire text if it's reasonably short
-  if (text.length < 500) {
-    return text.trim();
-  }
+  // Remove surrounding quotes that LLMs often add
+  result = result.replace(/^["'](.*)["']$/, '$1');
 
-  // If all else fails, use the first paragraph
-  return paragraphs[0] || text.trim();
+  return result;
 }
 
 export default {

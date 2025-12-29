@@ -68,6 +68,72 @@ You should wear:
       expect(result.recommendations).toBeDefined();
       expect(result.spokenResponse).toBeDefined();
     });
+
+    it('should strip markdown from structured recommendations', () => {
+      const ollamaOutput = `
+Base layers: **Long-sleeve thermal shirt**
+Outerwear: **Warm winter coat**, *light jacket*
+Bottoms: **Jeans** or __thick leggings__
+Accessories: **Warm hat**, **gloves**
+Footwear: **Winter boots**
+
+Spoken: **It's cold today!** You'll need your *warm coat* and gloves.
+      `.trim();
+
+      const result = parseOllamaResponse(ollamaOutput);
+
+      // Check that markdown is stripped from items
+      expect(result.recommendations.baseLayers[0]).toBe('Long-sleeve thermal shirt');
+      expect(result.recommendations.baseLayers[0]).not.toContain('**');
+
+      expect(result.recommendations.outerwear[0]).toBe('Warm winter coat');
+      expect(result.recommendations.outerwear[0]).not.toContain('**');
+
+      expect(result.recommendations.outerwear[1]).toBe('light jacket');
+      expect(result.recommendations.outerwear[1]).not.toContain('*');
+
+      // Check spoken response is clean
+      expect(result.spokenResponse).not.toContain('**');
+      expect(result.spokenResponse).not.toContain('*');
+      expect(result.spokenResponse).toContain("It's cold today!");
+    });
+
+    it('should strip markdown from natural language recommendations', () => {
+      const ollamaOutput = `
+You should wear:
+- **A long-sleeve shirt** for warmth
+- **Your favorite warm coat** because it's cold
+- __Thick pants__ to keep your legs warm
+- Don't forget your **hat** and *gloves*!
+- Wear your **rain boots** since it might rain
+      `.trim();
+
+      const result = parseOllamaResponse(ollamaOutput);
+
+      // Check that recommendations don't contain markdown
+      const allItems = [
+        ...result.recommendations.baseLayers,
+        ...result.recommendations.outerwear,
+        ...result.recommendations.bottoms,
+        ...result.recommendations.accessories,
+        ...result.recommendations.footwear,
+      ];
+
+      allItems.forEach(item => {
+        expect(item).not.toContain('**');
+        expect(item).not.toContain('__');
+        expect(item).not.toContain('*');
+      });
+    });
+
+    it('should handle mixed markdown formatting', () => {
+      const ollamaOutput = 'Outerwear: ** Warm coat, *windbreaker*, __rain jacket__';
+      const result = parseOllamaResponse(ollamaOutput);
+
+      expect(result.recommendations.outerwear[0]).toBe('Warm coat');
+      expect(result.recommendations.outerwear[1]).toBe('windbreaker');
+      expect(result.recommendations.outerwear[2]).toBe('rain jacket');
+    });
   });
 
   describe('extractRecommendations', () => {
@@ -155,6 +221,33 @@ Spoken: It's cold today, so wear your warm coat!
       const spoken = extractSpokenResponse(text);
 
       expect(spoken).toBe('This is spoken');
+    });
+
+    it('should strip surrounding quotes from spoken response', () => {
+      const text = 'Spoken: "It\'s cold today, wear a warm coat!"';
+      const spoken = extractSpokenResponse(text);
+
+      expect(spoken).toBe("It's cold today, wear a warm coat!");
+      expect(spoken).not.toContain('"');
+    });
+
+    it('should strip single quotes from spoken response', () => {
+      const text = "Spoken: 'Wear your coat today!'";
+      const spoken = extractSpokenResponse(text);
+
+      expect(spoken).toBe('Wear your coat today!');
+      expect(spoken).not.toContain("'");
+    });
+
+    it('should preserve inner quotes but strip outer quotes', () => {
+      const text = 'Spoken: "It\'s a beautiful day, isn\'t it?"';
+      const spoken = extractSpokenResponse(text);
+
+      expect(spoken).toBe("It's a beautiful day, isn't it?");
+      // Should keep the apostrophes but remove the outer quotes
+      expect(spoken).toContain("It's");
+      expect(spoken).not.toMatch(/^"/);
+      expect(spoken).not.toMatch(/"$/);
     });
   });
 });

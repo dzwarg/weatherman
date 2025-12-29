@@ -51,12 +51,23 @@ describe('claudeService', () => {
       timeframe: 'morning',
     };
 
-    it('should call Claude API with correct parameters', async () => {
+    it('should call Claude API with correct parameters and return JSON', async () => {
+      const mockJsonResponse = {
+        recommendations: {
+          baseLayers: ['Thermal shirt'],
+          outerwear: ['Warm coat'],
+          bottoms: ['Pants'],
+          accessories: ['Hat'],
+          footwear: ['Boots']
+        },
+        spokenResponse: 'Wear a warm coat!'
+      };
+
       const mockResponse = {
         content: [
           {
             type: 'text',
-            text: 'Base layers: Thermal shirt\nOuterwear: Warm coat\nSpoken: Wear a warm coat!',
+            text: JSON.stringify(mockJsonResponse),
           },
         ],
       };
@@ -80,12 +91,14 @@ describe('claudeService', () => {
         })
       );
 
-      expect(result).toEqual(mockResponse.content[0].text);
+      expect(result).toEqual(mockJsonResponse);
+      expect(result.recommendations).toBeDefined();
+      expect(result.spokenResponse).toBeDefined();
     });
 
     it('should include profile information in prompt', async () => {
       const mockResponse = {
-        content: [{ type: 'text', text: 'Recommendations here' }],
+        content: [{ type: 'text', text: JSON.stringify({ recommendations: {}, spokenResponse: 'test' }) }],
       };
 
       mockCreate.mockResolvedValue(mockResponse);
@@ -99,7 +112,7 @@ describe('claudeService', () => {
 
     it('should include weather information in prompt', async () => {
       const mockResponse = {
-        content: [{ type: 'text', text: 'Recommendations here' }],
+        content: [{ type: 'text', text: JSON.stringify({ recommendations: {}, spokenResponse: 'test' }) }],
       };
 
       mockCreate.mockResolvedValue(mockResponse);
@@ -113,7 +126,7 @@ describe('claudeService', () => {
 
     it('should include voice prompt context', async () => {
       const mockResponse = {
-        content: [{ type: 'text', text: 'Recommendations here' }],
+        content: [{ type: 'text', text: JSON.stringify({ recommendations: {}, spokenResponse: 'test' }) }],
       };
 
       mockCreate.mockResolvedValue(mockResponse);
@@ -137,15 +150,16 @@ describe('claudeService', () => {
         },
       };
 
+      const mockJsonResponse = { recommendations: {}, spokenResponse: 'test' };
       const mockResponse = {
-        content: [{ type: 'text', text: 'Recommendations here' }],
+        content: [{ type: 'text', text: JSON.stringify(mockJsonResponse) }],
       };
 
       mockCreate.mockResolvedValue(mockResponse);
 
       const result = await generateClothingAdvice(minimalRequest);
 
-      expect(result).toEqual('Recommendations here');
+      expect(result).toEqual(mockJsonResponse);
     });
 
     it('should throw error when no text content in response', async () => {
@@ -254,14 +268,15 @@ describe('claudeService', () => {
       expect(result.system).toContain('straightforward');
     });
 
-    it('should include format instructions', () => {
+    it('should include JSON format instructions', () => {
       const result = buildPrompt(mockRequest);
-      expect(result.userMessage).toContain('Base layers');
-      expect(result.userMessage).toContain('Outerwear');
-      expect(result.userMessage).toContain('Bottoms');
-      expect(result.userMessage).toContain('Accessories');
-      expect(result.userMessage).toContain('Footwear');
-      expect(result.userMessage).toContain('Spoken');
+      expect(result.userMessage).toContain('JSON');
+      expect(result.userMessage).toContain('baseLayers');
+      expect(result.userMessage).toContain('outerwear');
+      expect(result.userMessage).toContain('bottoms');
+      expect(result.userMessage).toContain('accessories');
+      expect(result.userMessage).toContain('footwear');
+      expect(result.userMessage).toContain('spokenResponse');
     });
   });
 });

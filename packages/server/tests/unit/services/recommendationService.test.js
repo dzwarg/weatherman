@@ -2,12 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateRecommendations, isClaudeAvailable, clearClaudeCache } from '../../../src/services/recommendationService.js';
 import * as claudeService from '../../../src/services/claudeService.js';
 import * as clothingRules from '../../../src/utils/clothingRules.js';
-import * as ollamaResponseParser from '../../../src/utils/ollamaResponseParser.js';
 
 // Mock dependencies
 vi.mock('../../../src/services/claudeService.js');
 vi.mock('../../../src/utils/clothingRules.js');
-vi.mock('../../../src/utils/ollamaResponseParser.js');
 
 describe('recommendationService', () => {
   beforeEach(() => {
@@ -43,15 +41,13 @@ describe('recommendationService', () => {
 
   describe('generateRecommendations', () => {
     it('should use Claude when available', async () => {
-      const mockClaudeResponse = 'Base layers: Thermal shirt\nSpoken: Wear warm clothes!';
-      const mockParsedResponse = {
+      const mockClaudeResponse = {
         recommendations: mockRuleBasedRecommendations,
         spokenResponse: 'Wear warm clothes!',
       };
 
       claudeService.checkHealth.mockResolvedValue(true);
       claudeService.generateClothingAdvice.mockResolvedValue(mockClaudeResponse);
-      ollamaResponseParser.parseOllamaResponse.mockReturnValue(mockParsedResponse);
 
       const result = await generateRecommendations(mockRequest);
 
@@ -178,15 +174,13 @@ describe('recommendationService', () => {
     });
 
     it('should set higher confidence for Claude responses', async () => {
-      const mockClaudeResponse = 'Claude recommendations';
-      const mockParsedResponse = {
+      const mockClaudeResponse = {
         recommendations: mockRuleBasedRecommendations,
         spokenResponse: 'Wear warm clothes!',
       };
 
       claudeService.checkHealth.mockResolvedValue(true);
       claudeService.generateClothingAdvice.mockResolvedValue(mockClaudeResponse);
-      ollamaResponseParser.parseOllamaResponse.mockReturnValue(mockParsedResponse);
 
       const claudeResult = await generateRecommendations(mockRequest);
 

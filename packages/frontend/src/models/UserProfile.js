@@ -27,7 +27,7 @@ export class UserProfile {
   }
 
   validate() {
-    const validIds = ['4-girl', '7-boy', '10-boy'];
+    const validIds = ['4yo-girl', '7yo-boy', '10yo-boy'];
     if (!validIds.includes(this.id)) {
       throw new Error(`Invalid profile ID. Must be one of: ${validIds.join(', ')}`);
     }
@@ -77,10 +77,10 @@ export class UserProfile {
   }
 }
 
-// Predefined profiles
+// Predefined profiles (IDs match server format)
 export const PREDEFINED_PROFILES = [
   {
-    id: '4-girl',
+    id: '4yo-girl',
     age: 4,
     gender: 'girl',
     complexityLevel: 'simple',
@@ -88,7 +88,7 @@ export const PREDEFINED_PROFILES = [
     displayName: '4 year old girl',
   },
   {
-    id: '7-boy',
+    id: '7yo-boy',
     age: 7,
     gender: 'boy',
     complexityLevel: 'moderate',
@@ -96,7 +96,7 @@ export const PREDEFINED_PROFILES = [
     displayName: '7 year old boy',
   },
   {
-    id: '10-boy',
+    id: '10yo-boy',
     age: 10,
     gender: 'boy',
     complexityLevel: 'complex',

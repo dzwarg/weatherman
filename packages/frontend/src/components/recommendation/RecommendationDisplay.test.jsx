@@ -242,6 +242,84 @@ describe('RecommendationDisplay', () => {
     });
   });
 
+  describe('server response format', () => {
+    it('should handle object format with item and reason', () => {
+      const serverFormatRecommendation = {
+        recommendations: {
+          outerwear: [
+            { item: 'Warm winter coat', reason: "It's very cold outside" },
+            { item: 'Raincoat', reason: 'To stay dry' },
+          ],
+          baseLayers: [{ item: 'Long-sleeve shirt', reason: 'To stay warm' }],
+          accessories: [{ item: 'Umbrella', reason: 'Protection from rain' }],
+          footwear: [{ item: 'Rain boots', reason: 'To keep your feet dry' }],
+        },
+        weatherData: {
+          temperature: 36,
+          feelsLike: 33,
+          conditions: 'Rainy',
+          precipitationProbability: 80,
+          windSpeed: 5,
+        },
+        spokenResponse: "It's cold and rainy. Wear a warm coat!",
+        confidence: 0.9,
+      };
+
+      render(<RecommendationDisplay recommendation={serverFormatRecommendation} />);
+
+      // Check items are displayed
+      expect(screen.getByText('Warm winter coat')).toBeInTheDocument();
+      expect(screen.getByText('Raincoat')).toBeInTheDocument();
+      expect(screen.getByText('Long-sleeve shirt')).toBeInTheDocument();
+      expect(screen.getByText('Umbrella')).toBeInTheDocument();
+      expect(screen.getByText('Rain boots')).toBeInTheDocument();
+
+      // Check reasons are displayed
+      expect(screen.getByText("It's very cold outside")).toBeInTheDocument();
+      expect(screen.getByText('To stay dry')).toBeInTheDocument();
+      expect(screen.getByText('To stay warm')).toBeInTheDocument();
+      expect(screen.getByText('Protection from rain')).toBeInTheDocument();
+      expect(screen.getByText('To keep your feet dry')).toBeInTheDocument();
+    });
+
+    it('should handle mixed format (some strings, some objects)', () => {
+      const mixedFormatRecommendation = {
+        recommendations: {
+          outerwear: [
+            { item: 'Light jacket', reason: 'For cool morning air' },
+            'Windbreaker', // String format
+          ],
+          baseLayers: ['T-shirt', 'Shorts'],
+          accessories: [{ item: 'Sunglasses', reason: 'UV protection' }],
+          footwear: ['Sneakers'],
+        },
+        weatherData: {
+          temperature: 65,
+          feelsLike: 65,
+          conditions: 'Clear',
+          precipitationProbability: 0,
+          windSpeed: 5,
+        },
+        spokenResponse: 'Nice weather today!',
+        confidence: 0.85,
+      };
+
+      render(<RecommendationDisplay recommendation={mixedFormatRecommendation} />);
+
+      // Check all items are displayed
+      expect(screen.getByText('Light jacket')).toBeInTheDocument();
+      expect(screen.getByText('Windbreaker')).toBeInTheDocument();
+      expect(screen.getByText('T-shirt')).toBeInTheDocument();
+      expect(screen.getByText('Shorts')).toBeInTheDocument();
+      expect(screen.getByText('Sunglasses')).toBeInTheDocument();
+      expect(screen.getByText('Sneakers')).toBeInTheDocument();
+
+      // Check reasons are displayed where available
+      expect(screen.getByText('For cool morning air')).toBeInTheDocument();
+      expect(screen.getByText('UV protection')).toBeInTheDocument();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle recommendation with minimal data', () => {
       const minimalRecommendation = {

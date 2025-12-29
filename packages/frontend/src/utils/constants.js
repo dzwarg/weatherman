@@ -7,9 +7,10 @@
 export const WAKE_PHRASE = 'good morning weatherbot';
 
 // Predefined user profiles
+// Note: IDs match server format (4yo-girl, 7yo-boy, 10yo-boy)
 export const PROFILES = [
   {
-    id: '4-girl',
+    id: '4yo-girl',
     age: 4,
     gender: 'girl',
     complexityLevel: 'simple',
@@ -17,7 +18,7 @@ export const PROFILES = [
     displayName: '4 year old girl',
   },
   {
-    id: '7-boy',
+    id: '7yo-boy',
     age: 7,
     gender: 'boy',
     complexityLevel: 'moderate',
@@ -25,7 +26,7 @@ export const PROFILES = [
     displayName: '7 year old boy',
   },
   {
-    id: '10-boy',
+    id: '10yo-boy',
     age: 10,
     gender: 'boy',
     complexityLevel: 'complex',

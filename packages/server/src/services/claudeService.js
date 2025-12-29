@@ -18,7 +18,7 @@ if (config.anthropicApiKey) {
 /**
  * Generate clothing advice using Claude API
  * @param {Object} request - Recommendation request
- * @returns {Promise<string>} Claude response text
+ * @returns {Promise<Object>} Structured recommendation object with recommendations and spokenResponse
  */
 export async function generateClothingAdvice(request) {
   if (!anthropic) {
@@ -53,7 +53,25 @@ export async function generateClothingAdvice(request) {
       throw new Error('No text content in Claude API response');
     }
 
-    return textContent.text;
+    // Parse JSON response
+    let responseText = textContent.text.trim();
+
+    // Remove markdown code blocks if present (Claude sometimes adds them despite instructions)
+    responseText = responseText.replace(/^```json\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+
+    try {
+      const parsed = JSON.parse(responseText);
+
+      // Validate structure
+      if (!parsed.recommendations || !parsed.spokenResponse) {
+        throw new Error('Invalid JSON structure: missing recommendations or spokenResponse');
+      }
+
+      return parsed;
+    } catch (parseError) {
+      console.error('Failed to parse Claude response as JSON:', responseText);
+      throw new Error(`Invalid JSON response from Claude: ${parseError.message}`);
+    }
   } catch (error) {
     // Log error details
     console.error('Claude API error:', {
@@ -132,17 +150,22 @@ export function buildPrompt(request) {
     userParts.push(`Timeframe: ${timeframe}`);
   }
 
-  // Task instructions
+  // Task instructions - request JSON format
   userParts.push('\nPlease recommend appropriate clothing for this child based on the weather and context.');
-  userParts.push('Organize your response in the following format:');
+  userParts.push('Respond with ONLY a valid JSON object in this exact format (no markdown, no code blocks):');
   userParts.push('');
-  userParts.push('Base layers: [items]');
-  userParts.push('Outerwear: [items]');
-  userParts.push('Bottoms: [items]');
-  userParts.push('Accessories: [items]');
-  userParts.push('Footwear: [items]');
+  userParts.push('{');
+  userParts.push('  "recommendations": {');
+  userParts.push('    "baseLayers": ["item1", "item2"],');
+  userParts.push('    "outerwear": ["item1", "item2"],');
+  userParts.push('    "bottoms": ["item1", "item2"],');
+  userParts.push('    "accessories": ["item1", "item2"],');
+  userParts.push('    "footwear": ["item1", "item2"]');
+  userParts.push('  },');
+  userParts.push('  "spokenResponse": "A friendly, age-appropriate sentence or two explaining the recommendations"');
+  userParts.push('}');
   userParts.push('');
-  userParts.push('Spoken: [A friendly, age-appropriate sentence or two explaining the recommendations]');
+  userParts.push('IMPORTANT: Return ONLY the JSON object. Do not include markdown formatting, code blocks, or any other text.');
 
   const userMessage = userParts.join('\n');
 

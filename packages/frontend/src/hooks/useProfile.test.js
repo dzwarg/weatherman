@@ -37,11 +37,11 @@ describe('useProfile hook', () => {
     const { result } = renderHook(() => useProfile());
 
     act(() => {
-      result.current.selectProfile('7-boy');
+      result.current.selectProfile('7yo-boy');
     });
 
     expect(result.current.activeProfile).not.toBeNull();
-    expect(result.current.activeProfile.id).toBe('7-boy');
+    expect(result.current.activeProfile.id).toBe('7yo-boy');
     expect(result.current.activeProfile.age).toBe(7);
     expect(result.current.hasProfile).toBe(true);
   });
@@ -50,21 +50,21 @@ describe('useProfile hook', () => {
     const { result } = renderHook(() => useProfile());
 
     act(() => {
-      result.current.selectProfile('4-girl');
+      result.current.selectProfile('4yo-girl');
     });
 
     // Create new hook instance to verify persistence
     const { result: result2 } = renderHook(() => useProfile());
 
     expect(result2.current.activeProfile).not.toBeNull();
-    expect(result2.current.activeProfile.id).toBe('4-girl');
+    expect(result2.current.activeProfile.id).toBe('4yo-girl');
   });
 
   it('should clear active profile', () => {
     const { result } = renderHook(() => useProfile());
 
     act(() => {
-      result.current.selectProfile('10-boy');
+      result.current.selectProfile('10yo-boy');
     });
 
     expect(result.current.activeProfile).not.toBeNull();
@@ -90,7 +90,7 @@ describe('useProfile hook', () => {
   it('should restore profile from localStorage on mount', () => {
     // Manually set profile in localStorage with proper JSON (full profile object)
     const profileData = {
-      id: '7-boy',
+      id: '7yo-boy',
       age: 7,
       gender: 'boy',
       complexityLevel: 'moderate',
@@ -104,7 +104,7 @@ describe('useProfile hook', () => {
     const { result } = renderHook(() => useProfile());
 
     expect(result.current.activeProfile).not.toBeNull();
-    expect(result.current.activeProfile.id).toBe('7-boy');
+    expect(result.current.activeProfile.id).toBe('7yo-boy');
   });
 
   it('should handle corrupted localStorage data', () => {

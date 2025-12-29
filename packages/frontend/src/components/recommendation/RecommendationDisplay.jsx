@@ -137,17 +137,28 @@ export function RecommendationDisplay({ recommendation }) {
           {categoryIcons[key]} {title}
         </h3>
         <ul style={styles.itemList}>
-          {items.map((item, index) => (
-            <li
-              key={index}
-              style={{
-                ...styles.item,
-                ...(index === items.length - 1 ? styles.lastItem : {}),
-              }}
-            >
-              {item}
-            </li>
-          ))}
+          {items.map((item, index) => {
+            // Handle both string format (local fallback) and object format (server response)
+            const itemText = typeof item === 'string' ? item : item.item;
+            const itemReason = typeof item === 'object' && item.reason ? item.reason : null;
+
+            return (
+              <li
+                key={index}
+                style={{
+                  ...styles.item,
+                  ...(index === items.length - 1 ? styles.lastItem : {}),
+                }}
+              >
+                <div style={{ fontWeight: '500' }}>{itemText}</div>
+                {itemReason && (
+                  <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                    {itemReason}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     );

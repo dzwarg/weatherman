@@ -5,7 +5,6 @@
 
 import { getClothingRecommendations } from '../utils/clothingRules.js';
 import * as claudeService from './claudeService.js';
-import { parseOllamaResponse } from '../utils/ollamaResponseParser.js';
 import crypto from 'crypto';
 
 // Cache for Claude API availability check (5 minute TTL)
@@ -27,17 +26,16 @@ export async function generateRecommendations(request) {
 
     if (claudeAvailable) {
       try {
-        // Try to get recommendations from Claude API
+        // Try to get recommendations from Claude API (returns structured JSON)
         const claudeResponse = await claudeService.generateClothingAdvice(request);
-        const parsed = parseOllamaResponse(claudeResponse);
 
-        // Return structured response with Claude recommendations
+        // Claude now returns structured JSON directly - no parsing needed!
         return {
           id: generateId(),
           profileId: request.profile.id,
           weatherData: request.weather,
-          recommendations: parsed.recommendations,
-          spokenResponse: parsed.spokenResponse,
+          recommendations: claudeResponse.recommendations,
+          spokenResponse: claudeResponse.spokenResponse,
           source: 'claude',
           confidence: 0.95, // Higher confidence for LLM-generated
           createdAt: new Date().toISOString(),
