@@ -24,8 +24,8 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   weatherApiKey: process.env.WEATHER_API_KEY,
   weatherApiUrl: process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5',
-  ollamaUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
-  ollamaModel: process.env.OLLAMA_MODEL || 'mistral:latest',
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  claudeModel: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
 };
 
 export default config;

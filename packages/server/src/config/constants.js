@@ -17,13 +17,14 @@ export const RATE_LIMITS = {
 // API timeouts
 export const TIMEOUTS = {
   WEATHER_API: 5000, // 5 seconds
-  OLLAMA_API: 10000, // 10 seconds
+  CLAUDE_API: 30000, // 30 seconds (Claude API can be slower)
 };
 
-// Ollama settings
-export const OLLAMA_SETTINGS = {
+// Claude API settings
+export const CLAUDE_SETTINGS = {
+  model: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
+  maxTokens: 1024,
   temperature: 0.7,
-  maxTokens: 500,
 };
 
 // User profiles
@@ -36,6 +37,6 @@ export const USER_PROFILES = [
 export default {
   RATE_LIMITS,
   TIMEOUTS,
-  OLLAMA_SETTINGS,
+  CLAUDE_SETTINGS,
   USER_PROFILES,
 };
