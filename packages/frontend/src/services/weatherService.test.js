@@ -187,7 +187,7 @@ describe('weatherService', () => {
       };
       WeatherData.mockImplementationOnce(() => mockNewInstance);
 
-      const result = await weatherService.getCurrentWeather(mockLocation);
+      const _result = await weatherService.getCurrentWeather(mockLocation);
 
       expect(apiClient.getCurrentWeather).toHaveBeenCalledWith(42.36, -71.06, 'imperial');
       expect(cacheService.set).toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('weatherService', () => {
       };
       WeatherData.mockImplementationOnce(() => mockInstance);
 
-      const result = await weatherService.getCurrentWeather(mockLocation);
+      const _result = await weatherService.getCurrentWeather(mockLocation);
 
       expect(apiClient.getCurrentWeather).toHaveBeenCalledWith(42.36, -71.06, 'imperial');
       expect(cacheService.set).toHaveBeenCalled();
@@ -256,7 +256,7 @@ describe('weatherService', () => {
       WeatherData.mockImplementationOnce(() => mockInstance);
 
       // Should still fetch from API
-      const result = await weatherService.getCurrentWeather(mockLocation);
+      const _result = await weatherService.getCurrentWeather(mockLocation);
 
       expect(apiClient.getCurrentWeather).toHaveBeenCalled();
     });

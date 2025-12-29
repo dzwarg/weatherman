@@ -136,7 +136,8 @@ export function extractRecommendations(text) {
  * @param {Object} recommendations - Recommendations object to populate
  */
 function extractFromNaturalLanguage(text, recommendations) {
-  const lowerText = text.toLowerCase();
+  // lowerText is used in the future for keyword matching
+  // const lowerText = text.toLowerCase();
 
   // Keywords for each category
   const categoryKeywords = {

@@ -127,7 +127,7 @@ describe('useWeather', () => {
       await act(async () => {
         try {
           await result.current.fetchWeather(mockLocation);
-        } catch (err) {
+        } catch {
           // Error is expected and will be set in state
         }
       });
@@ -191,7 +191,7 @@ describe('useWeather', () => {
       await act(async () => {
         try {
           await result.current.fetchForecast(mockLocation);
-        } catch (err) {
+        } catch {
           // Error is expected and will be set in state
         }
       });
@@ -310,7 +310,7 @@ describe('useWeather', () => {
       await act(async () => {
         try {
           await result.current.fetchWeather(mockLocation);
-        } catch (err) {
+        } catch {
           // Error is expected
         }
       });

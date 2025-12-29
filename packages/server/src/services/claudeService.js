@@ -5,7 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config/env.js';
-import { CLAUDE_SETTINGS, TIMEOUTS } from '../config/constants.js';
+import { CLAUDE_SETTINGS } from '../config/constants.js';
 
 // Initialize Anthropic client (will be null if no API key)
 let anthropic = null;

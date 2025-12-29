@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useVoiceRecognition } from './useVoiceRecognition';
 import voiceService from '../services/voiceService';
 import { parseVoiceQuery } from '../utils/voiceUtils';
@@ -138,7 +138,7 @@ describe('useVoiceRecognition', () => {
     it('should restart wake word detection after query', () => {
       const { result } = renderHook(() => useVoiceRecognition());
 
-      const startWakeWordSpy = vi.spyOn(result.current, 'startWakeWordDetection');
+      const _startWakeWordSpy = vi.spyOn(result.current, 'startWakeWordDetection');
 
       act(() => {
         result.current.startWakeWordDetection();

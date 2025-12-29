@@ -150,7 +150,7 @@ export function getClothingRecommendations(request) {
 /**
  * Generate natural language spoken response
  */
-function generateSpokenResponse(recommendations, weather, profile) {
+function generateSpokenResponse(recommendations, weather, _profile) {
   const parts = [];
 
   // Weather description

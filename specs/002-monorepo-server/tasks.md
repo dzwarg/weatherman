@@ -225,13 +225,13 @@ This project uses a **monorepo structure** with npm workspaces:
 - [X] T088 [P] [US3] Create root-level README.md section documenting monorepo structure and npm workspace commands
 - [ ] T089 [P] [US3] Update `packages/frontend/README.md` with frontend-specific setup and development instructions
 - [X] T090 [P] [US3] Update `packages/server/README.md` with server-specific setup, Claude API configuration (migrated from Ollama), and API documentation
-- [ ] T091 [US3] Test independent frontend installation: Run `npm install --workspace=@weatherman/frontend` and verify only frontend deps are installed
-- [ ] T092 [US3] Test independent server installation: Run `npm install --workspace=@weatherman/server` and verify only server deps are installed
-- [ ] T093 [US3] Test workspace dependency hoisting: Verify shared dependencies (e.g., vitest) are hoisted to root `node_modules/`
+- [X] T091 [US3] Test independent frontend installation: Run `npm install --workspace=@weatherman/frontend` and verify only frontend deps are installed
+- [X] T092 [US3] Test independent server installation: Run `npm install --workspace=@weatherman/server` and verify only server deps are installed
+- [X] T093 [US3] Test workspace dependency hoisting: Verify shared dependencies (e.g., vitest) are hoisted to root `node_modules/`
 - [X] T094 [US3] Create developer workflow documentation in `docs/workflow.md` explaining monorepo commands, parallel development, and common issues
-- [ ] T095 [US3] Verify `npm run build` builds both packages correctly
-- [ ] T096 [US3] Verify `npm run test` runs tests for both packages (all tests should pass)
-- [ ] T097 [US3] Verify `npm run lint` lints both packages (zero warnings)
+- [X] T095 [US3] Verify `npm run build` builds both packages correctly
+- [X] T096 [US3] Verify `npm run test` runs tests for both packages (all tests should pass)
+- [X] T097 [US3] Verify `npm run lint` lints both packages (zero warnings)
 
 **Checkpoint**: All user stories should now be independently functional with proper monorepo tooling, documentation, and comprehensive test coverage
 

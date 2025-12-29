@@ -22,7 +22,7 @@ export function OfflineIndicator() {
         } else {
           setServerStatus('offline');
         }
-      } catch (error) {
+      } catch {
         setServerStatus('offline');
       }
 

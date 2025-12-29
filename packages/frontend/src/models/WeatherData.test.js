@@ -56,7 +56,7 @@ describe('WeatherData', () => {
 
   describe('validation', () => {
     it('should throw error for missing location', () => {
-      const { location, ...dataWithoutLocation } = validWeatherData;
+      const { location: _location, ...dataWithoutLocation } = validWeatherData;
       expect(() => new WeatherData(dataWithoutLocation)).toThrow('Location');
     });
 
@@ -66,7 +66,7 @@ describe('WeatherData', () => {
     });
 
     it('should throw error for missing current weather', () => {
-      const { current, ...dataWithoutCurrent } = validWeatherData;
+      const { current: _current, ...dataWithoutCurrent } = validWeatherData;
       expect(() => new WeatherData(dataWithoutCurrent)).toThrow('Current');
     });
   });

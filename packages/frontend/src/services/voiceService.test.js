@@ -292,7 +292,7 @@ describe('voiceService', () => {
         capturedUtterance = utterance;
       };
 
-      const promise1 = voiceService.speak('First');
+      const _promise1 = voiceService.speak('First');
       const promise2 = voiceService.speak('Second');
 
       expect(cancelCalled).toBe(true);
@@ -345,7 +345,7 @@ describe('voiceService', () => {
         cancelCalled = true;
       };
 
-      const promise = voiceService.speak('Hello');
+      const _promise = voiceService.speak('Hello');
 
       capturedUtterance.onstart();
       expect(voiceService.isSpeaking).toBe(true);
@@ -390,7 +390,7 @@ describe('voiceService', () => {
       };
 
       voiceService.startWakeWordDetection(vi.fn(), vi.fn());
-      const promise = voiceService.speak('Test');
+      const _promise = voiceService.speak('Test');
 
       capturedUtterance.onstart();
 

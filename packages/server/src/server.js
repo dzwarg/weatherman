@@ -31,7 +31,7 @@ app.get('/api/health', async (req, res) => {
         claude: claudeAvailable ? 'connected' : 'unavailable',
       },
     });
-  } catch (error) {
+  } catch {
     // Even if health checks fail, the server is still operational
     res.json({
       status: 'ok',

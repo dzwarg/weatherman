@@ -92,7 +92,7 @@ export async function isClaudeAvailable() {
     claudeCacheExpiry = now + CACHE_TTL;
 
     return available;
-  } catch (error) {
+  } catch {
     // On error, cache as unavailable
     claudeAvailableCache = false;
     claudeCacheExpiry = now + CACHE_TTL;
