@@ -87,7 +87,7 @@ test.describe('Voice Weather Clothing Workflow', () => {
     await expect(page.getByText(/selected|✓/i)).toBeVisible({ timeout: 5000 });
   });
 
-  test('should show offline indicator when server is unreachable', async ({ page, context }) => {
+  test('should show offline indicator when server is unreachable', async ({ page, context: _context }) => {
     // Block all API requests to simulate offline server
     await page.route('**/api/**', route => route.abort());
 

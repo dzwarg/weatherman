@@ -5,6 +5,7 @@
 
 import express from 'express';
 import helmet from 'helmet';
+import compression from 'compression';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { corsMiddleware } from './middleware/cors.js';
@@ -23,6 +24,7 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(corsMiddleware);
+app.use(compression()); // Enable gzip compression
 app.use(express.json());
 app.use(requestLogger);
 

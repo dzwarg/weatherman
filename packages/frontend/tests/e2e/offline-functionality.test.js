@@ -43,7 +43,7 @@ test.describe('Offline Functionality', () => {
       try {
         const registration = await navigator.serviceWorker.ready;
         return registration !== null && registration !== undefined;
-      } catch (error) {
+      } catch {
         return false;
       }
     });
@@ -125,7 +125,7 @@ test.describe('Offline Functionality', () => {
     await context.setOffline(false);
   });
 
-  test('should have Workbox caching configuration in vite.config.js', async ({ page }) => {
+  test('should have Workbox caching configuration in vite.config.js', async ({ page: _page }) => {
     // This test verifies the PWA configuration exists (not runtime SW behavior)
     // It checks that workbox caching is properly configured in vite.config.js
 
