@@ -37,7 +37,7 @@ export const PROFILES = [
 
 // API Configuration
 export const API_CONFIG = {
-  OPENWEATHER_API_KEY: import.meta.env.VITE_OPENWEATHER_API_KEY,
+  // API key is stored server-side only for security
   // Use proxy in development to avoid CORS issues
   OPENWEATHER_BASE_URL: import.meta.env.DEV
     ? '/api/weather/onecall'

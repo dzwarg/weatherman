@@ -258,12 +258,12 @@ This project uses a **monorepo structure** with npm workspaces:
 
 ### Production Readiness
 
-- [ ] T105 [P] Add production CORS configuration in `packages/server/src/middleware/cors.js` with environment-based origin allowlist
-- [ ] T106 [P] Add production environment variables example in `packages/server/.env.production.example`
-- [ ] T107 [P] Configure server to serve frontend static build in production mode (optional - for monolith deployment)
-- [ ] T108 Review security: Ensure no API keys in frontend bundle, validate all user inputs, proper error messages
-- [ ] T109 Review PWA compliance: Run Lighthouse audit and ensure 100/100 PWA score is maintained
-- [ ] T110 Review voice interaction: Test all voice features work with server integration (capture, playback, offline mode)
+- [X] T105 [P] Add production CORS configuration in `packages/server/src/middleware/cors.js` with environment-based origin allowlist
+- [X] T106 [P] Add production environment variables example in `packages/server/.env.production.example`
+- [X] T107 [P] Configure server to serve frontend static build in production mode (optional - for monolith deployment)
+- [X] T108 Review security: Ensure no API keys in frontend bundle, validate all user inputs, proper error messages
+- [X] T109 Review PWA compliance: Run Lighthouse audit and ensure 100/100 PWA score is maintained
+- [X] T110 Review voice interaction: Test all voice features work with server integration (capture, playback, offline mode)
 
 ### Performance Optimization
 

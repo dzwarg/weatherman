@@ -4,11 +4,21 @@
  */
 
 export const errorHandler = (err, req, res, _next) => {
-  // Log error for debugging
-  console.error('Error:', err);
-
   // Determine status code
   const statusCode = err.statusCode || err.status || 500;
+
+  // Log error for debugging (hide sensitive info in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Error:', err);
+  } else {
+    // Production: Only log essential info (no stack traces)
+    console.error('Error:', {
+      code: err.code || 'INTERNAL_ERROR',
+      message: err.message,
+      statusCode,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   // Build error response
   const errorResponse = {
@@ -19,8 +29,8 @@ export const errorHandler = (err, req, res, _next) => {
     timestamp: new Date().toISOString(),
   };
 
-  // Add details if available
-  if (err.details) {
+  // Add details if available (only in development or if explicitly safe)
+  if (err.details && (process.env.NODE_ENV === 'development' || err.safeDetails)) {
     errorResponse.error.details = err.details;
   }
 
