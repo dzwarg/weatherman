@@ -94,7 +94,7 @@ jobs:
             COMMIT_MSG=$(echo "$line" | cut -d' ' -f2-)
 
             # Skip merge commits (e.g., "Merge branch 'main' into feature")
-            if [[ "$COMMIT_MSG" =~ ^Merge\ ]]; then
+            if [[ "$COMMIT_MSG" =~ ^Merge[[:space:]] ]]; then
               echo "::notice::Skipping merge commit $COMMIT_SHA: $COMMIT_MSG"
               continue
             fi
