@@ -104,6 +104,29 @@ jobs:
       - name: Build frontend
         run: npm run build --workspace=packages/frontend
 
+      - name: Check deployment prerequisites
+        run: |
+          echo "🔍 Deployment Prerequisites Check"
+          echo "=================================="
+          echo "Current user: $(whoami)"
+          echo "Current UID: $(id -u)"
+          echo "Current groups: $(groups)"
+          echo ""
+          echo "Checking sudoers configuration..."
+          if sudo -n true 2>/dev/null; then
+            echo "✅ Sudo access configured (NOPASSWD working)"
+          else
+            echo "❌ Sudo requires password - sudoers not configured correctly"
+            echo ""
+            echo "To fix this issue:"
+            echo "1. Install sudoers file for user: $(whoami)"
+            echo "   sudo ./scripts/deployment/install-sudoers.sh $(whoami)"
+            echo ""
+            echo "2. Verify installation:"
+            echo "   sudo -l -U $(whoami)"
+            exit 1
+          fi
+
       - name: Stop inactive environment
         run: |
           INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"

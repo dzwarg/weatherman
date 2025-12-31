@@ -38,10 +38,16 @@ Cmnd_Alias STATE_MGMT = \
 Cmnd_Alias FRONTEND_DEPLOY = \
     /bin/mkdir -p /var/www/weatherman/blue, \
     /bin/mkdir -p /var/www/weatherman/green, \
+    /usr/bin/mkdir -p /var/www/weatherman/blue, \
+    /usr/bin/mkdir -p /var/www/weatherman/green, \
     /bin/rm -rf /var/www/weatherman/blue, \
     /bin/rm -rf /var/www/weatherman/green, \
+    /usr/bin/rm -rf /var/www/weatherman/blue, \
+    /usr/bin/rm -rf /var/www/weatherman/green, \
     /bin/cp -r packages/frontend/dist/. /var/www/weatherman/blue/, \
     /bin/cp -r packages/frontend/dist/. /var/www/weatherman/green/, \
+    /usr/bin/cp -r packages/frontend/dist/. /var/www/weatherman/blue/, \
+    /usr/bin/cp -r packages/frontend/dist/. /var/www/weatherman/green/, \
     /usr/bin/chown -R www-data\:www-data /var/www/weatherman/blue, \
     /usr/bin/chown -R www-data\:www-data /var/www/weatherman/green, \
     /bin/chown -R www-data\:www-data /var/www/weatherman/blue, \
