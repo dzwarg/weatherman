@@ -14,7 +14,7 @@
 #
 # Examples:
 #   sudo ./scripts/deployment/install-nginx-config.sh
-#   sudo ./scripts/deployment/install-nginx-config.sh weatherman.example.com
+#   sudo ./scripts/deployment/install-nginx-config.sh weatherman.zwarg.com
 #   sudo ./scripts/deployment/install-nginx-config.sh localhost
 
 set -e
@@ -23,7 +23,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_SOURCE="$SCRIPT_DIR/nginx-weatherman.conf"
 CONFIG_DEST="/etc/nginx/sites-available/weatherman"
 CONFIG_ENABLED="/etc/nginx/sites-enabled/weatherman"
-DEFAULT_SERVER_NAME="weatherman.example.com"
+DEFAULT_SERVER_NAME="weatherman.zwarg.com"
 
 # Colors for output
 RED='\033[0;31m'

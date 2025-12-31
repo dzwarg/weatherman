@@ -21,7 +21,7 @@ set -e
 ENV_NAME="blue"
 PORT=3001
 PM2_APP_NAME="weatherman-blue"
-PM2_CONFIG="pm2.blue.config.js"
+PM2_CONFIG="pm2.blue.config.cjs"
 WORK_DIR=$(pwd)
 
 echo "🔵 Deploying to Blue environment..."

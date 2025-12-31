@@ -267,7 +267,7 @@ upstream backend {
 
 server {
     listen 80;
-    server_name weatherman.example.com;
+    server_name weatherman.zwarg.com;
 
     location /api {
         proxy_pass http://backend;
