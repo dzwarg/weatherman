@@ -1,7 +1,8 @@
 module.exports = {
   apps: [{
     name: 'weatherman-blue',
-    script: './packages/server/src/server.js',
+    script: '/opt/weatherman/blue/src/server.js',
+    cwd: '/opt/weatherman/blue',
     instances: 'max',
     exec_mode: 'cluster',
     env: {
@@ -22,8 +23,8 @@ module.exports = {
     max_restarts: 10,
     min_uptime: '10s',
     // Logging
-    error_file: './logs/blue-error.log',
-    out_file: './logs/blue-out.log',
+    error_file: '/opt/weatherman/blue/logs/error.log',
+    out_file: '/opt/weatherman/blue/logs/out.log',
     log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     // Auto-restart on file changes (disabled in production)
     watch: false,

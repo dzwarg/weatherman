@@ -62,8 +62,31 @@ Cmnd_Alias FRONTEND_DEPLOY = \
     /usr/bin/chmod -R 755 /var/www/weatherman/blue, \
     /usr/bin/chmod -R 755 /var/www/weatherman/green
 
+# Backend deployment directory management (explicit paths only - no wildcards)
+Cmnd_Alias BACKEND_DEPLOY = \
+    /bin/mkdir -p /opt/weatherman/blue, \
+    /bin/mkdir -p /opt/weatherman/green, \
+    /usr/bin/mkdir -p /opt/weatherman/blue, \
+    /usr/bin/mkdir -p /opt/weatherman/green, \
+    /bin/rm -rf /opt/weatherman/blue, \
+    /bin/rm -rf /opt/weatherman/green, \
+    /usr/bin/rm -rf /opt/weatherman/blue, \
+    /usr/bin/rm -rf /opt/weatherman/green, \
+    /bin/cp -r packages/server/. /opt/weatherman/blue/, \
+    /bin/cp -r packages/server/. /opt/weatherman/green/, \
+    /usr/bin/cp -r packages/server/. /opt/weatherman/blue/, \
+    /usr/bin/cp -r packages/server/. /opt/weatherman/green/, \
+    /bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
+    /bin/chown -R weatherman\:weatherman /opt/weatherman/green, \
+    /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
+    /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/green, \
+    /bin/chmod -R 755 /opt/weatherman/blue, \
+    /bin/chmod -R 755 /opt/weatherman/green, \
+    /usr/bin/chmod -R 755 /opt/weatherman/blue, \
+    /usr/bin/chmod -R 755 /opt/weatherman/green
+
 # Allow deployment users to execute these commands without password
-DEPLOY_USERS ALL=(root) NOPASSWD: TEST_CMDS, NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY
+DEPLOY_USERS ALL=(root) NOPASSWD: TEST_CMDS, NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY, BACKEND_DEPLOY
 
 # Optional: Add logging for audit trail
 Defaults:DEPLOY_USERS log_output

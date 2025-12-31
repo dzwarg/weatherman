@@ -1,7 +1,8 @@
 module.exports = {
   apps: [{
     name: 'weatherman-green',
-    script: './packages/server/src/server.js',
+    script: '/opt/weatherman/green/src/server.js',
+    cwd: '/opt/weatherman/green',
     instances: 'max',
     exec_mode: 'cluster',
     env: {
@@ -22,8 +23,8 @@ module.exports = {
     max_restarts: 10,
     min_uptime: '10s',
     // Logging
-    error_file: './logs/green-error.log',
-    out_file: './logs/green-out.log',
+    error_file: '/opt/weatherman/green/logs/error.log',
+    out_file: '/opt/weatherman/green/logs/out.log',
     log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     // Auto-restart on file changes (disabled in production)
     watch: false,

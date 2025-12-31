@@ -45,8 +45,61 @@ if [ ! -d "packages/frontend/dist" ]; then
   exit 1
 fi
 
+# Deploy backend to stable location
+BACKEND_DEPLOY_DIR="/opt/weatherman/$ENV_NAME"
+echo ""
+echo "Deploying backend to stable location..."
+echo "Target: $BACKEND_DEPLOY_DIR"
+
+# Remove old backend deployment completely
+sudo rm -rf "$BACKEND_DEPLOY_DIR"
+
+# Create backend deployment directory
+sudo mkdir -p "$BACKEND_DEPLOY_DIR"
+
+# Copy backend code to deployment directory
+sudo cp -r packages/server/. "$BACKEND_DEPLOY_DIR/"
+
+# Copy PM2 config to deployment directory
+sudo cp "$PM2_CONFIG" "$BACKEND_DEPLOY_DIR/"
+
+# Set ownership to weatherman user
+sudo chown -R weatherman:weatherman "$BACKEND_DEPLOY_DIR"
+
+# Set proper permissions
+sudo chmod -R 755 "$BACKEND_DEPLOY_DIR"
+
+echo "✅ Backend code deployed to $BACKEND_DEPLOY_DIR"
+
+# Install dependencies in deployment directory
+echo ""
+echo "Installing backend dependencies in deployment directory..."
+cd "$BACKEND_DEPLOY_DIR"
+npm ci --production
+cd "$WORK_DIR"
+echo "✅ Backend dependencies installed"
+
+# Create logs directory in deployment location
+mkdir -p "$BACKEND_DEPLOY_DIR/logs"
+
+# Create .env file in deployment directory
+echo ""
+echo "Creating .env file in deployment directory..."
+cat > "$BACKEND_DEPLOY_DIR/.env" << EOF
+NODE_ENV=production
+PORT=$PORT
+ENV_NAME=$ENV_NAME
+WEATHER_API_KEY=$WEATHER_API_KEY
+WEATHER_API_URL=$WEATHER_API_URL
+ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
+CLAUDE_MODEL=$CLAUDE_MODEL
+EOF
+chmod 600 "$BACKEND_DEPLOY_DIR/.env"
+echo "✅ Environment file created in deployment directory"
+
 # Deploy frontend static files to environment-specific directory
 FRONTEND_DEPLOY_DIR="/var/www/weatherman/$ENV_NAME"
+echo ""
 echo "Deploying frontend static files..."
 echo "Target: $FRONTEND_DEPLOY_DIR"
 
@@ -71,25 +124,10 @@ echo "Stopping existing Green environment..."
 npx pm2 stop "$PM2_APP_NAME" 2>/dev/null || echo "  (not running)"
 npx pm2 delete "$PM2_APP_NAME" 2>/dev/null || echo "  (not found)"
 
-# Create .env file for backend with secrets from GitHub Actions
-echo ""
-echo "Creating .env file for backend..."
-cat > packages/server/.env << EOF
-NODE_ENV=production
-PORT=$PORT
-ENV_NAME=$ENV_NAME
-WEATHER_API_KEY=$WEATHER_API_KEY
-WEATHER_API_URL=$WEATHER_API_URL
-ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
-CLAUDE_MODEL=$CLAUDE_MODEL
-EOF
-chmod 600 packages/server/.env
-echo "✅ Environment file created"
-
-# Start Green environment with PM2
+# Start Green environment with PM2 from deployment directory
 echo ""
 echo "Starting Green environment..."
-npx pm2 start "$PM2_CONFIG" --env production
+npx pm2 start "$BACKEND_DEPLOY_DIR/$PM2_CONFIG" --env production
 
 # Wait for PM2 to initialize
 sleep 2
