@@ -80,6 +80,10 @@ Cmnd_Alias BACKEND_DEPLOY = \
     /bin/cp pm2.green.config.js /opt/weatherman/green/, \
     /usr/bin/cp pm2.blue.config.js /opt/weatherman/blue/, \
     /usr/bin/cp pm2.green.config.js /opt/weatherman/green/, \
+    /bin/cp package-lock.json /opt/weatherman/blue/, \
+    /bin/cp package-lock.json /opt/weatherman/green/, \
+    /usr/bin/cp package-lock.json /opt/weatherman/blue/, \
+    /usr/bin/cp package-lock.json /opt/weatherman/green/, \
     /bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
     /bin/chown -R weatherman\:weatherman /opt/weatherman/green, \
     /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
