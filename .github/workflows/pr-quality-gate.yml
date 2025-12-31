@@ -93,6 +93,12 @@ jobs:
             COMMIT_SHA=$(echo "$line" | cut -d' ' -f1)
             COMMIT_MSG=$(echo "$line" | cut -d' ' -f2-)
 
+            # Skip merge commits (e.g., "Merge branch 'main' into feature")
+            if [[ "$COMMIT_MSG" =~ ^Merge\ ]]; then
+              echo "::notice::Skipping merge commit $COMMIT_SHA: $COMMIT_MSG"
+              continue
+            fi
+
             # Conventional commit format: type(scope?): description
             # Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert, security
             if [[ ! "$COMMIT_MSG" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert|security)(\(.+\))?\!?:\ .+ ]]; then
