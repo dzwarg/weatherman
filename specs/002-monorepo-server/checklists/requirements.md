@@ -83,7 +83,7 @@ All critical user journeys are covered.
 
 ✅ **Measurable outcomes defined**: 8 success criteria provide clear targets for feature completion verification.
 
-✅ **No implementation leakage**: While the spec mentions monorepo structure and server component (necessary architectural concepts), it doesn't prescribe specific tools (e.g., doesn't mandate npm workspaces vs Yarn workspaces, doesn't require Express vs Fastify).
+✅ **No implementation leakage**: While the spec mentions monorepo structure and server component (necessary architectural concepts), it doesn't prescribe specific tools (e.g., doesn't mandate specific workspace implementation, doesn't require Express vs Fastify).
 
 ## Notes
 

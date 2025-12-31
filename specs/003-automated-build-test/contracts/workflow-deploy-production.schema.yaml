@@ -1,0 +1,276 @@
+# GitHub Actions Workflow Contract: Deploy Production
+#
+# Purpose: Deploy to production using blue-green pattern with automatic rollback
+# Trigger: Push to main branch (after PR merge)
+# Runner: Self-hosted (production server)
+# Timeout: 20 minutes (deployment + post-deploy tests)
+
+name: Deploy Production
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.specify/**'
+      - 'specs/**'
+
+# Only one deployment at a time (queued, not cancelled)
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+  BLUE_PORT: '3001'
+  GREEN_PORT: '3002'
+  DEPLOYMENT_TIMEOUT: '900'  # 15 minutes
+
+jobs:
+  # Job 1: Determine current active environment
+  detect-environment:
+    name: Detect Active Environment
+    runs-on: [self-hosted, production]
+    timeout-minutes: 5
+    outputs:
+      active_env: ${{ steps.detect.outputs.active }}
+      inactive_env: ${{ steps.detect.outputs.inactive }}
+      active_port: ${{ steps.detect.outputs.active_port }}
+      inactive_port: ${{ steps.detect.outputs.inactive_port }}
+    steps:
+      - name: Check current traffic routing
+        id: detect
+        run: |
+          # Read nginx upstream configuration
+          ACTIVE=$(grep -oP 'server localhost:\K\d+' /etc/nginx/sites-enabled/weatherman | head -1)
+
+          if [ "$ACTIVE" == "3001" ]; then
+            echo "active=blue" >> $GITHUB_OUTPUT
+            echo "inactive=green" >> $GITHUB_OUTPUT
+            echo "active_port=3001" >> $GITHUB_OUTPUT
+            echo "inactive_port=3002" >> $GITHUB_OUTPUT
+          else
+            echo "active=green" >> $GITHUB_OUTPUT
+            echo "inactive=blue" >> $GITHUB_OUTPUT
+            echo "active_port=3002" >> $GITHUB_OUTPUT
+            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Active environment: $(grep active= $GITHUB_OUTPUT)"
+
+  # Job 2: Deploy to inactive environment (Green if Blue is active, vice versa)
+  deploy-inactive:
+    name: Deploy to Inactive Environment
+    runs-on: [self-hosted, production]
+    timeout-minutes: 10
+    needs: [detect-environment]
+    environment:
+      name: production
+      url: https://weatherman.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --omit=dev
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Stop existing inactive environment
+        run: |
+          pm2 delete weatherman-${{ needs.detect-environment.outputs.inactive_env }} || true
+          pm2 save --force
+
+      - name: Start inactive environment with PM2
+        run: |
+          export PORT=${{ needs.detect-environment.outputs.inactive_port }}
+          pm2 start pm2.${{ needs.detect-environment.outputs.inactive_env }}.config.js
+          pm2 save --force
+
+      - name: Wait for health check
+        timeout-minutes: 2
+        run: |
+          timeout 120s bash -c 'until curl -f http://localhost:${{ needs.detect-environment.outputs.inactive_port }}/health; do sleep 1; done'
+          echo "✅ Inactive environment healthy"
+
+      - name: Save deployment state
+        run: |
+          echo '{
+            "environment_id": "${{ needs.detect-environment.outputs.inactive_env }}",
+            "deployed_commit_sha": "${{ github.sha }}",
+            "deployed_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+            "pm2_process_id": "weatherman-${{ needs.detect-environment.outputs.inactive_env }}",
+            "port": ${{ needs.detect-environment.outputs.inactive_port }},
+            "status": "deploying"
+          }' > /var/lib/weatherman/state/${{ needs.detect-environment.outputs.inactive_env }}.json
+
+  # Job 3: Run post-deployment validation tests
+  post-deployment-tests:
+    name: Post-Deployment Validation
+    runs-on: [self-hosted, production]
+    timeout-minutes: 15
+    needs: [detect-environment, deploy-inactive]
+    outputs:
+      tests_passed: ${{ steps.tests.outputs.passed }}
+      performance_ok: ${{ steps.performance.outputs.ok }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Run smoke tests
+        id: smoke
+        timeout-minutes: 1
+        run: |
+          bash scripts/testing/smoke-tests.sh http://localhost:${{ needs.detect-environment.outputs.inactive_port }}
+
+      - name: Run integration tests
+        timeout-minutes: 5
+        run: |
+          export BASE_URL=http://localhost:${{ needs.detect-environment.outputs.inactive_port }}
+          npm run test:integration --workspace=packages/backend
+          npm run test:e2e --workspace=packages/frontend
+
+      - name: Capture performance baseline (active environment)
+        run: |
+          bash scripts/testing/performance-baseline.sh \
+            http://localhost:${{ needs.detect-environment.outputs.active_port }} \
+            > /tmp/active-perf.json
+
+      - name: Capture performance metrics (inactive environment)
+        run: |
+          bash scripts/testing/performance-baseline.sh \
+            http://localhost:${{ needs.detect-environment.outputs.inactive_port }} \
+            > /tmp/inactive-perf.json
+
+      - name: Compare performance (20% threshold)
+        id: performance
+        run: |
+          bash scripts/testing/compare-performance.sh \
+            /tmp/active-perf.json \
+            /tmp/inactive-perf.json
+          echo "ok=true" >> $GITHUB_OUTPUT
+
+      - name: Mark tests as passed
+        id: tests
+        run: echo "passed=true" >> $GITHUB_OUTPUT
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post-deployment-tests-${{ github.run_number }}
+          path: |
+            /tmp/active-perf.json
+            /tmp/inactive-perf.json
+          retention-days: 90
+
+  # Job 4: Switch traffic to new environment (Blue→Green or Green→Blue)
+  switch-traffic:
+    name: Switch Traffic
+    runs-on: [self-hosted, production]
+    timeout-minutes: 5
+    needs: [detect-environment, post-deployment-tests]
+    if: needs.post-deployment-tests.outputs.tests_passed == 'true' && needs.post-deployment-tests.outputs.performance_ok == 'true'
+    steps:
+      - name: Update nginx upstream
+        run: |
+          sudo bash scripts/deployment/switch-traffic.sh ${{ needs.detect-environment.outputs.inactive_port }}
+
+      - name: Reload nginx
+        run: sudo nginx -t && sudo systemctl reload nginx
+
+      - name: Verify traffic switch
+        run: |
+          sleep 5
+          ACTIVE_PORT=$(curl -s http://localhost/api/info | jq -r '.port')
+          if [ "$ACTIVE_PORT" != "${{ needs.detect-environment.outputs.inactive_port }}" ]; then
+            echo "❌ Traffic switch failed"
+            exit 1
+          fi
+          echo "✅ Traffic successfully switched to ${{ needs.detect-environment.outputs.inactive_env }}"
+
+      - name: Update deployment state
+        run: |
+          jq '.status = "active" | .traffic_routing_state = "active"' \
+            /var/lib/weatherman/state/${{ needs.detect-environment.outputs.inactive_env }}.json \
+            > /tmp/state.json
+          mv /tmp/state.json /var/lib/weatherman/state/${{ needs.detect-environment.outputs.inactive_env }}.json
+
+          jq '.status = "inactive" | .traffic_routing_state = "inactive"' \
+            /var/lib/weatherman/state/${{ needs.detect-environment.outputs.active_env }}.json \
+            > /tmp/state.json
+          mv /tmp/state.json /var/lib/weatherman/state/${{ needs.detect-environment.outputs.active_env }}.json
+
+      - name: Create deployment record
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment?.id || 0,
+              state: 'success',
+              description: 'Deployed to ${{ needs.detect-environment.outputs.inactive_env }} and switched traffic',
+              environment_url: 'https://weatherman.example.com'
+            });
+
+  # Job 5: Rollback on failure
+  rollback:
+    name: Rollback on Failure
+    runs-on: [self-hosted, production]
+    timeout-minutes: 5
+    needs: [detect-environment, deploy-inactive, post-deployment-tests]
+    if: failure() && needs.deploy-inactive.result == 'success'
+    steps:
+      - name: Stop failed inactive environment
+        run: |
+          pm2 delete weatherman-${{ needs.detect-environment.outputs.inactive_env }} || true
+          pm2 save --force
+
+      - name: Update deployment state (mark as failed)
+        run: |
+          jq '.status = "failed"' \
+            /var/lib/weatherman/state/${{ needs.detect-environment.outputs.inactive_env }}.json \
+            > /tmp/state.json
+          mv /tmp/state.json /var/lib/weatherman/state/${{ needs.detect-environment.outputs.inactive_env }}.json
+
+      - name: Notify failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment?.id || 0,
+              state: 'failure',
+              description: 'Deployment to ${{ needs.detect-environment.outputs.inactive_env }} failed, traffic remains on ${{ needs.detect-environment.outputs.active_env }}',
+            });
+
+            core.setFailed('❌ Deployment failed, rolled back. Traffic remains on ${{ needs.detect-environment.outputs.active_env }}');
+
+# Deployment Flow:
+# 1. Detect active environment (Blue or Green)
+# 2. Deploy to inactive environment
+# 3. Run post-deployment tests (smoke, integration, performance)
+# 4. If tests pass: Switch traffic to inactive (making it active)
+# 5. If tests fail: Rollback (stop inactive, keep traffic on active)
+
+# Success Criteria:
+# - New code deployed to inactive environment
+# - Health check passing
+# - All post-deployment tests pass
+# - Performance within 20% of active environment
+# - Traffic successfully switched
+# - Zero downtime (active environment serves throughout)

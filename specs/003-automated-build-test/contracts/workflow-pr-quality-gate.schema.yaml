@@ -1,0 +1,178 @@
+# GitHub Actions Workflow Contract: PR Quality Gate
+#
+# Purpose: Enforce quality checks before allowing PR merge to main
+# Trigger: Pull request opened/updated targeting main branch
+# Runner: GitHub-hosted (ubuntu-latest)
+# Timeout: 10 minutes
+
+name: PR Quality Gate
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  # Job 1: Validate branch naming convention
+  validate-branch:
+    name: Validate Branch Name
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check branch name format
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if [[ ! "$BRANCH" =~ ^spec/[0-9]+/task/[0-9]+-[a-z0-9-]+$ ]]; then
+            echo "❌ Invalid branch name: $BRANCH"
+            echo "Expected format: spec/<number>/task/<number>-description"
+            echo "Example: spec/003/task/001-github-actions-ci"
+            exit 1
+          fi
+          echo "✅ Branch name valid: $BRANCH"
+
+  # Job 2: Check deployment status (block merge during active deployment)
+  check-deployment:
+    name: Check Deployment Status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check for active deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployments = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              environment: 'production',
+              per_page: 1
+            });
+
+            if (deployments.data.length > 0) {
+              const latest = deployments.data[0];
+              const statuses = await github.rest.repos.listDeploymentStatuses({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: latest.id,
+                per_page: 1
+              });
+
+              if (statuses.data[0]?.state === 'in_progress' || statuses.data[0]?.state === 'queued') {
+                core.setFailed('❌ Deployment in progress. Wait for completion before merging.');
+                return;
+              }
+            }
+
+            console.log('✅ No active deployment, safe to merge');
+
+  # Job 3: Run all quality checks (reuse CI workflow)
+  quality-checks:
+    name: Run Quality Checks
+    uses: ./.github/workflows/ci.yml
+    # This calls the CI workflow defined in workflow-ci.schema.yaml
+
+  # Job 4: Validate conventional commit format
+  validate-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for commit validation
+
+      - name: Check conventional commit format
+        run: |
+          COMMITS=$(git log --format=%s origin/main..HEAD)
+          PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"
+
+          while IFS= read -r commit; do
+            if [[ ! "$commit" =~ $PATTERN ]]; then
+              echo "❌ Invalid commit message: $commit"
+              echo "Expected format: type(scope): subject"
+              echo "Valid types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+              exit 1
+            fi
+          done <<< "$COMMITS"
+
+          echo "✅ All commits follow conventional format"
+
+      - name: Verify GPG signatures
+        run: |
+          UNSIGNED=$(git log --show-signature origin/main..HEAD | grep -c "No signature" || true)
+          if [ "$UNSIGNED" -gt 0 ]; then
+            echo "❌ Found $UNSIGNED unsigned commits"
+            echo "All commits must be GPG signed per constitution"
+            exit 1
+          fi
+          echo "✅ All commits are GPG signed"
+
+  # Job 5: Aggregate coverage across packages
+  aggregate-coverage:
+    name: Aggregate Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [quality-checks]
+    steps:
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage-${{ github.run_number }}
+          path: coverage/frontend/
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage-${{ github.run_number }}
+          path: coverage/backend/
+
+      - name: Calculate aggregate coverage
+        run: |
+          FRONTEND_COV=$(jq '.total.lines.pct' coverage/frontend/coverage-summary.json)
+          BACKEND_COV=$(jq '.total.lines.pct' coverage/backend/coverage-summary.json)
+          AGGREGATE=$(echo "scale=2; ($FRONTEND_COV + $BACKEND_COV) / 2" | bc)
+
+          echo "Frontend Coverage: ${FRONTEND_COV}%"
+          echo "Backend Coverage: ${BACKEND_COV}%"
+          echo "Aggregate Coverage: ${AGGREGATE}%"
+
+          if (( $(echo "$AGGREGATE < 80.0" | bc -l) )); then
+            echo "❌ Aggregate coverage ${AGGREGATE}% is below 80% threshold"
+            exit 1
+          fi
+
+          echo "✅ Aggregate coverage meets 80% threshold"
+
+      - name: Post coverage comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const frontendCov = JSON.parse(fs.readFileSync('coverage/frontend/coverage-summary.json', 'utf8')).total.lines.pct;
+            const backendCov = JSON.parse(fs.readFileSync('coverage/backend/coverage-summary.json', 'utf8')).total.lines.pct;
+            const aggregate = ((frontendCov + backendCov) / 2).toFixed(2);
+
+            const body = `## Code Coverage Report\n\n| Package | Coverage |\n|---------|----------|\n| Frontend | ${frontendCov}% |\n| Backend | ${backendCov}% |\n| **Aggregate** | **${aggregate}%** |\n\n${aggregate >= 80 ? '✅' : '❌'} Threshold: 80%`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+# Required Status Checks (must all pass for PR merge):
+# - validate-branch: ✅
+# - check-deployment: ✅
+# - quality-checks: ✅ (all CI jobs)
+# - validate-commits: ✅
+# - aggregate-coverage: ✅
+
+# Branch Protection Rules (configured in GitHub repo settings):
+# - Require status checks to pass before merging
+# - Require branches to be up to date before merging
+# - Require linear history (no merge commits)
+# - Require conversation resolution before merging

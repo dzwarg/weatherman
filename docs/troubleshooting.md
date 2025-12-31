@@ -235,7 +235,7 @@ Or manually:
 3. **Restart dev server**:
    ```bash
    # Environment variables only loaded on start
-   yarn dev
+   npm run dev
    ```
 
 ### API Request Timeout
@@ -312,9 +312,9 @@ Or manually:
 
 2. **Run Lighthouse audit**:
    ```bash
-   yarn build
-   yarn preview
-   yarn lighthouse
+   npm run build
+   npm run preview
+   npm run lighthouse
    ```
    - Should score 100/100 on PWA category
 
@@ -415,7 +415,7 @@ Or manually:
 
 1. **Check bundle size**:
    ```bash
-   yarn build
+   npm run build
    # Should be < 200KB gzipped
    ```
 

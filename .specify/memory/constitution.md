@@ -49,16 +49,16 @@ Every code change requires specification and task tracking:
 All changes must pass quality gates before commit:
 - Unit tests must pass (0 failures, 80%+ coverage)
 - ESLint must pass (0 errors)
-- Build must succeed (`yarn build`)
+- Build must succeed (`npm run build`)
 - Manual testing completed for voice and offline features
 - No `console.log` in production code
 - No unused variables or imports
 
 **Quality Commands:**
 ```bash
-yarn test          # Must pass
-yarn lint          # Must pass
-yarn build         # Must succeed
+npm test          # Must pass
+npm run lint      # Must pass
+npm run build     # Must succeed
 ```
 
 ### V. Signed & Conventional Commits (NON-NEGOTIABLE)
@@ -107,7 +107,7 @@ User privacy and security are paramount:
 - **Build Tool**: Vite 5+ with PWA plugin
 - **Design System**: Racine (Seeds by Sprout Social)
   - URL: https://seeds.sproutsocial.com/
-- **Package Manager**: Yarn (not npm)
+- **Package Manager**: npm 10+ (included with Node.js 22+)
 - **Node Version**: 22+
 - **Language**: JavaScript with HTML5 and CSS3
 - **Voice API**: Web Speech API (native browser)
@@ -137,9 +137,9 @@ User privacy and security are paramount:
 4. Create branch: `git checkout -b spec/X/task/Y-description`
 
 ### Pre-Commit Checklist
-- [ ] Unit tests pass (`yarn test`)
-- [ ] Linting passes (`yarn lint`)
-- [ ] Build succeeds (`yarn build`)
+- [ ] Unit tests pass (`npm test`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] Build succeeds (`npm run build`)
 - [ ] Manual voice testing completed
 - [ ] Offline functionality verified
 - [ ] Documentation updated (if needed)
@@ -147,7 +147,7 @@ User privacy and security are paramount:
 ### Commit Process
 ```bash
 git add [specific files]
-yarn test && yarn lint && yarn build  # Verify quality
+npm test && npm run lint && npm run build  # Verify quality
 git commit -m "type(scope): subject"   # GPG signed
 git log --show-signature -1            # Verify signature
 ```

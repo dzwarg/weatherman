@@ -124,7 +124,7 @@ Build a Progressive Web App (PWA) that helps children (ages 4-10) determine appr
 - ✅ **PASS**: React 22+ (mandatory)
 - ✅ **PASS**: Vite 5+ with PWA plugin (mandatory)
 - ✅ **PASS**: Racine/Seeds Design System (mandatory)
-- ✅ **PASS**: Yarn package manager (mandatory)
+- ✅ **PASS**: npm package manager (mandatory)
 - ✅ **PASS**: Node 22+ (mandatory)
 - ✅ **PASS**: JavaScript with HTML5 and CSS3 (mandatory)
 - ✅ **PASS**: Web Speech API native browser (mandatory)

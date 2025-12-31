@@ -134,7 +134,7 @@ Edit `packages/frontend/package.json`:
 - Change `"name"` to `"@weatherman/frontend"`
 - Keep all existing dependencies and devDependencies
 - Keep all existing scripts
-- Remove `"yarn"` from `engines` (npm only in monorepo)
+- Remove any package manager specifications from `engines` except npm (npm only in monorepo)
 
 ### Step 5: Create Server Package
 

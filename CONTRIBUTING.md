@@ -26,7 +26,7 @@ Thank you for your interest in contributing to Weatherman! This document provide
    ```
 4. **Install dependencies**:
    ```bash
-   yarn install
+   npm install
    ```
 5. **Configure environment**:
    ```bash
@@ -49,9 +49,9 @@ Thank you for your interest in contributing to Weatherman! This document provide
 
 3. Test your changes:
    ```bash
-   yarn test
-   yarn lint
-   yarn build
+   npm test
+   npm run lint
+   npm run build
    ```
 
 ### GPG Signing Requirements
@@ -201,9 +201,9 @@ Brief description of changes
 Closes #123
 
 ## Testing
-- [ ] All tests pass (`yarn test`)
-- [ ] Linting passes (`yarn lint`)
-- [ ] Build succeeds (`yarn build`)
+- [ ] All tests pass (`npm test`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] Build succeeds (`npm run build`)
 - [ ] Manual testing completed
 
 ## Screenshots (if applicable)
@@ -289,16 +289,16 @@ export function ProfileCard({ profile, isSelected, onSelect }) {
 
 ```bash
 # Run all tests
-yarn test
+npm test
 
 # Watch mode
-yarn test:watch
+npm test:watch
 
 # With coverage
-yarn test:coverage
+npm test:coverage
 
 # Specific file
-yarn test src/services/voiceService.test.js
+npm test src/services/voiceService.test.js
 ```
 
 ### Writing Tests

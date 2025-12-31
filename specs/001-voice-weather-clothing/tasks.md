@@ -218,7 +218,7 @@ Tasks are organized into dependency-driven phases. Each phase contains tasks tha
 ### Performance Optimization
 
 - [x] [SPEC-001-073] [P1] [INFRA] Run Lighthouse audit and optimize for 100/100 PWA score
-- [x] [SPEC-001-074] [P1] [INFRA] Verify bundle size < 300KB with `yarn build --analyze`
+- [x] [SPEC-001-074] [P1] [INFRA] Verify bundle size < 300KB with `npm run build -- --analyze`
 - [x] [SPEC-001-075] [P2] [INFRA] Add code splitting for profile and settings pages with React.lazy in `src/App.jsx`
 - [x] [SPEC-001-076] [P2] [INFRA] Optimize Seeds component imports to reduce bundle size (tree-shaking verification)
 - [x] [SPEC-001-077] [P3] [INFRA] Add performance monitoring with Web Vitals tracking in `src/main.jsx`
@@ -293,7 +293,7 @@ Tests are **OPTIONAL** for this implementation unless explicitly requested. Howe
 ### Environment Setup
 
 Before starting implementation:
-1. Ensure Node 22+ and Yarn installed
+1. Ensure Node 22+ and npm 10+ installed
 2. Obtain OpenWeatherMap API key (paid subscription required for One Call API 3.0)
 3. Configure `.env` file with `VITE_OPENWEATHER_API_KEY`
 4. Set up GPG signing for commits
