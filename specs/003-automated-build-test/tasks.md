@@ -119,7 +119,7 @@
 - [X] T041 [US3] Initialize Blue environment state file at `/var/lib/weatherman/state/blue.json` as active
 - [X] T042 [US3] Initialize Green environment state file at `/var/lib/weatherman/state/green.json` as inactive
 - [X] T043 [US3] Add deployment state update logic in deploy-inactive job to track environment status
-- [ ] T044 [US3] Test deployment workflow by merging to main and verifying Blue-Green switch (manual verification required)
+- [X] T044 [US3] Test deployment workflow by merging to main and verifying Blue-Green switch (manual verification required)
 
 **Checkpoint**: At this point, merges to main automatically deploy with zero downtime
 
@@ -133,20 +133,20 @@
 
 ### Implementation for User Story 4
 
-- [ ] T045 [P] [US4] Create smoke test script at `scripts/testing/smoke-tests.sh` for 30-second health checks
-- [ ] T046 [P] [US4] Create performance baseline script at `scripts/testing/performance-baseline.sh` to capture metrics
-- [ ] T047 [P] [US4] Create performance comparison script at `scripts/testing/compare-performance.sh` with 20% threshold check
-- [ ] T048 [US4] Create post-deployment test orchestration script at `scripts/testing/run-post-deployment-tests.sh`
-- [ ] T049 [US4] Add post-deployment-tests job to deploy workflow that runs smoke, integration, and performance tests
-- [ ] T050 [US4] Configure 15-minute timeout for post-deployment-tests job
-- [ ] T051 [P] [US4] Create frontend post-deployment smoke tests at `packages/frontend/tests/post-deployment/smoke.test.js`
-- [ ] T052 [P] [US4] Create backend post-deployment integration tests at `packages/backend/tests/post-deployment/integration.test.js`
-- [ ] T053 [US4] Add switch-traffic job to deploy workflow that runs only if tests pass
-- [ ] T054 [US4] Add nginx reload step in switch-traffic job with verification
-- [ ] T055 [US4] Update deployment state files to mark environments active/inactive after traffic switch
-- [ ] T056 [US4] Add rollback job to deploy workflow that runs on failure, stops Green, and updates state
-- [ ] T057 [US4] Add GitHub deployment status creation in switch-traffic and rollback jobs
-- [ ] T058 [US4] Test post-deployment validation by deploying with performance regression and verifying rollback
+- [X] T045 [P] [US4] Create smoke test script at `scripts/testing/smoke-tests.sh` for 30-second health checks
+- [X] T046 [P] [US4] Create performance baseline script at `scripts/testing/performance-baseline.sh` to capture metrics
+- [X] T047 [P] [US4] Create performance comparison script at `scripts/testing/compare-performance.sh` with 20% threshold check
+- [X] T048 [US4] Create post-deployment test orchestration script at `scripts/testing/run-post-deployment-tests.sh`
+- [X] T049 [US4] Add post-deployment-tests job to deploy workflow that runs smoke, integration, and performance tests
+- [X] T050 [US4] Configure 15-minute timeout for post-deployment-tests job
+- [X] T051 [P] [US4] Create frontend post-deployment smoke tests at `packages/frontend/tests/post-deployment/smoke.test.js`
+- [X] T052 [P] [US4] Create backend post-deployment integration tests at `packages/server/tests/post-deployment/integration.test.js`
+- [X] T053 [US4] Add switch-traffic job to deploy workflow that runs only if tests pass
+- [X] T054 [US4] Add nginx reload step in switch-traffic job with verification
+- [X] T055 [US4] Update deployment state files to mark environments active/inactive after traffic switch
+- [X] T056 [US4] Add rollback job to deploy workflow that runs on failure, stops Green, and updates state
+- [X] T057 [US4] Add GitHub deployment status creation in switch-traffic and rollback jobs
+- [X] T058 [US4] Test post-deployment validation by deploying with performance regression and verifying rollback
 
 **Checkpoint**: All user stories should now be independently functional - full CI/CD pipeline complete
 
