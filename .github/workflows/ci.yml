@@ -17,6 +17,7 @@ on:
       - '.gitignore'
       - '.specify/**'
       - 'specs/**'
+  workflow_call:  # Allow this workflow to be reused by other workflows
 
 # Only one CI run per branch at a time, cancel in-progress runs
 concurrency:
