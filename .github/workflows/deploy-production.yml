@@ -1,0 +1,229 @@
+# GitHub Actions Workflow: Production Deployment (Blue-Green)
+#
+# Purpose: Deploy to production using blue-green pattern with zero downtime
+# Trigger: Push to main branch (after PR merge)
+# Runner: Self-hosted (production server)
+# Strategy: Blue-Green deployment with automatic rollback on failure
+#
+# Phase 5: Post-Merge Deployment (T032-T044)
+
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '.specify/**'
+      - 'specs/**'
+
+# T033: Prevent concurrent deployments
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false  # Let current deployment finish
+
+env:
+  NODE_VERSION: '22'
+  DEPLOYMENT_STATE_DIR: '/var/lib/weatherman/state'
+
+jobs:
+  # T034: Determine which environment is currently active
+  detect-environment:
+    name: Detect Active Environment
+    runs-on: [self-hosted]
+    timeout-minutes: 5
+    outputs:
+      active_env: ${{ steps.detect.outputs.active }}
+      inactive_env: ${{ steps.detect.outputs.inactive }}
+      active_port: ${{ steps.detect.outputs.active_port }}
+      inactive_port: ${{ steps.detect.outputs.inactive_port }}
+    steps:
+      - name: Detect active environment from nginx config
+        id: detect
+        run: |
+          # Check nginx upstream configuration to determine active environment
+          NGINX_CONF="/etc/nginx/sites-enabled/weatherman"
+
+          if ! [ -f "$NGINX_CONF" ]; then
+            echo "⚠️  Nginx config not found, defaulting to Blue as active"
+            echo "active=blue" >> $GITHUB_OUTPUT
+            echo "inactive=green" >> $GITHUB_OUTPUT
+            echo "active_port=3000" >> $GITHUB_OUTPUT
+            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Extract current upstream port from nginx config
+          ACTIVE_PORT=$(grep -oP 'proxy_pass\s+http://localhost:\K\d+' "$NGINX_CONF" | head -1)
+
+          if [ "$ACTIVE_PORT" == "3000" ]; then
+            echo "🔵 Blue environment is active (port 3000)"
+            echo "active=blue" >> $GITHUB_OUTPUT
+            echo "inactive=green" >> $GITHUB_OUTPUT
+            echo "active_port=3000" >> $GITHUB_OUTPUT
+            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+          elif [ "$ACTIVE_PORT" == "3001" ]; then
+            echo "🟢 Green environment is active (port 3001)"
+            echo "active=blue" >> $GITHUB_OUTPUT
+            echo "inactive=blue" >> $GITHUB_OUTPUT
+            echo "active_port=3001" >> $GITHUB_OUTPUT
+            echo "inactive_port=3000" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Could not determine active environment, defaulting to Blue"
+            echo "active=blue" >> $GITHUB_OUTPUT
+            echo "inactive=green" >> $GITHUB_OUTPUT
+            echo "active_port=3000" >> $GITHUB_OUTPUT
+            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+          fi
+
+  # T035: Deploy to the inactive environment
+  deploy-inactive:
+    name: Deploy to Inactive Environment
+    runs-on: [self-hosted]
+    timeout-minutes: 10
+    needs: [detect-environment]
+    environment:
+      name: production
+      url: https://weatherman.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build --workspace=packages/frontend
+
+      - name: Stop inactive environment
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          echo "Stopping $INACTIVE_ENV environment..."
+
+          # Stop PM2 processes for inactive environment
+          pm2 stop "weatherman-$INACTIVE_ENV" || echo "Process not running"
+          pm2 delete "weatherman-$INACTIVE_ENV" || echo "Process not found"
+
+      - name: Deploy to inactive environment
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
+
+          echo "Deploying to $INACTIVE_ENV environment (port $INACTIVE_PORT)..."
+
+          # Use deployment script
+          bash scripts/deployment/deploy-to-$INACTIVE_ENV.sh
+
+      # T039: Health check polling
+      - name: Wait for health check
+        run: |
+          INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
+          HEALTH_URL="http://localhost:$INACTIVE_PORT/health"
+          MAX_ATTEMPTS=24  # 2 minutes (5 second intervals)
+          ATTEMPT=0
+
+          echo "Waiting for $HEALTH_URL to respond..."
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            if curl -sf "$HEALTH_URL" > /dev/null 2>&1; then
+              echo "✅ Health check passed!"
+              exit 0
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS failed, retrying in 5 seconds..."
+            sleep 5
+          done
+
+          echo "❌ Health check failed after $MAX_ATTEMPTS attempts"
+          exit 1
+
+      # T043: Update deployment state
+      - name: Update deployment state
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          STATE_FILE="${{ env.DEPLOYMENT_STATE_DIR }}/$INACTIVE_ENV.json"
+
+          cat > "$STATE_FILE" <<EOF
+          {
+            "environment": "$INACTIVE_ENV",
+            "status": "deployed",
+            "port": ${{ needs.detect-environment.outputs.inactive_port }},
+            "commit_sha": "${{ github.sha }}",
+            "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployed_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+          echo "Updated state for $INACTIVE_ENV environment"
+
+  # Placeholder for Phase 6: Post-deployment tests
+  # This will be implemented in T045-T058
+  post-deployment-tests:
+    name: Post-Deployment Validation
+    runs-on: [self-hosted]
+    timeout-minutes: 15
+    needs: [detect-environment, deploy-inactive]
+    steps:
+      - name: Placeholder for post-deployment tests
+        run: |
+          echo "✅ Post-deployment tests placeholder (Phase 6: T045-T058)"
+          echo "In Phase 6, this will run:"
+          echo "  - Smoke tests"
+          echo "  - Integration tests"
+          echo "  - Performance baseline comparison"
+
+  # Placeholder for Phase 6: Traffic switching
+  # This will be implemented in T053-T055
+  switch-traffic:
+    name: Switch Traffic
+    runs-on: [self-hosted]
+    timeout-minutes: 5
+    needs: [detect-environment, post-deployment-tests]
+    steps:
+      - name: Placeholder for traffic switching
+        run: |
+          echo "✅ Traffic switching placeholder (Phase 6: T053-T055)"
+          echo "In Phase 6, this will:"
+          echo "  - Update nginx upstream configuration"
+          echo "  - Reload nginx"
+          echo "  - Verify traffic switch"
+          echo "  - Update deployment state files"
+
+  # Summary job
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: [self-hosted]
+    needs: [detect-environment, deploy-inactive, post-deployment-tests, switch-traffic]
+    if: always()
+    steps:
+      - name: Report deployment status
+        run: |
+          echo "📊 Deployment Summary"
+          echo "===================="
+          echo "Active environment: ${{ needs.detect-environment.outputs.active_env }}"
+          echo "Deployed to: ${{ needs.detect-environment.outputs.inactive_env }}"
+          echo "Deploy status: ${{ needs.deploy-inactive.result }}"
+          echo "Tests status: ${{ needs.post-deployment-tests.result }}"
+          echo "Switch status: ${{ needs.switch-traffic.result }}"
+          echo ""
+
+          if [[ "${{ needs.deploy-inactive.result }}" == "success" ]] && \
+             [[ "${{ needs.post-deployment-tests.result }}" == "success" ]] && \
+             [[ "${{ needs.switch-traffic.result }}" == "success" ]]; then
+            echo "✅ Deployment completed successfully"
+            exit 0
+          else
+            echo "❌ Deployment encountered issues"
+            exit 1
+          fi

@@ -1,0 +1,58 @@
+# Sudoers configuration for Weatherman deployment automation
+#
+# Installation:
+#   sudo visudo -c -f /Users/mm39178/repos/weatherman/scripts/deployment/weatherman-sudoers
+#   sudo cp /Users/mm39178/repos/weatherman/scripts/deployment/weatherman-sudoers /etc/sudoers.d/weatherman
+#   sudo chmod 440 /etc/sudoers.d/weatherman
+#
+# This file grants the 'weatherman' user/role minimum privileges needed
+# for blue-green deployment automation scripts.
+#
+# Security: NOPASSWD is used for automation; ensure the weatherman user
+# has restricted access and is only used by GitHub Actions runner.
+
+# User/Group that will execute deployment scripts
+# Replace 'weatherman' with actual username or use %group for groups
+User_Alias DEPLOY_USERS = weatherman
+
+# Nginx configuration management
+Cmnd_Alias NGINX_CONFIG = \
+    /bin/cp /etc/nginx/sites-enabled/weatherman /etc/nginx/sites-enabled/weatherman.backup, \
+    /bin/cp /etc/nginx/sites-enabled/weatherman.backup /etc/nginx/sites-enabled/weatherman, \
+    /bin/sed -i s* /etc/nginx/sites-enabled/weatherman, \
+    /usr/sbin/nginx -t, \
+    /bin/systemctl reload nginx, \
+    /usr/bin/systemctl reload nginx
+
+# Deployment state directory management
+Cmnd_Alias STATE_MGMT = \
+    /bin/mkdir -p /var/lib/weatherman/state/, \
+    /bin/mkdir -p /var/lib/weatherman/state, \
+    /bin/chmod 755 /var/lib/weatherman/state/, \
+    /bin/chmod 755 /var/lib/weatherman/state, \
+    /bin/chmod 644 /var/lib/weatherman/state/*.json, \
+    /usr/bin/tee /var/lib/weatherman/state/blue.json, \
+    /usr/bin/tee /var/lib/weatherman/state/green.json
+
+# Frontend deployment directory management (explicit paths only - no wildcards)
+Cmnd_Alias FRONTEND_DEPLOY = \
+    /bin/mkdir -p /var/www/weatherman/blue, \
+    /bin/mkdir -p /var/www/weatherman/green, \
+    /bin/rm -rf /var/www/weatherman/blue, \
+    /bin/rm -rf /var/www/weatherman/green, \
+    /bin/cp -r packages/frontend/dist /var/www/weatherman/blue, \
+    /bin/cp -r packages/frontend/dist /var/www/weatherman/green, \
+    /usr/bin/chown -R www-data\:www-data /var/www/weatherman/blue, \
+    /usr/bin/chown -R www-data\:www-data /var/www/weatherman/green, \
+    /bin/chown -R www-data\:www-data /var/www/weatherman/blue, \
+    /bin/chown -R www-data\:www-data /var/www/weatherman/green, \
+    /bin/chmod -R 755 /var/www/weatherman/blue, \
+    /bin/chmod -R 755 /var/www/weatherman/green, \
+    /usr/bin/chmod -R 755 /var/www/weatherman/blue, \
+    /usr/bin/chmod -R 755 /var/www/weatherman/green
+
+# Allow deployment users to execute these commands without password
+DEPLOY_USERS ALL=(root) NOPASSWD: NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY
+
+# Optional: Add logging for audit trail
+Defaults:DEPLOY_USERS log_output

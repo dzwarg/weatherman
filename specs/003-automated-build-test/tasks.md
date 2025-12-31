@@ -107,18 +107,18 @@
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Create deployment workflow file at `.github/workflows/deploy-production.yml` with push to main trigger
-- [ ] T033 [US3] Configure concurrency group "production-deployment" to prevent concurrent deployments
-- [ ] T034 [US3] Add detect-environment job that checks nginx config to determine active Blue or Green
-- [ ] T035 [US3] Add deploy-inactive job that runs on self-hosted runner, stops inactive environment, builds, and starts with PM2
-- [ ] T036 [US3] Create deploy-to-green.sh script at `scripts/deployment/deploy-to-green.sh` for PM2 deployment
-- [ ] T037 [P] [US3] Create switch-traffic.sh script at `scripts/deployment/switch-traffic.sh` for nginx upstream switching
-- [ ] T038 [P] [US3] Create rollback-to-blue.sh script at `scripts/deployment/rollback-to-blue.sh` for emergency rollback
-- [ ] T039 [US3] Add health check polling in deploy-inactive job (wait for /health endpoint with 2-minute timeout)
-- [ ] T040 [US3] Create deployment state directory `/var/lib/weatherman/state/` on production server
-- [ ] T041 [US3] Initialize Blue environment state file at `/var/lib/weatherman/state/blue.json` as active
-- [ ] T042 [US3] Initialize Green environment state file at `/var/lib/weatherman/state/green.json` as inactive
-- [ ] T043 [US3] Add deployment state update logic in deploy-inactive job to track environment status
+- [X] T032 [US3] Create deployment workflow file at `.github/workflows/deploy-production.yml` with push to main trigger
+- [X] T033 [US3] Configure concurrency group "production-deployment" to prevent concurrent deployments
+- [X] T034 [US3] Add detect-environment job that checks nginx config to determine active Blue or Green
+- [X] T035 [US3] Add deploy-inactive job that runs on self-hosted runner, stops inactive environment, builds, and starts with PM2
+- [X] T036 [US3] Create deploy-to-green.sh script at `scripts/deployment/deploy-to-green.sh` for PM2 deployment
+- [X] T037 [P] [US3] Create switch-traffic.sh script at `scripts/deployment/switch-traffic.sh` for nginx upstream switching
+- [X] T038 [P] [US3] Create rollback-to-blue.sh script at `scripts/deployment/rollback-to-blue.sh` for emergency rollback
+- [X] T039 [US3] Add health check polling in deploy-inactive job (wait for /health endpoint with 2-minute timeout)
+- [X] T040 [US3] Create deployment state directory `/var/lib/weatherman/state/` on production server
+- [X] T041 [US3] Initialize Blue environment state file at `/var/lib/weatherman/state/blue.json` as active
+- [X] T042 [US3] Initialize Green environment state file at `/var/lib/weatherman/state/green.json` as inactive
+- [X] T043 [US3] Add deployment state update logic in deploy-inactive job to track environment status
 - [ ] T044 [US3] Test deployment workflow by merging to main and verifying Blue-Green switch (manual verification required)
 
 **Checkpoint**: At this point, merges to main automatically deploy with zero downtime

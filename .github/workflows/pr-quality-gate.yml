@@ -94,11 +94,11 @@ jobs:
             COMMIT_MSG=$(echo "$line" | cut -d' ' -f2-)
 
             # Conventional commit format: type(scope?): description
-            # Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert
-            if [[ ! "$COMMIT_MSG" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?\!?:\ .+ ]]; then
+            # Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert, security
+            if [[ ! "$COMMIT_MSG" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert|security)(\(.+\))?\!?:\ .+ ]]; then
               echo "::error::Commit $COMMIT_SHA has invalid format: $COMMIT_MSG"
               echo "::error::Expected format: type(scope?): description"
-              echo "::error::Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+              echo "::error::Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert, security"
               INVALID_COMMITS=$((INVALID_COMMITS + 1))
             fi
           done <<< "$COMMITS"
