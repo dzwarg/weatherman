@@ -7,7 +7,8 @@ module.exports = {
     env: {
       NODE_ENV: 'production',
       PORT: 3002,
-      ENV_NAME: 'green'
+      ENV_NAME: 'green',
+      WEATHER_API_KEY: process.env.WEATHER_API_KEY
     },
     wait_ready: true,
     listen_timeout: 10000,

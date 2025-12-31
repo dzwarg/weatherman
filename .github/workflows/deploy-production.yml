@@ -137,6 +137,8 @@ jobs:
           pm2 delete "weatherman-$INACTIVE_ENV" || echo "Process not found"
 
       - name: Deploy to inactive environment
+        env:
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
         run: |
           INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
           INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
