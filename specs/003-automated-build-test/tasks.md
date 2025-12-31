@@ -93,7 +93,7 @@
 - [X] T028 [US2] Add aggregate coverage calculation job that downloads artifacts and checks 80% threshold
 - [X] T029 [US2] Add PR comment action that posts coverage summary table to pull request
 - [X] T030 [US2] Configure GitHub branch protection rules for main branch requiring all status checks
-- [ ] T031 [US2] Test PR workflow by creating a pull request and verifying all gates enforce correctly
+- [X] T031 [US2] Test PR workflow by creating a pull request and verifying all gates enforce correctly
 
 **Checkpoint**: At this point, only quality-verified code can reach main branch
 
