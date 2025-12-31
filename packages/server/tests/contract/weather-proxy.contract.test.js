@@ -9,9 +9,13 @@
  * - Required fields are present
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import app from '../../src/app.js';
+import axios from 'axios';
+
+// Mock axios for external API calls
+vi.mock('axios');
 
 describe('Weather Proxy API Contract Tests', () => {
   let server;
@@ -19,6 +23,53 @@ describe('Weather Proxy API Contract Tests', () => {
   beforeAll(() => {
     const port = 3001; // Use different port to avoid conflicts
     server = app.listen(port);
+
+    // Mock axios.get to return mock weather data
+    axios.get = vi.fn((url) => {
+      if (url.includes('/weather')) {
+        // Mock current weather response
+        return Promise.resolve({
+          data: {
+            coord: { lat: 42.3601, lon: -71.0589 },
+            weather: [{ id: 800, main: 'Clear', description: 'clear sky', icon: '01d' }],
+            main: {
+              temp: 72.5,
+              feels_like: 70.2,
+              pressure: 1013,
+              humidity: 45,
+            },
+            wind: { speed: 5.2, deg: 180, gust: 7.1 },
+            clouds: { all: 10 },
+            visibility: 10000,
+            dt: Math.floor(Date.now() / 1000),
+            sys: { sunrise: 1234567890, sunset: 1234598790 },
+          },
+        });
+      } else if (url.includes('/forecast')) {
+        // Mock forecast response
+        const now = Math.floor(Date.now() / 1000);
+        return Promise.resolve({
+          data: {
+            city: { timezone: -14400 },
+            list: Array.from({ length: 40 }, (_, i) => ({
+              dt: now + i * 10800, // 3-hour intervals
+              main: {
+                temp: 70 + Math.random() * 10,
+                feels_like: 68 + Math.random() * 10,
+                pressure: 1010 + Math.random() * 10,
+                humidity: 40 + Math.random() * 20,
+              },
+              weather: [{ id: 800, main: 'Clear', description: 'clear sky', icon: '01d' }],
+              clouds: { all: 10 },
+              wind: { speed: 5 + Math.random() * 3, deg: 180, gust: 7 },
+              visibility: 10000,
+              pop: Math.random() * 0.3,
+            })),
+          },
+        });
+      }
+      return Promise.reject(new Error('Unknown endpoint'));
+    });
   });
 
   afterAll(() => {

@@ -963,7 +963,7 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@eslint/js@9.39.2":
+"@eslint/js@^9.15.0", "@eslint/js@9.39.2":
   version "9.39.2"
   resolved "https://registry.npmjs.org/@eslint/js/-/js-9.39.2.tgz"
   integrity sha512-q1mjIoW1VX4IvSocvM/vbTiveKC4k9eLrajNEuSsmjymSDEbpGddtpfOoN7YGAqBK3NG+uqo8ia4PDTt8buCYA==
@@ -1495,6 +1495,10 @@
     loupe "^3.1.2"
     tinyrainbow "^1.2.0"
 
+"@weatherman/backend@file:/Users/mm39178/repos/weatherman/packages/backend":
+  version "0.1.0"
+  resolved "file:packages/backend"
+
 "@weatherman/frontend@file:/Users/mm39178/repos/weatherman/packages/frontend":
   version "0.1.0"
   resolved "file:packages/frontend"
@@ -1509,6 +1513,7 @@
   dependencies:
     "@anthropic-ai/sdk" "^0.71.2"
     axios "^1.6.5"
+    compression "^1.8.1"
     cors "^2.8.5"
     dotenv "^16.4.0"
     express "^4.18.2"

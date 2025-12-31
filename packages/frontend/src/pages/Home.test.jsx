@@ -92,7 +92,7 @@ describe('Home', () => {
     mockStopListening = vi.fn();
     mockClearQuery = vi.fn();
     mockSpeak = vi.fn().mockResolvedValue();
-    mockFetchWeather = vi.fn().mockResolvedValue();
+    mockFetchWeather = vi.fn().mockResolvedValue(mockWeatherData);
 
     // Mock apiClient
     apiClient.getRecommendations = vi.fn().mockResolvedValue(mockRecommendation);
@@ -127,7 +127,7 @@ describe('Home', () => {
       isOnline: true,
     });
 
-    recommendationService.generateRecommendation.mockReturnValue(mockRecommendation);
+    recommendationService.generateRecommendation.mockResolvedValue(mockRecommendation);
     isQueryInScope.mockReturnValue(true);
     getOutOfScopeMessage.mockReturnValue("Sorry, I can only help with weather and clothing advice.");
   });
@@ -245,6 +245,13 @@ describe('Home', () => {
         parsedIntent: 'clothing_advice',
         recognitionConfidence: 0.9,
       };
+
+      // Set active profile so recommendations can be generated
+      useProfile.mockReturnValue({
+        activeProfile: mockProfiles[0],
+        allProfiles: mockProfiles,
+        selectProfile: mockSelectProfile,
+      });
 
       useVoiceRecognition.mockReturnValue({
         isListening: false,

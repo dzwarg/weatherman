@@ -154,9 +154,9 @@ describe('useVoiceRecognition', () => {
         listeningCallback({ transcript: 'test', confidence: 0.9 });
       });
 
-      // Advance timer
+      // Advance timer past the 15 second delay for wake word restart
       act(() => {
-        vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(15000);
       });
 
       // Note: The callback is stored, so we check if startWakeWordDetection was called
