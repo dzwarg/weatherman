@@ -349,7 +349,7 @@ describe('Home', () => {
 
     it('should handle geolocation errors', async () => {
       const mockGeolocation = {
-        getCurrentPosition: vi.fn((success, error) => {
+        getCurrentPosition: vi.fn((_success, error) => {
           error({ code: 1 });
         }),
       };

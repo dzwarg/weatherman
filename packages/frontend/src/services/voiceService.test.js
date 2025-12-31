@@ -338,10 +338,10 @@ describe('voiceService', () => {
     }, 10000); // Increase timeout to 10 seconds
 
     it('should reject on synthesis error', async () => {
-      let capturedUtterance;
+      let _capturedUtterance;
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
-        capturedUtterance = utterance;
+        _capturedUtterance = utterance;
         // Trigger error immediately
         setTimeout(() => {
           if (utterance.onerror) {
@@ -370,10 +370,10 @@ describe('voiceService', () => {
 
   describe('stopSpeaking', () => {
     it('should stop speaking', async () => {
-      let capturedUtterance;
+      let _capturedUtterance;
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
-        capturedUtterance = utterance;
+        _capturedUtterance = utterance;
         // Set speaking state and trigger onstart
         window.speechSynthesis.speaking = true;
         voiceService.isSpeaking = true;
@@ -429,10 +429,10 @@ describe('voiceService', () => {
 
   describe('cleanup', () => {
     it('should stop listening and speaking', async () => {
-      let capturedUtterance;
+      let _capturedUtterance;
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
-        capturedUtterance = utterance;
+        _capturedUtterance = utterance;
         // Set speaking state and trigger onstart
         window.speechSynthesis.speaking = true;
         voiceService.isSpeaking = true;
