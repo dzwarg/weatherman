@@ -31,7 +31,7 @@ jobs:
   # Job 1: Determine current active environment
   detect-environment:
     name: Detect Active Environment
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     timeout-minutes: 5
     outputs:
       active_env: ${{ steps.detect.outputs.active }}
@@ -62,7 +62,7 @@ jobs:
   # Job 2: Deploy to inactive environment (Green if Blue is active, vice versa)
   deploy-inactive:
     name: Deploy to Inactive Environment
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     timeout-minutes: 10
     needs: [detect-environment]
     environment:
@@ -117,7 +117,7 @@ jobs:
   # Job 3: Run post-deployment validation tests
   post-deployment-tests:
     name: Post-Deployment Validation
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     timeout-minutes: 15
     needs: [detect-environment, deploy-inactive]
     outputs:
@@ -179,7 +179,7 @@ jobs:
   # Job 4: Switch traffic to new environment (Blue→Green or Green→Blue)
   switch-traffic:
     name: Switch Traffic
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     timeout-minutes: 5
     needs: [detect-environment, post-deployment-tests]
     if: needs.post-deployment-tests.outputs.tests_passed == 'true' && needs.post-deployment-tests.outputs.performance_ok == 'true'
@@ -229,7 +229,7 @@ jobs:
   # Job 5: Rollback on failure
   rollback:
     name: Rollback on Failure
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     timeout-minutes: 5
     needs: [detect-environment, deploy-inactive, post-deployment-tests]
     if: failure() && needs.deploy-inactive.result == 'success'

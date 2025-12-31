@@ -275,7 +275,7 @@ sudo ./svc.sh start
 # .github/workflows/deploy-production.yml (excerpt)
 jobs:
   deploy:
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -378,7 +378,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, production]
+    runs-on: [self-hosted]
     environment:
       name: production
       url: https://weatherman.example.com
