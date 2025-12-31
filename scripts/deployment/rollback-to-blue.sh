@@ -52,8 +52,8 @@ fi
 # Stop Green environment
 echo ""
 echo "Stopping Green environment..."
-pm2 stop weatherman-green 2>/dev/null || echo "  (not running)"
-pm2 delete weatherman-green 2>/dev/null || echo "  (not found)"
+npx pm2 stop weatherman-green 2>/dev/null || echo "  (not running)"
+npx pm2 delete weatherman-green 2>/dev/null || echo "  (not found)"
 
 # Update Green state to failed
 cat > "$STATE_DIR/green.json" <<EOF
@@ -78,5 +78,5 @@ echo "  2. Fix issues in code"
 echo "  3. Deploy again when ready"
 echo ""
 echo "View logs:"
-echo "  pm2 logs weatherman-blue"
+echo "  npx pm2 logs weatherman-blue"
 echo "  tail -f /var/log/nginx/error.log"

@@ -68,24 +68,24 @@ echo "✅ Frontend files deployed to $FRONTEND_DEPLOY_DIR"
 # Stop existing Blue environment (if running)
 echo ""
 echo "Stopping existing Blue environment..."
-pm2 stop "$PM2_APP_NAME" 2>/dev/null || echo "  (not running)"
-pm2 delete "$PM2_APP_NAME" 2>/dev/null || echo "  (not found)"
+npx pm2 stop "$PM2_APP_NAME" 2>/dev/null || echo "  (not running)"
+npx pm2 delete "$PM2_APP_NAME" 2>/dev/null || echo "  (not found)"
 
 # Start Blue environment with PM2
 echo ""
 echo "Starting Blue environment..."
-pm2 start "$PM2_CONFIG" --env production
+npx pm2 start "$PM2_CONFIG" --env production
 
 # Wait for PM2 to initialize
 sleep 2
 
 # Verify PM2 process is running
-if pm2 list | grep -q "$PM2_APP_NAME.*online"; then
+if npx pm2 list | grep -q "$PM2_APP_NAME.*online"; then
   echo "✅ Blue environment started successfully"
-  pm2 list | grep "$PM2_APP_NAME"
+  npx pm2 list | grep "$PM2_APP_NAME"
 else
   echo "❌ Failed to start Blue environment"
-  pm2 logs "$PM2_APP_NAME" --lines 20 --nostream
+  npx pm2 logs "$PM2_APP_NAME" --lines 20 --nostream
   exit 1
 fi
 
