@@ -133,8 +133,8 @@ jobs:
           echo "Stopping $INACTIVE_ENV environment..."
 
           # Stop PM2 processes for inactive environment
-          pm2 stop "weatherman-$INACTIVE_ENV" || echo "Process not running"
-          pm2 delete "weatherman-$INACTIVE_ENV" || echo "Process not found"
+          npx pm2 stop "weatherman-$INACTIVE_ENV" || echo "Process not running"
+          npx pm2 delete "weatherman-$INACTIVE_ENV" || echo "Process not found"
 
       - name: Deploy to inactive environment
         env:
