@@ -202,44 +202,219 @@ jobs:
 
           echo "✅ Updated state for $INACTIVE_ENV environment"
 
-  # Placeholder for Phase 6: Post-deployment tests
-  # This will be implemented in T045-T058
+  # T049-T050: Post-deployment validation tests
   post-deployment-tests:
     name: Post-Deployment Validation
     runs-on: [self-hosted]
-    timeout-minutes: 15
+    timeout-minutes: 15  # T050: 15-minute timeout for post-deployment tests
     needs: [detect-environment, deploy-inactive]
     steps:
-      - name: Placeholder for post-deployment tests
-        run: |
-          echo "✅ Post-deployment tests placeholder (Phase 6: T045-T058)"
-          echo "In Phase 6, this will run:"
-          echo "  - Smoke tests"
-          echo "  - Integration tests"
-          echo "  - Performance baseline comparison"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Placeholder for Phase 6: Traffic switching
-  # This will be implemented in T053-T055
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run post-deployment test suite
+        env:
+          BASE_URL: http://localhost:${{ needs.detect-environment.outputs.inactive_port }}
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
+          ACTIVE_ENV="${{ needs.detect-environment.outputs.active_env }}"
+          ACTIVE_PORT="${{ needs.detect-environment.outputs.active_port }}"
+
+          echo "Running post-deployment tests on $INACTIVE_ENV environment..."
+          bash scripts/testing/run-post-deployment-tests.sh \
+            "$INACTIVE_ENV" \
+            "$INACTIVE_PORT" \
+            "$ACTIVE_ENV" \
+            "$ACTIVE_PORT"
+
+  # T053-T055: Traffic switching with state updates
   switch-traffic:
     name: Switch Traffic
     runs-on: [self-hosted]
     timeout-minutes: 5
     needs: [detect-environment, post-deployment-tests]
     steps:
-      - name: Placeholder for traffic switching
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Switch traffic to inactive environment
         run: |
-          echo "✅ Traffic switching placeholder (Phase 6: T053-T055)"
-          echo "In Phase 6, this will:"
-          echo "  - Update nginx upstream configuration"
-          echo "  - Reload nginx"
-          echo "  - Verify traffic switch"
-          echo "  - Update deployment state files"
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+
+          echo "Switching traffic to $INACTIVE_ENV environment..."
+          sudo bash scripts/deployment/switch-traffic.sh "$INACTIVE_ENV"
+
+      # T054: Nginx reload with verification
+      - name: Verify nginx configuration and reload
+        run: |
+          echo "Verifying nginx configuration..."
+
+          # Test nginx config syntax
+          sudo nginx -t
+
+          # Reload nginx to apply new upstream
+          echo "Reloading nginx..."
+          sudo systemctl reload nginx
+
+          # Verify nginx is still running
+          if sudo systemctl is-active --quiet nginx; then
+            echo "✅ Nginx reloaded successfully"
+          else
+            echo "❌ Nginx failed to reload"
+            exit 1
+          fi
+
+      # T055: Update deployment state files to mark environments active/inactive
+      - name: Update deployment state after traffic switch
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          ACTIVE_ENV="${{ needs.detect-environment.outputs.active_env }}"
+          INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
+          ACTIVE_PORT="${{ needs.detect-environment.outputs.active_port }}"
+
+          STATE_DIR="${{ env.DEPLOYMENT_STATE_DIR }}"
+
+          # Update new active environment state (was inactive, now active)
+          cat <<EOF | sudo tee "$STATE_DIR/$INACTIVE_ENV.json" > /dev/null
+          {
+            "environment": "$INACTIVE_ENV",
+            "status": "active",
+            "traffic_routing": "active",
+            "port": $INACTIVE_PORT,
+            "commit_sha": "${{ github.sha }}",
+            "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployed_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}",
+            "switched_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          # Update old active environment state (was active, now inactive)
+          cat <<EOF | sudo tee "$STATE_DIR/$ACTIVE_ENV.json" > /dev/null
+          {
+            "environment": "$ACTIVE_ENV",
+            "status": "inactive",
+            "traffic_routing": "inactive",
+            "port": $ACTIVE_PORT,
+            "last_active_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          # Set permissions
+          sudo chmod 644 "$STATE_DIR/$INACTIVE_ENV.json"
+          sudo chmod 644 "$STATE_DIR/$ACTIVE_ENV.json"
+
+          echo "✅ Deployment state updated - $INACTIVE_ENV is now active"
+
+      # T057: Create GitHub deployment status (success)
+      - name: Create GitHub deployment status
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+
+          echo "Creating GitHub deployment status..."
+
+          # Use GitHub API to create deployment status
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/deployments \
+            -d "{
+              \"ref\": \"${{ github.sha }}\",
+              \"environment\": \"production-$INACTIVE_ENV\",
+              \"description\": \"Deployed to $INACTIVE_ENV and traffic switched\",
+              \"auto_merge\": false,
+              \"required_contexts\": []
+            }" || echo "Note: Deployment status creation failed (non-critical)"
+
+  # T056-T057: Rollback job on test failure with GitHub deployment status
+  rollback:
+    name: Rollback on Failure
+    runs-on: [self-hosted]
+    timeout-minutes: 5
+    needs: [detect-environment, deploy-inactive, post-deployment-tests]
+    if: failure()  # Only run if post-deployment-tests failed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Stop failed deployment
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
+
+          echo "Post-deployment tests failed. Rolling back $INACTIVE_ENV environment..."
+
+          # Stop the failed deployment
+          npx pm2 stop "weatherman-$INACTIVE_ENV" || echo "Process already stopped"
+          npx pm2 delete "weatherman-$INACTIVE_ENV" || echo "Process already deleted"
+
+          echo "✅ Stopped failed $INACTIVE_ENV environment"
+
+      - name: Update deployment state to failed
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+          INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
+          STATE_DIR="${{ env.DEPLOYMENT_STATE_DIR }}"
+
+          # Mark failed environment state
+          cat <<EOF | sudo tee "$STATE_DIR/$INACTIVE_ENV.json" > /dev/null
+          {
+            "environment": "$INACTIVE_ENV",
+            "status": "failed",
+            "traffic_routing": "inactive",
+            "port": $INACTIVE_PORT,
+            "commit_sha": "${{ github.sha }}",
+            "deployment_attempted_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployed_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}",
+            "failure_reason": "Post-deployment tests failed"
+          }
+          EOF
+
+          sudo chmod 644 "$STATE_DIR/$INACTIVE_ENV.json"
+
+          echo "✅ Updated state for failed $INACTIVE_ENV deployment"
+
+      # T057: Create GitHub deployment status (failure)
+      - name: Create GitHub deployment failure status
+        run: |
+          INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
+
+          echo "Creating GitHub deployment failure status..."
+
+          # Use GitHub API to create deployment status
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/deployments \
+            -d "{
+              \"ref\": \"${{ github.sha }}\",
+              \"environment\": \"production-$INACTIVE_ENV\",
+              \"description\": \"Deployment to $INACTIVE_ENV failed - rolled back\",
+              \"auto_merge\": false,
+              \"required_contexts\": []
+            }" || echo "Note: Deployment status creation failed (non-critical)"
+
+          echo ""
+          echo "🔴 Rollback complete. Active environment remains unchanged."
 
   # Summary job
   deployment-summary:
     name: Deployment Summary
     runs-on: [self-hosted]
-    needs: [detect-environment, deploy-inactive, post-deployment-tests, switch-traffic]
+    needs: [detect-environment, deploy-inactive, post-deployment-tests, switch-traffic, rollback]
     if: always()
     steps:
       - name: Report deployment status
@@ -251,13 +426,19 @@ jobs:
           echo "Deploy status: ${{ needs.deploy-inactive.result }}"
           echo "Tests status: ${{ needs.post-deployment-tests.result }}"
           echo "Switch status: ${{ needs.switch-traffic.result }}"
+          echo "Rollback status: ${{ needs.rollback.result }}"
           echo ""
 
           if [[ "${{ needs.deploy-inactive.result }}" == "success" ]] && \
              [[ "${{ needs.post-deployment-tests.result }}" == "success" ]] && \
              [[ "${{ needs.switch-traffic.result }}" == "success" ]]; then
             echo "✅ Deployment completed successfully"
+            echo "Traffic is now routed to: ${{ needs.detect-environment.outputs.inactive_env }}"
             exit 0
+          elif [[ "${{ needs.rollback.result }}" == "success" ]]; then
+            echo "⚠️  Deployment failed but rollback completed successfully"
+            echo "Traffic remains on: ${{ needs.detect-environment.outputs.active_env }}"
+            exit 1
           else
             echo "❌ Deployment encountered issues"
             exit 1
