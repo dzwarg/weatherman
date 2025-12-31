@@ -12,6 +12,7 @@ export default defineConfig({
       '**/dist/**',
       '**/.{idea,git,cache,output,temp}/**',
       '**/tests/e2e/**',
+      '**/tests/post-deployment/**', // Exclude post-deployment tests from normal runs
     ],
     coverage: {
       provider: 'v8',
