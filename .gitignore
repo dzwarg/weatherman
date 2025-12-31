@@ -67,7 +67,8 @@ Thumbs.db
 .vscode/
 .history/
 
-# Yarn
+# Yarn (project uses npm, not yarn)
+yarn.lock
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
