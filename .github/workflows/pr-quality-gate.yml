@@ -23,11 +23,12 @@ jobs:
           BRANCH_NAME="${{ github.head_ref }}"
           echo "Validating branch name: $BRANCH_NAME"
 
-          # Branch must match: spec/N/task/N-description OR spec/N/feature/description
-          if [[ ! "$BRANCH_NAME" =~ ^spec/[0-9]{3}/(task|feature)/[0-9]{3}-.+ ]]; then
+          # Branch must match: NNN-feature-description (speckit convention)
+          # where NNN is a 3-digit spec number
+          if [[ ! "$BRANCH_NAME" =~ ^[0-9]{3}-.+ ]]; then
             echo "::error::Branch name '$BRANCH_NAME' does not match required format"
-            echo "::error::Expected format: spec/NNN/task/NNN-description OR spec/NNN/feature/description"
-            echo "::error::Example: spec/003/task/022-pr-quality-gate"
+            echo "::error::Expected format: NNN-feature-description"
+            echo "::error::Example: 003-automated-build-test"
             exit 1
           fi
 

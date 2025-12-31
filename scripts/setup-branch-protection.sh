@@ -101,7 +101,7 @@ rm -f /tmp/branch-protection.json
 
 echo ""
 echo "📖 Branch protection is now active. Pull requests to main must:"
-echo "  1. Have a valid branch name (spec/N/task/N-description)"
+echo "  1. Have a valid branch name (NNN-feature-description format)"
 echo "  2. Not conflict with active deployments"
 echo "  3. Have conventional commit messages"
 echo "  4. Pass all CI checks (lint, test, build)"
