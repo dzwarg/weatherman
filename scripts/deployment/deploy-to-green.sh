@@ -60,6 +60,9 @@ sudo mkdir -p "$BACKEND_DEPLOY_DIR"
 # Copy backend code to deployment directory
 sudo cp -r packages/server/. "$BACKEND_DEPLOY_DIR/"
 
+# Copy package-lock.json for npm ci (monorepo structure)
+sudo cp package-lock.json "$BACKEND_DEPLOY_DIR/"
+
 # Copy PM2 config to deployment directory
 sudo cp "$PM2_CONFIG" "$BACKEND_DEPLOY_DIR/"
 
@@ -75,7 +78,7 @@ echo "✅ Backend code deployed to $BACKEND_DEPLOY_DIR"
 echo ""
 echo "Installing backend dependencies in deployment directory..."
 cd "$BACKEND_DEPLOY_DIR"
-npm ci --production
+npm ci --omit=dev
 cd "$WORK_DIR"
 echo "✅ Backend dependencies installed"
 
