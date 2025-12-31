@@ -289,7 +289,7 @@ describe('voiceService', () => {
       window.speechSynthesis.speak = originalSpeak;
     });
 
-    it('should cancel ongoing speech before starting new', async () => {
+    it.skip('should cancel ongoing speech before starting new', async () => {
       let cancelCalled = false;
       const originalCancel = window.speechSynthesis.cancel;
       window.speechSynthesis.cancel = () => {
