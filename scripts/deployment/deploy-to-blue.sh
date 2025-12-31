@@ -106,7 +106,7 @@ fi
 
 echo ""
 echo "🔵 Blue environment deployment complete!"
-echo "Health check URL: http://localhost:$PORT/health"
+echo "Health check URL: http://localhost:$PORT/api/health"
 echo ""
 echo "Next steps:"
 echo "  1. Wait for health check to pass"

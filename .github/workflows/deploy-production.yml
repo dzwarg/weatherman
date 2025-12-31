@@ -155,7 +155,7 @@ jobs:
       - name: Wait for health check
         run: |
           INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
-          HEALTH_URL="http://localhost:$INACTIVE_PORT/health"
+          HEALTH_URL="http://localhost:$INACTIVE_PORT/api/health"
           MAX_ATTEMPTS=24  # 2 minutes (5 second intervals)
           ATTEMPT=0
 
