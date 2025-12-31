@@ -51,32 +51,32 @@ jobs:
             echo "⚠️  Nginx config not found, defaulting to Blue as active"
             echo "active=blue" >> $GITHUB_OUTPUT
             echo "inactive=green" >> $GITHUB_OUTPUT
-            echo "active_port=3000" >> $GITHUB_OUTPUT
-            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+            echo "active_port=3001" >> $GITHUB_OUTPUT
+            echo "inactive_port=3002" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           # Extract current upstream port from nginx config
           ACTIVE_PORT=$(grep -oP 'proxy_pass\s+http://localhost:\K\d+' "$NGINX_CONF" | head -1)
 
-          if [ "$ACTIVE_PORT" == "3000" ]; then
-            echo "🔵 Blue environment is active (port 3000)"
+          if [ "$ACTIVE_PORT" == "3001" ]; then
+            echo "🔵 Blue environment is active (port 3001)"
             echo "active=blue" >> $GITHUB_OUTPUT
             echo "inactive=green" >> $GITHUB_OUTPUT
-            echo "active_port=3000" >> $GITHUB_OUTPUT
-            echo "inactive_port=3001" >> $GITHUB_OUTPUT
-          elif [ "$ACTIVE_PORT" == "3001" ]; then
-            echo "🟢 Green environment is active (port 3001)"
-            echo "active=blue" >> $GITHUB_OUTPUT
-            echo "inactive=blue" >> $GITHUB_OUTPUT
             echo "active_port=3001" >> $GITHUB_OUTPUT
-            echo "inactive_port=3000" >> $GITHUB_OUTPUT
+            echo "inactive_port=3002" >> $GITHUB_OUTPUT
+          elif [ "$ACTIVE_PORT" == "3002" ]; then
+            echo "🟢 Green environment is active (port 3002)"
+            echo "active=green" >> $GITHUB_OUTPUT
+            echo "inactive=blue" >> $GITHUB_OUTPUT
+            echo "active_port=3002" >> $GITHUB_OUTPUT
+            echo "inactive_port=3001" >> $GITHUB_OUTPUT
           else
             echo "⚠️  Could not determine active environment, defaulting to Blue"
             echo "active=blue" >> $GITHUB_OUTPUT
             echo "inactive=green" >> $GITHUB_OUTPUT
-            echo "active_port=3000" >> $GITHUB_OUTPUT
-            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+            echo "active_port=3001" >> $GITHUB_OUTPUT
+            echo "inactive_port=3002" >> $GITHUB_OUTPUT
           fi
 
   # T035: Deploy to the inactive environment
@@ -137,6 +137,11 @@ jobs:
           pm2 delete "weatherman-$INACTIVE_ENV" || echo "Process not found"
 
       - name: Deploy to inactive environment
+        env:
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+          WEATHER_API_URL: ${{ secrets.WEATHER_API_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ secrets.CLAUDE_MODEL }}
         run: |
           INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
           INACTIVE_PORT="${{ needs.detect-environment.outputs.inactive_port }}"
