@@ -73,44 +73,47 @@ This creates:
 
 ### Nginx Configuration
 
-Create nginx site configuration for Weatherman:
-
-```nginx
-# /etc/nginx/sites-available/weatherman
-upstream weatherman {
-    server localhost:3000;  # Blue environment (active by default)
-}
-
-server {
-    listen 80;
-    server_name weatherman.example.com;
-
-    location / {
-        proxy_pass http://localhost:3000;  # Points to active environment
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /health {
-        proxy_pass http://localhost:3000/health;
-        access_log off;
-    }
-}
-```
-
-Enable the site:
+Install nginx configuration using the automated script:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/weatherman /etc/nginx/sites-enabled/weatherman
-sudo nginx -t
-sudo systemctl reload nginx
+# Method 1: Automated installation (recommended)
+sudo ./scripts/deployment/install-nginx-config.sh
+
+# Method 2: Custom server name
+sudo ./scripts/deployment/install-nginx-config.sh your-domain.com
+
+# Method 3: Localhost for testing
+sudo ./scripts/deployment/install-nginx-config.sh localhost
 ```
+
+**What the installation script does:**
+- Validates nginx syntax before installation
+- Backs up existing configuration automatically
+- Installs to sites-available with correct permissions
+- Creates symlink to sites-enabled
+- Tests complete nginx configuration
+- Reloads nginx service (if running)
+- Rolls back on failure
+
+**Verify installation:**
+```bash
+# Run verification checks
+./scripts/deployment/verify-nginx-config.sh
+
+# Manual verification
+sudo nginx -t
+sudo systemctl status nginx
+curl http://localhost/health
+```
+
+**Configuration features:**
+- Blue-Green deployment support (ports 3000/3001)
+- Health check endpoint with monitoring disabled
+- WebSocket support for real-time features
+- Security headers (XSS, CORS, frame protection)
+- Static asset caching
+- Request logging (access and error logs)
+- SSL/HTTPS ready (commented out, enable when needed)
 
 ### PM2 Configuration
 
