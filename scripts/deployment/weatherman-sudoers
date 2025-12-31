@@ -84,10 +84,18 @@ Cmnd_Alias BACKEND_DEPLOY = \
     /bin/cp package-lock.json /opt/weatherman/green/, \
     /usr/bin/cp package-lock.json /opt/weatherman/blue/, \
     /usr/bin/cp package-lock.json /opt/weatherman/green/, \
+    /bin/cp -r node_modules /opt/weatherman/blue/, \
+    /bin/cp -r node_modules /opt/weatherman/green/, \
+    /usr/bin/cp -r node_modules /opt/weatherman/blue/, \
+    /usr/bin/cp -r node_modules /opt/weatherman/green/, \
     /bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
     /bin/chown -R weatherman\:weatherman /opt/weatherman/green, \
     /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
     /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/green, \
+    /bin/chown -R weatherman\:weatherman /opt/weatherman/blue/node_modules, \
+    /bin/chown -R weatherman\:weatherman /opt/weatherman/green/node_modules, \
+    /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/blue/node_modules, \
+    /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/green/node_modules, \
     /bin/chmod -R 755 /opt/weatherman/blue, \
     /bin/chmod -R 755 /opt/weatherman/green, \
     /usr/bin/chmod -R 755 /opt/weatherman/blue, \

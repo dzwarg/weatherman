@@ -74,13 +74,12 @@ sudo chmod -R 755 "$BACKEND_DEPLOY_DIR"
 
 echo "✅ Backend code deployed to $BACKEND_DEPLOY_DIR"
 
-# Install dependencies in deployment directory
+# Copy node_modules from workspace to deployment directory
 echo ""
-echo "Installing backend dependencies in deployment directory..."
-cd "$BACKEND_DEPLOY_DIR"
-npm ci --omit=dev
-cd "$WORK_DIR"
-echo "✅ Backend dependencies installed"
+echo "Copying node_modules to deployment directory..."
+sudo cp -r node_modules "$BACKEND_DEPLOY_DIR/"
+sudo chown -R weatherman:weatherman "$BACKEND_DEPLOY_DIR/node_modules"
+echo "✅ Node modules copied to deployment directory"
 
 # Create logs directory in deployment location
 mkdir -p "$BACKEND_DEPLOY_DIR/logs"
@@ -130,7 +129,9 @@ npx pm2 delete "$PM2_APP_NAME" 2>/dev/null || echo "  (not found)"
 # Start Green environment with PM2 from deployment directory
 echo ""
 echo "Starting Green environment..."
-npx pm2 start "$BACKEND_DEPLOY_DIR/$PM2_CONFIG" --env production
+cd "$BACKEND_DEPLOY_DIR"
+npx pm2 start "$PM2_CONFIG" --env production
+cd "$WORK_DIR"
 
 # Wait for PM2 to initialize
 sleep 2
