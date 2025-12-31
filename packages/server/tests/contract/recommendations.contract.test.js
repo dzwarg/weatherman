@@ -3,9 +3,13 @@
  * Verifies API responses match OpenAPI specifications in contracts/recommendations.yaml
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import app from '../../src/app.js';
+import * as recommendationService from '../../src/services/recommendationService.js';
+
+// Mock the recommendation service to avoid real Claude API calls
+vi.mock('../../src/services/recommendationService.js');
 
 describe('Recommendations API Contract Tests', () => {
   let server;
@@ -13,6 +17,38 @@ describe('Recommendations API Contract Tests', () => {
   beforeAll(() => {
     const port = 3002; // Use different port to avoid conflicts
     server = app.listen(port);
+
+    // Mock generateRecommendations to return consistent test data matching real service structure
+    recommendationService.generateRecommendations = vi.fn((request) => {
+      return Promise.resolve({
+        id: 'mock-recommendation-id',
+        profileId: request.profile.id,
+        weatherData: request.weather,
+        recommendations: {
+          baseLayers: ['Long-sleeve shirt', 'T-shirt'],
+          bottoms: ['Jeans', 'Comfortable pants'],
+          outerwear: request.weather.temperature < 50 || request.weather.conditions?.includes('Rain')
+            ? request.weather.conditions?.includes('Rain')
+              ? ['Rain jacket', 'Waterproof coat']
+              : ['Warm jacket']
+            : [],
+          footwear: ['Sneakers', 'Boots'],
+          accessories: request.weather.conditions?.includes('Rain')
+            ? ['Umbrella', 'Rain hat']
+            : ['Hat', 'Sunglasses'],
+          reasoning: `For a ${request.profile.age}-year-old ${request.profile.gender} in ${request.weather.conditions} weather at ${request.weather.temperature}°F, these items provide comfort and protection.`,
+          safetyNotes: request.weather.uvIndex > 7
+            ? ['Apply sunscreen', 'Stay hydrated']
+            : ['Stay warm', 'Layer appropriately'],
+          comfortLevel: 'comfortable',
+        },
+        spokenResponse: `For a ${request.profile.age}-year-old ${request.profile.gender}, wear a long-sleeve shirt and jeans today.`,
+        source: 'rules',
+        confidence: 0.85,
+        createdAt: new Date().toISOString(),
+        processingTime: 50,
+      });
+    });
   });
 
   afterAll(() => {

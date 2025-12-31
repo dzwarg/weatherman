@@ -26,7 +26,7 @@ Thank you for your interest in contributing to Weatherman! This document provide
    ```
 4. **Install dependencies**:
    ```bash
-   yarn install
+   npm install
    ```
 5. **Configure environment**:
    ```bash
@@ -49,9 +49,9 @@ Thank you for your interest in contributing to Weatherman! This document provide
 
 3. Test your changes:
    ```bash
-   yarn test
-   yarn lint
-   yarn build
+   npm test
+   npm run lint
+   npm run build
    ```
 
 ### GPG Signing Requirements
@@ -149,7 +149,7 @@ docs(readme): update installation instructions
 
 ### Branch Naming Convention
 
-- **Feature branches**: `feature/short-description` or `spec/001/task/###-description`
+- **Spec-driven features**: `NNN-short-description` (where NNN is spec number)
 - **Bug fixes**: `fix/short-description`
 - **Documentation**: `docs/short-description`
 - **Refactoring**: `refactor/short-description`
@@ -157,8 +157,8 @@ docs(readme): update installation instructions
 ### Examples
 
 ```bash
-feature/extreme-weather-handling
-spec/001/task/055-service-worker
+001-voice-weather-clothing
+003-automated-build-test
 fix/voice-permission-error
 docs/troubleshooting-guide
 refactor/recommendation-service
@@ -201,9 +201,9 @@ Brief description of changes
 Closes #123
 
 ## Testing
-- [ ] All tests pass (`yarn test`)
-- [ ] Linting passes (`yarn lint`)
-- [ ] Build succeeds (`yarn build`)
+- [ ] All tests pass (`npm test`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] Build succeeds (`npm run build`)
 - [ ] Manual testing completed
 
 ## Screenshots (if applicable)
@@ -289,16 +289,16 @@ export function ProfileCard({ profile, isSelected, onSelect }) {
 
 ```bash
 # Run all tests
-yarn test
+npm test
 
 # Watch mode
-yarn test:watch
+npm test:watch
 
 # With coverage
-yarn test:coverage
+npm test:coverage
 
 # Specific file
-yarn test src/services/voiceService.test.js
+npm test src/services/voiceService.test.js
 ```
 
 ### Writing Tests

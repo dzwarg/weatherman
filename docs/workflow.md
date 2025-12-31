@@ -40,27 +40,26 @@ All work must be done on a feature branch following the strict naming convention
 
 **Branch Naming Convention:**
 ```
-spec/<spec-number>/task/<task-number>-<short-description>
+<spec-number>-<short-description>
 ```
 
 **Components:**
-- `spec/<spec-number>`: Reference to the specification document or epic
-- `task/<task-number>`: Reference to the specific task or issue
+- `<spec-number>`: Reference to the specification document or epic
 - `<short-description>`: Brief, kebab-case description of the work
 
 **Examples:**
 ```bash
 # Example 1: Weather API integration
-git checkout -b spec/1/task/3-weather-api-integration
+git checkout -b 001-weather-api-integration
 
 # Example 2: Voice command parser
-git checkout -b spec/2/task/7-voice-command-parser
+git checkout -b 002-voice-command-parser
 
 # Example 3: Outfit recommendation engine
-git checkout -b spec/1/task/12-outfit-recommendation-engine
+git checkout -b 003-outfit-recommendation-engine
 
 # Example 4: PWA manifest setup
-git checkout -b spec/3/task/5-pwa-manifest-setup
+git checkout -b 004-pwa-manifest-setup
 ```
 
 **Branch Naming Rules:**
@@ -128,13 +127,13 @@ Run the test suite to ensure your changes don't break existing functionality:
 
 ```bash
 # Run all tests
-yarn test
+npm test
 
 # Run tests in watch mode during development
-yarn test:watch
+npm run test:watch
 
 # Run tests with coverage report
-yarn test:coverage
+npm run test:coverage
 ```
 
 **Requirements:**
@@ -149,10 +148,10 @@ Run linting to ensure code style consistency:
 
 ```bash
 # Run ESLint
-yarn lint
+npm run lint
 
 # Auto-fix linting issues where possible
-yarn lint:fix
+npm run lint:fix
 ```
 
 **Linting Rules:**
@@ -182,7 +181,7 @@ yarn lint:fix
 
 ```bash
 # Run TypeScript compiler check
-yarn tsc --noEmit
+npx tsc --noEmit
 ```
 
 #### D. Build Verification
@@ -191,7 +190,7 @@ Ensure the application builds successfully:
 
 ```bash
 # Create production build
-yarn build
+npm run build
 
 # Verify build output in ./dist/
 ```
@@ -379,7 +378,7 @@ git checkout main
 git pull origin main
 
 # 2. Create feature branch
-git checkout -b spec/1/task/8-add-wind-speed-indicator
+git checkout -b 001-add-wind-speed-indicator
 
 # 3. Verify spec and task exist
 cat docs/specs/spec-1.md  # Review specification
@@ -389,9 +388,9 @@ cat docs/tasks/task-8.md  # Review task details
 # ... implement the wind speed indicator ...
 
 # 5. Run quality checks
-yarn test                # ✓ All tests pass
-yarn lint                # ✓ No linting errors
-yarn build               # ✓ Build succeeds
+npm test                # ✓ All tests pass
+npm run lint             # ✓ No linting errors
+npm run build            # ✓ Build succeeds
 
 # 6. Create signed commit
 git add src/components/WindSpeedIndicator.jsx
@@ -408,7 +407,7 @@ Refs #8"
 git log --show-signature -1  # ✓ Signature verified
 
 # 8. Push to remote
-git push origin spec/1/task/8-add-wind-speed-indicator
+git push origin 001-add-wind-speed-indicator
 
 # 9. Create Pull Request (if applicable)
 # Open PR on GitHub/GitLab with:
@@ -499,17 +498,17 @@ git branch feature/weather-api
 git branch task-5-outfit-engine
 
 # ✓ Correct
-git branch spec/1/task/5-weather-api-integration
-git branch spec/2/task/12-outfit-recommendation-engine
+git branch 001-weather-api-integration
+git branch 002-outfit-recommendation-engine
 ```
 
 **Renaming a branch:**
 ```bash
 # Rename current branch
-git branch -m spec/1/task/5-correct-name
+git branch -m 001-correct-name
 
 # Rename another branch
-git branch -m old-name spec/1/task/5-new-name
+git branch -m old-name 001-new-name
 ```
 
 ### Commit Message Issues
@@ -537,12 +536,12 @@ git rebase -i HEAD~3
 Before considering your work complete, verify:
 
 - [ ] Main branch is synced
-- [ ] Feature branch follows naming convention: `spec/X/task/Y-description`
+- [ ] Feature branch follows naming convention: `NNN-description`
 - [ ] Spec and task documents exist and are referenced
 - [ ] Code changes are complete and tested
-- [ ] All unit tests pass (`yarn test`)
-- [ ] No linting errors (`yarn lint`)
-- [ ] Application builds successfully (`yarn build`)
+- [ ] All unit tests pass (`npm test`)
+- [ ] No linting errors (`npm run lint`)
+- [ ] Application builds successfully (`npm run build`)
 - [ ] Commits are GPG signed (verify with `git log --show-signature`)
 - [ ] Commits follow conventional format
 - [ ] Branch pushed to remote

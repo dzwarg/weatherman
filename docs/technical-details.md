@@ -631,13 +631,13 @@ Each user profile (4 y/o girl, 7 y/o boy, 10 y/o boy) has customized:
 ### Development
 
 ```bash
-yarn run dev  # Start development server with HTTPS
+npm run dev  # Start development server with HTTPS
 ```
 
 ### Build for Production
 
 ```bash
-yarn run build  # Creates optimized production build in dist/
+npm run build  # Creates optimized production build in dist/
 ```
 
 ### Deployment Checklist

@@ -153,7 +153,7 @@ If credit card requirement is a blocker, **OpenWeatherMap Free APIs** (Current W
 
 1. **Package Installation**:
    ```bash
-   yarn add @sproutsocial/racine @sproutsocial/seeds-react
+   npm install @sproutsocial/racine @sproutsocial/seeds-react
    ```
 
 2. **Import Approach**:

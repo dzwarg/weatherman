@@ -20,7 +20,7 @@ You can generate the PNG icons from the SVG using one of these methods:
 
 ```bash
 # Install dependencies
-yarn add -D sharp sharp-cli
+npm install --save-dev sharp sharp-cli
 
 # Generate icons
 npx sharp-cli -i public/icons/icon.svg -o public/icons/icon-192x192.png resize 192 192

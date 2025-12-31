@@ -29,8 +29,8 @@ export const errorHandler = (err, req, res, _next) => {
     timestamp: new Date().toISOString(),
   };
 
-  // Add details if available (only in development or if explicitly safe)
-  if (err.details && (process.env.NODE_ENV === 'development' || err.safeDetails)) {
+  // Add details if available (only in development, test, or if explicitly safe)
+  if (err.details && (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' || err.safeDetails)) {
     errorResponse.error.details = err.details;
   }
 

@@ -121,11 +121,19 @@ export default defineConfig({
     })
   ],
   server: {
-    // HTTPS required for voice/geolocation APIs in production
-    https: {
-      key: fs.readFileSync(path.join(projectRoot, 'localhost-key.pem')),
-      cert: fs.readFileSync(path.join(projectRoot, 'localhost-cert.pem')),
-    },
+    // HTTPS required for voice/geolocation APIs in development
+    // Only enable if certificate files exist
+    https: (() => {
+      const keyPath = path.join(projectRoot, 'localhost-key.pem');
+      const certPath = path.join(projectRoot, 'localhost-cert.pem');
+      if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+        return {
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath),
+        };
+      }
+      return false;
+    })(),
     port: 5173,
     proxy: {
       // Proxy all API requests to local server

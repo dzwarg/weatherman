@@ -34,31 +34,31 @@ Every feature must be offline-capable and mobile-optimized:
 
 ### III. Spec-Driven Development (NON-NEGOTIABLE)
 Every code change requires specification and task tracking:
-- Branch naming: `spec/<number>/task/<number>-short-description`
-- Specifications must exist at `./specs/<number>/spec.md`
-- Tasks must be documented in `./specs/<number>/tasks.md`
+- Branch naming: `<number>-<short-description>`
+- Specifications must exist at `./specs/<number>-<short-description>/spec.md`
+- Tasks must be documented in `./specs/<number>-<short-description>/tasks.md`
 - No branch creation without valid spec and task references
 - Pull requests must reference spec and task numbers
 - Acceptance criteria must be defined before implementation
 
 **Branch Examples:**
-- `spec/1/task/3-weather-api-integration`
-- `spec/2/task/7-voice-command-parser`
+- `spec/001-weather-api-integration`
+- `spec/002-voice-command-parser`
 
 ### IV. Quality-First Development (NON-NEGOTIABLE)
 All changes must pass quality gates before commit:
 - Unit tests must pass (0 failures, 80%+ coverage)
 - ESLint must pass (0 errors)
-- Build must succeed (`yarn build`)
+- Build must succeed (`npm run build`)
 - Manual testing completed for voice and offline features
 - No `console.log` in production code
 - No unused variables or imports
 
 **Quality Commands:**
 ```bash
-yarn test          # Must pass
-yarn lint          # Must pass
-yarn build         # Must succeed
+npm test          # Must pass
+npm run lint      # Must pass
+npm run build     # Must succeed
 ```
 
 ### V. Signed & Conventional Commits (NON-NEGOTIABLE)
@@ -107,7 +107,7 @@ User privacy and security are paramount:
 - **Build Tool**: Vite 5+ with PWA plugin
 - **Design System**: Racine (Seeds by Sprout Social)
   - URL: https://seeds.sproutsocial.com/
-- **Package Manager**: Yarn (not npm)
+- **Package Manager**: npm 10+ (included with Node.js 22+)
 - **Node Version**: 22+
 - **Language**: JavaScript with HTML5 and CSS3
 - **Voice API**: Web Speech API (native browser)
@@ -132,14 +132,19 @@ User privacy and security are paramount:
 
 ### Branch Creation Process
 1. Sync with main: `git pull origin main`
-2. Verify spec exists: `./specs/<number>/spec.md`
-3. Verify task exists: `./specs/<number>/tasks.md`
-4. Create branch: `git checkout -b spec/X/task/Y-description`
+2. Verify spec exists: `./specs/<number>-<description>/spec.md`
+3. Verify tasks exist: `./specs/<number>-<description>/tasks.md`
+4. Create branch: `git checkout -b <number>-<description>`
+
+**Branch Format**: `<spec-number>-<short-description>`
+- Example: `003-automated-build-test`
+- Spec number must be 3 digits (001, 002, 003, etc.)
+- Description should be kebab-case and descriptive
 
 ### Pre-Commit Checklist
-- [ ] Unit tests pass (`yarn test`)
-- [ ] Linting passes (`yarn lint`)
-- [ ] Build succeeds (`yarn build`)
+- [ ] Unit tests pass (`npm test`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] Build succeeds (`npm run build`)
 - [ ] Manual voice testing completed
 - [ ] Offline functionality verified
 - [ ] Documentation updated (if needed)
@@ -147,7 +152,7 @@ User privacy and security are paramount:
 ### Commit Process
 ```bash
 git add [specific files]
-yarn test && yarn lint && yarn build  # Verify quality
+npm test && npm run lint && npm run build  # Verify quality
 git commit -m "type(scope): subject"   # GPG signed
 git log --show-signature -1            # Verify signature
 ```
@@ -156,13 +161,47 @@ git log --show-signature -1            # Verify signature
 - Title follows conventional commit format
 - Description includes:
   - Spec reference
-  - Task reference
+  - Task reference (or Phase reference for multi-phase specs)
   - List of changes
   - Testing evidence
   - Screenshots/GIFs for UI changes
 - All automated checks pass
 - Code review completed
 - Approved before merge
+
+### Pull Request Merge Strategy (NON-NEGOTIABLE)
+All pull requests must use **squash merge only**:
+- **Target Branch**: All PRs merge into `main` branch only
+- **Merge Method**: Squash merge (single commit on main per PR)
+- **PR Scope**: Each PR represents a completed Spec or Phase
+- **Incremental Delivery**: Deliver smaller code changes faster
+- **Branch Protection**: GitHub repository must enforce squash-only merges
+
+**Incremental Delivery Process:**
+1. Complete a Spec or Phase with internally-consistent, working code
+2. Create PR from feature branch to main
+3. After squash merge, recreate feature branch for next Phase:
+   ```bash
+   git checkout main && git pull origin main
+   git branch -D <branch-name>
+   git push origin --delete <branch-name>
+   git checkout -b <branch-name>  # Same name, fresh from main
+   ```
+4. Continue with next Phase commits
+5. Create new PR when Phase is complete
+
+**Example: Multi-Phase Spec**
+- Spec 003: Automated Build & Test
+  - PR #1: Phase 4 (Quality Gates) → squash merge to main
+  - Branch recreation from main
+  - PR #2: Phase 5 (Deployment) → squash merge to main
+  - Branch recreation from main
+  - PR #3: Phase 6 (Rollback) → squash merge to main
+
+**Repository Configuration Required:**
+- Branch protection on `main` requiring all status checks
+- Squash merge as the only allowed merge method
+- Delete branch automatically after merge (enabled)
 
 ### Code Review Focus Areas
 - Voice interaction UX and clarity
@@ -248,4 +287,4 @@ All pull requests must include:
 - [ ] Privacy/security reviewed
 - [ ] Performance benchmarks met
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-16 | **Last Amended**: 2025-12-16
+**Version**: 1.1.0 | **Ratified**: 2025-12-16 | **Last Amended**: 2025-12-31

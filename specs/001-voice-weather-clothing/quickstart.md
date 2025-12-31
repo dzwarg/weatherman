@@ -18,10 +18,9 @@ Before you begin, ensure you have:
   node --version  # Should show v22.x.x or higher
   ```
 
-- **Yarn package manager** (not npm)
+- **npm package manager** (version 10+ included with Node.js 22+)
   ```bash
-  npm install -g yarn
-  yarn --version  # Should show 1.22.x or higher
+  npm --version  # Should show 10.x.x or higher
   ```
 
 - **GPG for commit signing** ([guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key))
@@ -53,7 +52,7 @@ cd weatherman
 git checkout 001-voice-weather-clothing
 
 # Install dependencies
-yarn install
+npm install
 ```
 
 ### 2. Configure Environment
@@ -78,13 +77,13 @@ VITE_WEATHER_CACHE_DURATION=3600000
 
 ```bash
 # Run tests
-yarn test
+npm test
 
 # Check linting
-yarn lint
+npm run lint
 
 # Build for production
-yarn build
+npm run build
 ```
 
 All commands should pass with no errors.
@@ -96,7 +95,7 @@ All commands should pass with no errors.
 ### Starting Dev Server
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 - Opens browser at `https://localhost:5173` (HTTPS required for voice/location APIs)
@@ -153,16 +152,16 @@ src/
 
 ```bash
 # Run all tests
-yarn test
+npm test
 
 # Run tests in watch mode
-yarn test:watch
+npm run test:watch
 
 # Run tests with coverage
-yarn test:coverage
+npm run test:coverage
 
 # Run specific test file
-yarn test src/services/weatherService.test.js
+npm test src/services/weatherService.test.js
 ```
 
 **Coverage Target**: 80%+ (constitutional requirement)
@@ -171,10 +170,10 @@ yarn test src/services/weatherService.test.js
 
 ```bash
 # Check for linting errors
-yarn lint
+npm run lint
 
 # Auto-fix linting errors
-yarn lint:fix
+npm run lint:fix
 ```
 
 **Zero errors required** before committing (constitutional requirement).
@@ -183,13 +182,13 @@ yarn lint:fix
 
 ```bash
 # Production build
-yarn build
+npm run build
 
 # Preview production build
-yarn preview
+npm run preview
 
 # Analyze bundle size
-yarn build --analyze
+npm run build -- --analyze
 ```
 
 **Bundle Target**: < 300KB minified + gzipped (constitutional requirement).
@@ -198,13 +197,13 @@ yarn build --analyze
 
 ```bash
 # Test Service Worker locally
-yarn build && yarn preview
+npm run build && npm run preview
 
 # Check PWA manifest
 open http://localhost:4173/manifest.json
 
 # Run Lighthouse audit
-yarn lighthouse
+npm run lighthouse
 ```
 
 **Lighthouse Target**: PWA score 100/100 (constitutional requirement).
@@ -225,13 +224,13 @@ Read these documents before coding:
 
 ### 2. Create Task Branch
 
-Tasks will be created via `/speckit.tasks` command. Branch naming convention:
+This spec uses the main feature branch for all tasks. Branch naming convention:
 
 ```bash
-git checkout -b spec/001/task/1-implement-weather-service
+git checkout 001-voice-weather-clothing
 ```
 
-Format: `spec/<spec-number>/task/<task-number>-short-description`
+Format: `<spec-number>-short-description`
 
 ### 3. Write Tests First (TDD)
 
@@ -240,7 +239,7 @@ Format: `spec/<spec-number>/task/<task-number>-short-description`
 touch tests/unit/services/weatherService.test.js
 
 # Write failing tests
-yarn test:watch
+npm run test:watch
 
 # Implement code to pass tests
 # Refactor and repeat
@@ -276,7 +275,7 @@ Before committing, test:
 git add src/services/weatherService.js tests/unit/services/weatherService.test.js
 
 # Run quality checks
-yarn test && yarn lint && yarn build
+npm test && npm run lint && npm run build
 
 # Commit with GPG signature and conventional format
 git commit -m "feat(weather): implement OpenWeatherMap integration
@@ -378,10 +377,10 @@ import 'fake-indexeddb/auto';
 **Solution**:
 ```bash
 # Analyze bundle
-yarn build --analyze
+npm run build -- --analyze
 
 # Check for large dependencies
-yarn why <package-name>
+npm explain <package-name>
 
 # Consider code splitting
 ```
@@ -421,7 +420,7 @@ yarn why <package-name>
 1. **Read the Specification**: Start with `spec.md` to understand requirements
 2. **Review Technical Plan**: Read `plan.md` for architecture decisions
 3. **Study Data Model**: Familiarize yourself with `data-model.md` entities
-4. **Run Dev Server**: `yarn dev` and explore the app structure
+4. **Run Dev Server**: `npm run dev` and explore the app structure
 5. **Pick a Task**: Tasks will be in `tasks.md` (created via `/speckit.tasks`)
 6. **Write Tests**: Start with TDD approach
 7. **Implement Feature**: Follow constitution requirements

@@ -30,6 +30,8 @@ When writing code, ensure adherence to best practices for progressive web applic
 ## Active Technologies
 - JavaScript (ES2022+) with React 22+, Node 22+ (001-voice-weather-clothing)
 - JavaScript ES2022+ with Node 22+ (002-monorepo-server)
+- JavaScript (ES2022+), Node.js 22+ + GitHub Actions, PM2 (cluster mode), Vitest, ESLint, Coverage tools (c8/istanbul) (003-automated-build-test)
+- GitHub Actions artifacts/logs (90-day retention), PM2 process state files (003-automated-build-test)
 
 ## Recent Changes
 - 001-voice-weather-clothing: Added JavaScript (ES2022+) with React 22+, Node 22+
