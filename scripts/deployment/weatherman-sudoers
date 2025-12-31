@@ -76,6 +76,10 @@ Cmnd_Alias BACKEND_DEPLOY = \
     /bin/cp -r packages/server/. /opt/weatherman/green/, \
     /usr/bin/cp -r packages/server/. /opt/weatherman/blue/, \
     /usr/bin/cp -r packages/server/. /opt/weatherman/green/, \
+    /bin/cp pm2.blue.config.js /opt/weatherman/blue/, \
+    /bin/cp pm2.green.config.js /opt/weatherman/green/, \
+    /usr/bin/cp pm2.blue.config.js /opt/weatherman/blue/, \
+    /usr/bin/cp pm2.green.config.js /opt/weatherman/green/, \
     /bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
     /bin/chown -R weatherman\:weatherman /opt/weatherman/green, \
     /usr/bin/chown -R weatherman\:weatherman /opt/weatherman/blue, \
