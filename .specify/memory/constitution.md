@@ -34,16 +34,16 @@ Every feature must be offline-capable and mobile-optimized:
 
 ### III. Spec-Driven Development (NON-NEGOTIABLE)
 Every code change requires specification and task tracking:
-- Branch naming: `spec/<number>/task/<number>-short-description`
-- Specifications must exist at `./specs/<number>/spec.md`
-- Tasks must be documented in `./specs/<number>/tasks.md`
+- Branch naming: `<number>-<short-description>`
+- Specifications must exist at `./specs/<number>-<short-description>/spec.md`
+- Tasks must be documented in `./specs/<number>-<short-description>/tasks.md`
 - No branch creation without valid spec and task references
 - Pull requests must reference spec and task numbers
 - Acceptance criteria must be defined before implementation
 
 **Branch Examples:**
-- `spec/1/task/3-weather-api-integration`
-- `spec/2/task/7-voice-command-parser`
+- `spec/001-weather-api-integration`
+- `spec/002-voice-command-parser`
 
 ### IV. Quality-First Development (NON-NEGOTIABLE)
 All changes must pass quality gates before commit:
