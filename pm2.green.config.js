@@ -1,0 +1,29 @@
+module.exports = {
+  apps: [{
+    name: 'weatherman-green',
+    script: './packages/server/src/server.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3002,
+      ENV_NAME: 'green'
+    },
+    wait_ready: true,
+    listen_timeout: 10000,
+    kill_timeout: 5000,
+    // Health check - PM2 will wait for ready event from app
+    ready_timeout: 30000,
+    // Restart policy
+    max_restarts: 10,
+    min_uptime: '10s',
+    // Logging
+    error_file: './logs/green-error.log',
+    out_file: './logs/green-out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    // Auto-restart on file changes (disabled in production)
+    watch: false,
+    // Graceful shutdown
+    shutdown_with_message: false,
+  }]
+};

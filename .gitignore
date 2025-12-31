@@ -76,3 +76,4 @@ Thumbs.db
 
 # IndexedDB (for testing)
 *.indexeddb
+logs/
