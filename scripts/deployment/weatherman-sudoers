@@ -42,10 +42,10 @@ Cmnd_Alias FRONTEND_DEPLOY = \
     /bin/rm -rf /var/www/weatherman/green, \
     /bin/cp -r packages/frontend/dist /var/www/weatherman/blue, \
     /bin/cp -r packages/frontend/dist /var/www/weatherman/green, \
-    /usr/bin/chown -R www-data:www-data /var/www/weatherman/blue, \
-    /usr/bin/chown -R www-data:www-data /var/www/weatherman/green, \
-    /bin/chown -R www-data:www-data /var/www/weatherman/blue, \
-    /bin/chown -R www-data:www-data /var/www/weatherman/green, \
+    /usr/bin/chown -R www-data\:www-data /var/www/weatherman/blue, \
+    /usr/bin/chown -R www-data\:www-data /var/www/weatherman/green, \
+    /bin/chown -R www-data\:www-data /var/www/weatherman/blue, \
+    /bin/chown -R www-data\:www-data /var/www/weatherman/green, \
     /bin/chmod -R 755 /var/www/weatherman/blue, \
     /bin/chmod -R 755 /var/www/weatherman/green, \
     /usr/bin/chmod -R 755 /var/www/weatherman/blue, \
