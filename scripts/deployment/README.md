@@ -2,6 +2,56 @@
 
 Blue-green deployment automation scripts for Weatherman application.
 
+## Architecture Overview
+
+Weatherman uses a blue-green deployment architecture with separate environments:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Nginx (Port 80)                      │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ Static Files: /var/www/weatherman/{blue|green}/       │ │
+│  │ - Frontend React app (index.html, JS, CSS, assets)    │ │
+│  │ - Served directly by nginx                            │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ API Proxy: /api/* → http://localhost:{3001|3002}      │ │
+│  │ - Proxied to PM2-managed backend                      │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            │
+        ┌───────────────────┴───────────────────┐
+        │                                       │
+        ▼                                       ▼
+┌───────────────────┐                 ┌───────────────────┐
+│   Blue Backend    │                 │   Green Backend   │
+│   Port: 3001      │                 │   Port: 3002      │
+│                   │                 │                   │
+│  PM2 Cluster Mode │                 │  PM2 Cluster Mode │
+│  - Multiple       │                 │  - Multiple       │
+│    workers        │                 │    workers        │
+│  - Load balanced  │                 │  - Load balanced  │
+│  - API endpoints  │                 │  - API endpoints  │
+└───────────────────┘                 └───────────────────┘
+```
+
+**Blue Environment:**
+- Backend: Node.js API on port 3001 (PM2 cluster)
+- Frontend: Static files in /var/www/weatherman/blue/
+
+**Green Environment:**
+- Backend: Node.js API on port 3002 (PM2 cluster)
+- Frontend: Static files in /var/www/weatherman/green/
+
+**Traffic Switching:**
+When switching from Blue to Green, nginx configuration is updated to:
+1. Change backend upstream from port 3001 → 3002
+2. Change frontend root from /var/www/weatherman/blue/ → /var/www/weatherman/green/
+
+This allows zero-downtime deployments with instant rollback capability.
+
 ## Prerequisites
 
 ### System Requirements
@@ -107,11 +157,15 @@ curl http://localhost/health
 ```
 
 **Configuration features:**
-- Blue-Green deployment support (ports 3000/3001)
+- Blue-Green deployment support
+  - Blue: Backend on port 3001, Frontend in /var/www/weatherman/blue/
+  - Green: Backend on port 3002, Frontend in /var/www/weatherman/green/
+- Nginx serves frontend static files directly (packages/frontend/dist)
+- Nginx proxies /api/* requests to PM2-managed backend cluster
 - Health check endpoint with monitoring disabled
 - WebSocket support for real-time features
 - Security headers (XSS, CORS, frame protection)
-- Static asset caching
+- Static asset caching with immutable cache-control
 - Request logging (access and error logs)
 - SSL/HTTPS ready (commented out, enable when needed)
 
@@ -119,8 +173,11 @@ curl http://localhost/health
 
 Ensure PM2 configs exist in repository root:
 
-- `pm2.blue.config.js` - Blue environment configuration (port 3000)
-- `pm2.green.config.js` - Green environment configuration (port 3001)
+- `pm2.blue.config.js` - Blue backend configuration (port 3001, cluster mode)
+- `pm2.green.config.js` - Green backend configuration (port 3002, cluster mode)
+
+PM2 manages the Node.js backend API server in cluster mode with multiple workers for load balancing.
+The frontend static files are served directly by nginx, not by the Node.js backend.
 
 ### GitHub Actions Runner (Self-Hosted)
 
@@ -153,15 +210,20 @@ Deploy application to specific environment.
 
 **What it does:**
 1. Verifies PM2 config exists
-2. Verifies build artifacts exist
-3. Stops existing environment processes
-4. Starts environment with PM2
-5. Verifies process is running
+2. Verifies build artifacts exist (packages/frontend/dist)
+3. Deploys frontend static files to environment-specific directory:
+   - Blue: /var/www/weatherman/blue/
+   - Green: /var/www/weatherman/green/
+4. Sets correct permissions (www-data:www-data, 755)
+5. Stops existing environment PM2 processes
+6. Starts environment backend with PM2 cluster
+7. Verifies PM2 process is running
 
 **Requirements:**
 - Application must be built (`npm run build --workspace=packages/frontend`)
 - PM2 must be installed
 - Correct PM2 config file must exist
+- Sudo access for frontend deployment directory management
 
 ### switch-traffic.sh
 
@@ -174,16 +236,19 @@ Switch nginx traffic between Blue and Green environments.
 ```
 
 **What it does:**
-1. Validates target environment health
+1. Validates target environment health (backend /health endpoint)
 2. Backs up current nginx configuration
-3. Updates nginx upstream to target port
+3. Updates nginx configuration:
+   - Backend upstream port (3001 ↔ 3002)
+   - Frontend root directory (/var/www/weatherman/blue ↔ /var/www/weatherman/green)
 4. Validates nginx syntax
 5. Reloads nginx with zero downtime
-6. Updates deployment state files
+6. Updates deployment state files (backend_port, frontend_dir)
 7. Rolls back on failure
 
 **Requirements:**
 - Target environment must be running and healthy
+- Target frontend files must be deployed to /var/www/weatherman/{env}/
 - Sudo access for nginx management
 - Nginx configuration at `/etc/nginx/sites-enabled/weatherman`
 
@@ -249,9 +314,9 @@ When code is merged to main branch:
    - Checkout code on self-hosted runner
    - Install dependencies: `npm ci`
    - Build frontend: `npm run build --workspace=packages/frontend`
-   - Stop inactive environment
-   - Deploy to inactive environment (Blue or Green)
-   - Start with PM2
+   - Deploy frontend static files to /var/www/weatherman/{env}/
+   - Stop inactive environment backend
+   - Start backend with PM2 cluster
 
 3. **Health Check**
    - Poll `/health` endpoint (2-minute timeout)
@@ -289,7 +354,7 @@ npm run build --workspace=packages/frontend
 ./scripts/deployment/deploy-to-green.sh
 
 # 3. Wait for health check
-curl http://localhost:3001/health
+curl http://localhost:3002/health
 
 # 4. Run post-deployment tests (manual)
 npm test --workspace=packages/frontend
@@ -352,12 +417,16 @@ pm2 logs --err
 ### Verify Health
 
 ```bash
-# Check both environments
-curl http://localhost:3000/health  # Blue
-curl http://localhost:3001/health  # Green
+# Check both backend environments directly
+curl http://localhost:3001/health  # Blue backend
+curl http://localhost:3002/health  # Green backend
 
 # Check via nginx (active environment)
 curl http://localhost/health
+
+# Check frontend directories exist
+ls -la /var/www/weatherman/blue/
+ls -la /var/www/weatherman/green/
 ```
 
 ## Troubleshooting
@@ -368,9 +437,10 @@ curl http://localhost/health
 
 **Solutions**:
 1. Check PM2 logs: `pm2 logs weatherman-green --lines 50`
-2. Verify port not in use: `lsof -i :3001`
-3. Check build artifacts: `ls -la packages/frontend/dist/`
-4. Manually test health: `curl http://localhost:3001/health`
+2. Verify port not in use: `lsof -i :3002`
+3. Check build artifacts deployed: `ls -la /var/www/weatherman/green/`
+4. Check source build: `ls -la packages/frontend/dist/`
+5. Manually test backend health: `curl http://localhost:3002/health`
 
 ### Traffic Switch Fails - Nginx Error
 

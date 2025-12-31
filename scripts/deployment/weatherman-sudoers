@@ -34,10 +34,19 @@ Cmnd_Alias STATE_MGMT = \
     /usr/bin/tee /var/lib/weatherman/state/blue.json, \
     /usr/bin/tee /var/lib/weatherman/state/green.json
 
+# Frontend deployment directory management
+Cmnd_Alias FRONTEND_DEPLOY = \
+    /bin/mkdir -p /var/www/weatherman/*, \
+    /bin/rm -rf /var/www/weatherman/*/, \
+    /bin/rm -rf /var/www/weatherman/*/*, \
+    /bin/cp -r * /var/www/weatherman/*/, \
+    /usr/bin/chown -R www-data:www-data /var/www/weatherman/*, \
+    /bin/chown -R www-data:www-data /var/www/weatherman/*, \
+    /bin/chmod -R 755 /var/www/weatherman/*, \
+    /usr/bin/chmod -R 755 /var/www/weatherman/*
+
 # Allow deployment users to execute these commands without password
-DEPLOY_USERS ALL=(root) NOPASSWD: NGINX_CONFIG, STATE_MGMT
+DEPLOY_USERS ALL=(root) NOPASSWD: NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY
 
 # Optional: Add logging for audit trail
 Defaults:DEPLOY_USERS log_output
-Defaults:DEPLOY_USERS!/usr/bin/sudoreplay log_output
-Defaults:DEPLOY_USERS!sudoedit log_output

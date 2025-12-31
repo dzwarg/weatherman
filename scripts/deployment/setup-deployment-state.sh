@@ -20,8 +20,10 @@ set -e
 STATE_DIR="/var/lib/weatherman/state"
 BLUE_STATE="$STATE_DIR/blue.json"
 GREEN_STATE="$STATE_DIR/green.json"
-BLUE_PORT=3000
-GREEN_PORT=3001
+BLUE_PORT=3001
+GREEN_PORT=3002
+BLUE_FRONTEND="/var/www/weatherman/blue"
+GREEN_FRONTEND="/var/www/weatherman/green"
 
 echo "🔧 Setting up deployment state directory..."
 echo "==========================================="
@@ -44,7 +46,8 @@ if [ ! -f "$BLUE_STATE" ]; then
 {
   "environment": "blue",
   "status": "active",
-  "port": $BLUE_PORT,
+  "backend_port": $BLUE_PORT,
+  "frontend_dir": "$BLUE_FRONTEND",
   "initialized_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "description": "Initial Blue environment - active by default"
 }
@@ -63,7 +66,8 @@ if [ ! -f "$GREEN_STATE" ]; then
 {
   "environment": "green",
   "status": "inactive",
-  "port": $GREEN_PORT,
+  "backend_port": $GREEN_PORT,
+  "frontend_dir": "$GREEN_FRONTEND",
   "initialized_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "description": "Initial Green environment - inactive by default"
 }

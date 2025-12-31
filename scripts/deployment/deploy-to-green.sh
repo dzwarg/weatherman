@@ -19,7 +19,7 @@ set -e
 
 # Configuration
 ENV_NAME="green"
-PORT=3001
+PORT=3002
 PM2_APP_NAME="weatherman-green"
 PM2_CONFIG="pm2.green.config.js"
 WORK_DIR=$(pwd)
@@ -45,7 +45,26 @@ if [ ! -d "packages/frontend/dist" ]; then
   exit 1
 fi
 
+# Deploy frontend static files to environment-specific directory
+FRONTEND_DEPLOY_DIR="/var/www/weatherman/$ENV_NAME"
+echo "Deploying frontend static files..."
+echo "Target: $FRONTEND_DEPLOY_DIR"
+
+# Create deployment directory if it doesn't exist
+sudo mkdir -p "$FRONTEND_DEPLOY_DIR"
+
+# Copy frontend build to deployment directory
+sudo rm -rf "$FRONTEND_DEPLOY_DIR"/*
+sudo cp -r packages/frontend/dist/* "$FRONTEND_DEPLOY_DIR/"
+
+# Set correct permissions for nginx
+sudo chown -R www-data:www-data "$FRONTEND_DEPLOY_DIR"
+sudo chmod -R 755 "$FRONTEND_DEPLOY_DIR"
+
+echo "✅ Frontend files deployed to $FRONTEND_DEPLOY_DIR"
+
 # Stop existing Green environment (if running)
+echo ""
 echo "Stopping existing Green environment..."
 pm2 stop "$PM2_APP_NAME" 2>/dev/null || echo "  (not running)"
 pm2 delete "$PM2_APP_NAME" 2>/dev/null || echo "  (not found)"

@@ -39,13 +39,19 @@ if [ "$TARGET_ENV" != "blue" ] && [ "$TARGET_ENV" != "green" ]; then
   exit 1
 fi
 
-# Determine target port
+# Determine target port and frontend directory
 if [ "$TARGET_ENV" == "blue" ]; then
-  TARGET_PORT=3000
-  echo "🔵 Switching traffic to Blue environment (port 3000)"
-else
   TARGET_PORT=3001
-  echo "🟢 Switching traffic to Green environment (port 3001)"
+  FRONTEND_DIR="/var/www/weatherman/blue"
+  echo "🔵 Switching traffic to Blue environment"
+  echo "   Backend: port 3001"
+  echo "   Frontend: $FRONTEND_DIR"
+else
+  TARGET_PORT=3002
+  FRONTEND_DIR="/var/www/weatherman/green"
+  echo "🟢 Switching traffic to Green environment"
+  echo "   Backend: port 3002"
+  echo "   Frontend: $FRONTEND_DIR"
 fi
 
 # Verify target environment is healthy
@@ -66,9 +72,18 @@ if [ -f "$NGINX_CONF" ]; then
   sudo cp "$NGINX_CONF" "$NGINX_CONF_BACKUP"
 fi
 
-# Update nginx upstream configuration
+# Update nginx configuration (backend port and frontend directory)
 echo "Updating nginx configuration..."
-sudo sed -i "s|proxy_pass http://localhost:[0-9]\+|proxy_pass http://localhost:$TARGET_PORT|g" "$NGINX_CONF"
+
+# Update backend upstream port
+sudo sed -i "s|server localhost:[0-9]\+ max_fails|server localhost:$TARGET_PORT max_fails|g" "$NGINX_CONF"
+
+# Update frontend root directory (all occurrences)
+if [ "$TARGET_ENV" == "blue" ]; then
+  sudo sed -i "s|root /var/www/weatherman/green|root /var/www/weatherman/blue|g" "$NGINX_CONF"
+else
+  sudo sed -i "s|root /var/www/weatherman/blue|root /var/www/weatherman/green|g" "$NGINX_CONF"
+fi
 
 # Verify nginx configuration syntax
 echo "Verifying nginx configuration..."
@@ -112,7 +127,8 @@ cat > "$STATE_DIR/$TARGET_ENV.json" <<EOF
 {
   "environment": "$TARGET_ENV",
   "status": "active",
-  "port": $TARGET_PORT,
+  "backend_port": $TARGET_PORT,
+  "frontend_dir": "$FRONTEND_DIR",
   "activated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 EOF
@@ -120,25 +136,33 @@ EOF
 # Mark old environment as inactive
 if [ "$TARGET_ENV" == "blue" ]; then
   OLD_ENV="green"
-  OLD_PORT=3001
+  OLD_PORT=3002
+  OLD_FRONTEND_DIR="/var/www/weatherman/green"
 else
   OLD_ENV="blue"
-  OLD_PORT=3000
+  OLD_PORT=3001
+  OLD_FRONTEND_DIR="/var/www/weatherman/blue"
 fi
 
 cat > "$STATE_DIR/$OLD_ENV.json" <<EOF
 {
   "environment": "$OLD_ENV",
   "status": "inactive",
-  "port": $OLD_PORT,
+  "backend_port": $OLD_PORT,
+  "frontend_dir": "$OLD_FRONTEND_DIR",
   "deactivated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 EOF
 
 echo ""
 echo "✅ Traffic switch complete!"
-echo "Active environment: $TARGET_ENV (port $TARGET_PORT)"
-echo "Inactive environment: $OLD_ENV (port $OLD_PORT)"
+echo "Active environment: $TARGET_ENV"
+echo "  Backend port: $TARGET_PORT"
+echo "  Frontend dir: $FRONTEND_DIR"
+echo ""
+echo "Inactive environment: $OLD_ENV"
+echo "  Backend port: $OLD_PORT"
+echo "  Frontend dir: $OLD_FRONTEND_DIR"
 echo ""
 echo "Monitor traffic:"
 echo "  curl http://localhost/health"

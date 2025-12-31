@@ -19,8 +19,8 @@ NC='\033[0m'
 
 CONFIG_FILE="/etc/nginx/sites-available/weatherman"
 ENABLED_LINK="/etc/nginx/sites-enabled/weatherman"
-BLUE_PORT=3000
-GREEN_PORT=3001
+BLUE_PORT=3001
+GREEN_PORT=3002
 
 echo ""
 echo "🔍 Verifying Nginx Configuration for Weatherman"
@@ -86,10 +86,10 @@ else
   ERRORS=$((ERRORS + 1))
 fi
 
-# Check 5: Active port detection
-echo -n "5. Active port detection... "
+# Check 5: Active backend port detection
+echo -n "5. Active backend port... "
 if [ -f "$CONFIG_FILE" ]; then
-  ACTIVE_PORT=$(grep -oP 'proxy_pass\s+http://localhost:\K\d+' "$CONFIG_FILE" | head -1)
+  ACTIVE_PORT=$(grep -oP 'server\s+localhost:\K\d+' "$CONFIG_FILE" | head -1)
   if [ "$ACTIVE_PORT" == "$BLUE_PORT" ]; then
     echo -e "${GREEN}✓ (Blue: $BLUE_PORT)${NC}"
   elif [ "$ACTIVE_PORT" == "$GREEN_PORT" ]; then
@@ -97,6 +97,24 @@ if [ -f "$CONFIG_FILE" ]; then
   else
     echo -e "${YELLOW}⚠️ (Port: $ACTIVE_PORT)${NC}"
     echo "   Expected: $BLUE_PORT or $GREEN_PORT"
+    WARNINGS=$((WARNINGS + 1))
+  fi
+else
+  echo -e "${RED}✗${NC}"
+  ERRORS=$((ERRORS + 1))
+fi
+
+# Check 5b: Active frontend directory detection
+echo -n "5b. Active frontend directory... "
+if [ -f "$CONFIG_FILE" ]; then
+  ACTIVE_FRONTEND=$(grep -oP 'root\s+\K/var/www/weatherman/\w+' "$CONFIG_FILE" | head -1)
+  if [ "$ACTIVE_FRONTEND" == "/var/www/weatherman/blue" ]; then
+    echo -e "${GREEN}✓ (Blue)${NC}"
+  elif [ "$ACTIVE_FRONTEND" == "/var/www/weatherman/green" ]; then
+    echo -e "${GREEN}✓ (Green)${NC}"
+  else
+    echo -e "${YELLOW}⚠️ (Dir: $ACTIVE_FRONTEND)${NC}"
+    echo "   Expected: /var/www/weatherman/blue or /var/www/weatherman/green"
     WARNINGS=$((WARNINGS + 1))
   fi
 else

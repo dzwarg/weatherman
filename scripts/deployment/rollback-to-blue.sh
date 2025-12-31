@@ -22,8 +22,10 @@ echo "🔵 Emergency Rollback to Blue Environment"
 echo "=========================================="
 
 # Configuration
-BLUE_PORT=3000
-GREEN_PORT=3001
+BLUE_PORT=3001
+GREEN_PORT=3002
+BLUE_FRONTEND="/var/www/weatherman/blue"
+GREEN_FRONTEND="/var/www/weatherman/green"
 STATE_DIR="/var/lib/weatherman/state"
 
 # Check if Blue environment is healthy
@@ -58,7 +60,8 @@ cat > "$STATE_DIR/green.json" <<EOF
 {
   "environment": "green",
   "status": "failed",
-  "port": $GREEN_PORT,
+  "backend_port": $GREEN_PORT,
+  "frontend_dir": "$GREEN_FRONTEND",
   "rolled_back_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "reason": "Emergency rollback executed"
 }
