@@ -16,8 +16,10 @@ function validateEnv() {
   }
 }
 
-// Validate on load
-validateEnv();
+// Validate on load (skip in test environment - setup.js will provide test values)
+if (process.env.NODE_ENV !== 'test') {
+  validateEnv();
+}
 
 export const config = {
   port: process.env.PORT || 3000,
