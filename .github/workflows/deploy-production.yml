@@ -56,8 +56,8 @@ jobs:
             exit 0
           fi
 
-          # Extract current upstream port from nginx config
-          ACTIVE_PORT=$(grep -oP 'proxy_pass\s+http://localhost:\K\d+' "$NGINX_CONF" | head -1)
+          # Extract current upstream port from nginx config (upstream block)
+          ACTIVE_PORT=$(grep -oP 'server\s+localhost:\K\d+' "$NGINX_CONF" | head -1)
 
           if [ "$ACTIVE_PORT" == "3001" ]; then
             echo "🔵 Blue environment is active (port 3001)"
