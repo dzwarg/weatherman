@@ -147,17 +147,79 @@ jobs:
           # This is informational only and won't block the PR
           echo "GPG signature check complete"
 
-  # T025: Reuse CI workflow for quality checks
-  run-ci-checks:
-    name: Run CI Checks
-    uses: ./.github/workflows/ci.yml
-    # CI workflow will run lint, tests, build, and coverage
+  # T025: Run CI quality checks inline (artifacts must be in same workflow)
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test --workspace=packages/frontend -- --run
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: packages/frontend/coverage/
+          retention-days: 90
+
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test --workspace=packages/server -- --run
+      - name: Upload backend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: packages/server/coverage/
+          retention-days: 90
+
+  build:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    needs: [lint, test-frontend, test-backend]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --workspace=packages/frontend
 
   # T028: Aggregate coverage calculation
   calculate-coverage:
     name: Calculate Coverage
     runs-on: ubuntu-latest
-    needs: run-ci-checks
+    needs: [test-frontend, test-backend]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -294,7 +356,10 @@ jobs:
       - check-deployment-status
       - validate-commits
       - verify-signatures
-      - run-ci-checks
+      - lint
+      - test-frontend
+      - test-backend
+      - build
       - calculate-coverage
     if: always()
     steps:
@@ -305,14 +370,20 @@ jobs:
           echo "- Deployment status check: ${{ needs.check-deployment-status.result }}"
           echo "- Commit format validation: ${{ needs.validate-commits.result }}"
           echo "- GPG signature verification: ${{ needs.verify-signatures.result }}"
-          echo "- CI checks: ${{ needs.run-ci-checks.result }}"
+          echo "- Lint: ${{ needs.lint.result }}"
+          echo "- Frontend tests: ${{ needs.test-frontend.result }}"
+          echo "- Backend tests: ${{ needs.test-backend.result }}"
+          echo "- Build: ${{ needs.build.result }}"
           echo "- Coverage calculation: ${{ needs.calculate-coverage.result }}"
 
           # Fail if any required check failed
           if [[ "${{ needs.validate-branch-name.result }}" != "success" ]] || \
              [[ "${{ needs.check-deployment-status.result }}" != "success" ]] || \
              [[ "${{ needs.validate-commits.result }}" != "success" ]] || \
-             [[ "${{ needs.run-ci-checks.result }}" != "success" ]] || \
+             [[ "${{ needs.lint.result }}" != "success" ]] || \
+             [[ "${{ needs.test-frontend.result }}" != "success" ]] || \
+             [[ "${{ needs.test-backend.result }}" != "success" ]] || \
+             [[ "${{ needs.build.result }}" != "success" ]] || \
              [[ "${{ needs.calculate-coverage.result }}" != "success" ]]; then
             echo "::error::❌ Quality gate FAILED - one or more required checks did not pass"
             exit 1
