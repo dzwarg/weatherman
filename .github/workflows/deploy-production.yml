@@ -181,7 +181,11 @@ jobs:
           INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
           STATE_FILE="${{ env.DEPLOYMENT_STATE_DIR }}/$INACTIVE_ENV.json"
 
-          cat > "$STATE_FILE" <<EOF
+          # Ensure state directory exists
+          sudo mkdir -p "${{ env.DEPLOYMENT_STATE_DIR }}"
+
+          # Write state file using sudo tee (required for /var/lib/ access)
+          cat <<EOF | sudo tee "$STATE_FILE" > /dev/null
           {
             "environment": "$INACTIVE_ENV",
             "status": "deployed",
@@ -193,7 +197,10 @@ jobs:
           }
           EOF
 
-          echo "Updated state for $INACTIVE_ENV environment"
+          # Set readable permissions on state file
+          sudo chmod 644 "$STATE_FILE"
+
+          echo "✅ Updated state for $INACTIVE_ENV environment"
 
   # Placeholder for Phase 6: Post-deployment tests
   # This will be implemented in T045-T058
