@@ -67,7 +67,7 @@ jobs:
     needs: [detect-environment]
     environment:
       name: production
-      url: https://weatherman.example.com
+      url: https://weatherman.zwarg.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -223,7 +223,7 @@ jobs:
               deployment_id: context.payload.deployment?.id || 0,
               state: 'success',
               description: 'Deployed to ${{ needs.detect-environment.outputs.inactive_env }} and switched traffic',
-              environment_url: 'https://weatherman.example.com'
+              environment_url: 'https://weatherman.zwarg.com'
             });
 
   # Job 5: Rollback on failure

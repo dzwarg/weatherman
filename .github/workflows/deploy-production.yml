@@ -87,7 +87,7 @@ jobs:
     needs: [detect-environment]
     environment:
       name: production
-      url: https://weatherman.example.com
+      url: https://weatherman.zwarg.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

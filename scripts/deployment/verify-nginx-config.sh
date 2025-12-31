@@ -128,7 +128,7 @@ if [ -f "$CONFIG_FILE" ]; then
   SERVER_NAME=$(grep -oP 'server_name\s+\K[^;]+' "$CONFIG_FILE" | head -1)
   if [ -n "$SERVER_NAME" ]; then
     echo -e "${GREEN}✓ ($SERVER_NAME)${NC}"
-    if [ "$SERVER_NAME" == "weatherman.example.com" ]; then
+    if [ "$SERVER_NAME" == "weatherman.zwarg.com" ]; then
       echo -e "   ${YELLOW}⚠️  Using example domain (update for production)${NC}"
       WARNINGS=$((WARNINGS + 1))
     fi
@@ -242,7 +242,7 @@ if [ $ERRORS -gt 0 ] || [ $WARNINGS -gt 0 ]; then
 
   if [ -f "$CONFIG_FILE" ]; then
     SERVER_NAME=$(grep -oP 'server_name\s+\K[^;]+' "$CONFIG_FILE" | head -1)
-    if [ "$SERVER_NAME" == "weatherman.example.com" ]; then
+    if [ "$SERVER_NAME" == "weatherman.zwarg.com" ]; then
       echo "   • Update server name for production:"
       echo "     sudo nano $CONFIG_FILE"
       echo "     sudo nginx -t && sudo systemctl reload nginx"
