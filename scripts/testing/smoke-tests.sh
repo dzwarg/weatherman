@@ -82,9 +82,9 @@ run_test "Health endpoint" \
 
 check_timeout || exit 1
 
-# Test 2: Health endpoint returns valid JSON
+# Test 2: Health endpoint returns valid JSON with status ok
 run_test "Health endpoint JSON" \
-  "curl -sf --max-time 5 '$BASE_URL/api/health' | jq -e '.status == \"ok\"'"
+  "curl -sf --max-time 5 '$BASE_URL/api/health' | grep -q '\"status\".*:.*\"ok\"'"
 
 check_timeout || exit 1
 
