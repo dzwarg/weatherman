@@ -71,6 +71,21 @@ echo "Stopping existing Blue environment..."
 npx pm2 stop "$PM2_APP_NAME" 2>/dev/null || echo "  (not running)"
 npx pm2 delete "$PM2_APP_NAME" 2>/dev/null || echo "  (not found)"
 
+# Create .env file for backend with secrets from GitHub Actions
+echo ""
+echo "Creating .env file for backend..."
+cat > packages/server/.env << EOF
+NODE_ENV=production
+PORT=$PORT
+ENV_NAME=$ENV_NAME
+WEATHER_API_KEY=$WEATHER_API_KEY
+WEATHER_API_URL=$WEATHER_API_URL
+ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
+CLAUDE_MODEL=$CLAUDE_MODEL
+EOF
+chmod 600 packages/server/.env
+echo "✅ Environment file created"
+
 # Start Blue environment with PM2
 echo ""
 echo "Starting Blue environment..."
