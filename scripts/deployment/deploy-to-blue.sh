@@ -50,12 +50,11 @@ FRONTEND_DEPLOY_DIR="/var/www/weatherman/$ENV_NAME"
 echo "Deploying frontend static files..."
 echo "Target: $FRONTEND_DEPLOY_DIR"
 
-# Create deployment directory if it doesn't exist
-sudo mkdir -p "$FRONTEND_DEPLOY_DIR"
+# Remove old deployment directory completely (no wildcards)
+sudo rm -rf "$FRONTEND_DEPLOY_DIR"
 
-# Copy frontend build to deployment directory
-sudo rm -rf "$FRONTEND_DEPLOY_DIR"/*
-sudo cp -r packages/frontend/dist/* "$FRONTEND_DEPLOY_DIR/"
+# Copy frontend build to deployment directory (dist becomes the directory)
+sudo cp -r packages/frontend/dist "$FRONTEND_DEPLOY_DIR"
 
 # Set correct permissions for nginx
 sudo chown -R www-data:www-data "$FRONTEND_DEPLOY_DIR"

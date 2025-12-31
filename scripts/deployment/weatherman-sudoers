@@ -34,16 +34,22 @@ Cmnd_Alias STATE_MGMT = \
     /usr/bin/tee /var/lib/weatherman/state/blue.json, \
     /usr/bin/tee /var/lib/weatherman/state/green.json
 
-# Frontend deployment directory management
+# Frontend deployment directory management (explicit paths only - no wildcards)
 Cmnd_Alias FRONTEND_DEPLOY = \
-    /bin/mkdir -p /var/www/weatherman/*, \
-    /bin/rm -rf /var/www/weatherman/*/, \
-    /bin/rm -rf /var/www/weatherman/*/*, \
-    /bin/cp -r * /var/www/weatherman/*/, \
-    /usr/bin/chown -R www-data:www-data /var/www/weatherman/*, \
-    /bin/chown -R www-data:www-data /var/www/weatherman/*, \
-    /bin/chmod -R 755 /var/www/weatherman/*, \
-    /usr/bin/chmod -R 755 /var/www/weatherman/*
+    /bin/mkdir -p /var/www/weatherman/blue, \
+    /bin/mkdir -p /var/www/weatherman/green, \
+    /bin/rm -rf /var/www/weatherman/blue, \
+    /bin/rm -rf /var/www/weatherman/green, \
+    /bin/cp -r packages/frontend/dist /var/www/weatherman/blue, \
+    /bin/cp -r packages/frontend/dist /var/www/weatherman/green, \
+    /usr/bin/chown -R www-data:www-data /var/www/weatherman/blue, \
+    /usr/bin/chown -R www-data:www-data /var/www/weatherman/green, \
+    /bin/chown -R www-data:www-data /var/www/weatherman/blue, \
+    /bin/chown -R www-data:www-data /var/www/weatherman/green, \
+    /bin/chmod -R 755 /var/www/weatherman/blue, \
+    /bin/chmod -R 755 /var/www/weatherman/green, \
+    /usr/bin/chmod -R 755 /var/www/weatherman/blue, \
+    /usr/bin/chmod -R 755 /var/www/weatherman/green
 
 # Allow deployment users to execute these commands without password
 DEPLOY_USERS ALL=(root) NOPASSWD: NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY
