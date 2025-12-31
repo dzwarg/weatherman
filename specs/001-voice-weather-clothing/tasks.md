@@ -300,9 +300,9 @@ Before starting implementation:
 
 ### Branching Strategy
 
-- **Feature branch**: `001-voice-weather-clothing` (already created)
-- **Task branches**: `spec/001/task/###-short-description` (e.g., `spec/001/task/001-vite-setup`)
-- **Pull requests**: Reference task ID in title and description
+- **Feature branch**: `001-voice-weather-clothing` (all work done on this branch)
+- **Branch format**: `<spec-number>-short-description`
+- **Pull requests**: Reference spec and task IDs in title and description
 
 ---
 

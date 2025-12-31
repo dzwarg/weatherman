@@ -48,7 +48,7 @@ pending → running → [succeeded | failed | cancelled | timed_out]
 {
   "workflow_id": "1234567890",
   "trigger_source": "pull_request",
-  "branch": "spec/003/task/001-ci-workflows",
+  "branch": "003-automated-build-test",
   "commit_sha": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
   "commit_message": "feat(ci): add GitHub Actions workflows",
   "author": "developer",

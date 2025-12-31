@@ -130,8 +130,8 @@ When you push to a feature branch, the CI workflow automatically runs:
 ### Example: Push to Feature Branch
 
 ```bash
-# Create feature branch (following spec/task convention)
-git checkout -b spec/003/task/001-github-actions-ci
+# Create feature branch (following speckit convention)
+git checkout -b 003-automated-build-test
 
 # Make changes
 # ... edit files ...
@@ -141,10 +141,10 @@ git add .
 git commit -m "feat(ci): add GitHub Actions CI workflow"
 
 # Push to remote (triggers CI workflow)
-git push origin spec/003/task/001-github-actions-ci
+git push origin 003-automated-build-test
 
 # Check CI status
-gh run list --branch spec/003/task/001-github-actions-ci
+gh run list --branch 003-automated-build-test
 ```
 
 ---
@@ -157,9 +157,9 @@ Once CI passes on your feature branch:
 
 ```bash
 # Create PR using GitHub CLI
-gh pr create --base main --head spec/003/task/001-github-actions-ci \
+gh pr create --base main --head 003-automated-build-test \
   --title "feat(ci): add GitHub Actions CI workflow" \
-  --body "Implements automated CI for feature branches per spec 003, task 001"
+  --body "Implements automated CI for feature branches per spec 003"
 
 # Or create via GitHub web UI
 ```
@@ -171,7 +171,7 @@ gh pr create --base main --head spec/003/task/001-github-actions-ci \
 **Triggered On**: Pull request opened/updated targeting `main`
 
 **Quality Checks**:
-1. ✅ **Branch Name Validation**: Must match `spec/<number>/task/<number>-description`
+1. ✅ **Branch Name Validation**: Must match `NNN-description` format
 2. ✅ **Deployment Check**: Blocks merge if production deployment is in progress
 3. ✅ **All CI Checks**: Reruns lint, test, build from CI workflow
 4. ✅ **Commit Validation**: Conventional commit format + GPG signatures
@@ -449,10 +449,10 @@ npm run build
 
 ```bash
 # Rename branch locally
-git branch -m spec/<number>/task/<number>-description
+git branch -m NNN-description
 
 # Force push to update remote
-git push origin -u spec/<number>/task/<number>-description --force
+git push origin -u NNN-description --force
 ```
 
 #### Issue: Deployment in Progress

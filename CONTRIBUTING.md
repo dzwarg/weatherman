@@ -149,7 +149,7 @@ docs(readme): update installation instructions
 
 ### Branch Naming Convention
 
-- **Feature branches**: `feature/short-description` or `spec/001/task/###-description`
+- **Spec-driven features**: `NNN-short-description` (where NNN is spec number)
 - **Bug fixes**: `fix/short-description`
 - **Documentation**: `docs/short-description`
 - **Refactoring**: `refactor/short-description`
@@ -157,8 +157,8 @@ docs(readme): update installation instructions
 ### Examples
 
 ```bash
-feature/extreme-weather-handling
-spec/001/task/055-service-worker
+001-voice-weather-clothing
+003-automated-build-test
 fix/voice-permission-error
 docs/troubleshooting-guide
 refactor/recommendation-service

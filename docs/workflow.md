@@ -378,7 +378,7 @@ git checkout main
 git pull origin main
 
 # 2. Create feature branch
-git checkout -b spec/1/task/8-add-wind-speed-indicator
+git checkout -b 001-add-wind-speed-indicator
 
 # 3. Verify spec and task exist
 cat docs/specs/spec-1.md  # Review specification
@@ -407,7 +407,7 @@ Refs #8"
 git log --show-signature -1  # ✓ Signature verified
 
 # 8. Push to remote
-git push origin spec/1/task/8-add-wind-speed-indicator
+git push origin 001-add-wind-speed-indicator
 
 # 9. Create Pull Request (if applicable)
 # Open PR on GitHub/GitLab with:
@@ -498,17 +498,17 @@ git branch feature/weather-api
 git branch task-5-outfit-engine
 
 # ✓ Correct
-git branch spec/1/task/5-weather-api-integration
-git branch spec/2/task/12-outfit-recommendation-engine
+git branch 001-weather-api-integration
+git branch 002-outfit-recommendation-engine
 ```
 
 **Renaming a branch:**
 ```bash
 # Rename current branch
-git branch -m spec/1/task/5-correct-name
+git branch -m 001-correct-name
 
 # Rename another branch
-git branch -m old-name spec/1/task/5-new-name
+git branch -m old-name 001-new-name
 ```
 
 ### Commit Message Issues
@@ -536,7 +536,7 @@ git rebase -i HEAD~3
 Before considering your work complete, verify:
 
 - [ ] Main branch is synced
-- [ ] Feature branch follows naming convention: `spec/X/task/Y-description`
+- [ ] Feature branch follows naming convention: `NNN-description`
 - [ ] Spec and task documents exist and are referenced
 - [ ] Code changes are complete and tested
 - [ ] All unit tests pass (`npm test`)

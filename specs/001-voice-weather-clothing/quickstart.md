@@ -224,13 +224,13 @@ Read these documents before coding:
 
 ### 2. Create Task Branch
 
-Tasks will be created via `/speckit.tasks` command. Branch naming convention:
+This spec uses the main feature branch for all tasks. Branch naming convention:
 
 ```bash
-git checkout -b spec/001/task/1-implement-weather-service
+git checkout 001-voice-weather-clothing
 ```
 
-Format: `spec/<spec-number>/task/<task-number>-short-description`
+Format: `<spec-number>-short-description`
 
 ### 3. Write Tests First (TDD)
 

@@ -25,10 +25,10 @@ jobs:
       - name: Check branch name format
         run: |
           BRANCH="${{ github.head_ref }}"
-          if [[ ! "$BRANCH" =~ ^spec/[0-9]+/task/[0-9]+-[a-z0-9-]+$ ]]; then
+          if [[ ! "$BRANCH" =~ ^[0-9]{3}-[a-z0-9-]+$ ]]; then
             echo "❌ Invalid branch name: $BRANCH"
-            echo "Expected format: spec/<number>/task/<number>-description"
-            echo "Example: spec/003/task/001-github-actions-ci"
+            echo "Expected format: NNN-description"
+            echo "Example: 003-automated-build-test"
             exit 1
           fi
           echo "✅ Branch name valid: $BRANCH"
