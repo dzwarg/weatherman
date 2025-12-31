@@ -15,6 +15,11 @@
 # Replace 'weatherman' with actual username or use %group for groups
 User_Alias DEPLOY_USERS = weatherman
 
+# Basic test commands (for deployment prerequisite checks)
+Cmnd_Alias TEST_CMDS = \
+    /bin/true, \
+    /usr/bin/true
+
 # Nginx configuration management
 Cmnd_Alias NGINX_CONFIG = \
     /bin/cp /etc/nginx/sites-enabled/weatherman /etc/nginx/sites-enabled/weatherman.backup, \
@@ -58,7 +63,7 @@ Cmnd_Alias FRONTEND_DEPLOY = \
     /usr/bin/chmod -R 755 /var/www/weatherman/green
 
 # Allow deployment users to execute these commands without password
-DEPLOY_USERS ALL=(root) NOPASSWD: NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY
+DEPLOY_USERS ALL=(root) NOPASSWD: TEST_CMDS, NGINX_CONFIG, STATE_MGMT, FRONTEND_DEPLOY
 
 # Optional: Add logging for audit trail
 Defaults:DEPLOY_USERS log_output
