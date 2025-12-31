@@ -278,16 +278,22 @@ jobs:
   comment-coverage:
     name: Post Coverage Comment
     runs-on: ubuntu-latest
-    needs: calculate-coverage
+    needs: [test-frontend, test-backend]
     if: always()
     permissions:
       pull-requests: write
     steps:
-      - name: Download coverage data
+      - name: Download frontend coverage
         uses: actions/download-artifact@v4
         with:
-          name: aggregate-coverage
-          path: coverage
+          name: frontend-coverage
+          path: coverage-frontend
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: coverage-backend
 
       - name: Post coverage comment
         uses: actions/github-script@v7
@@ -296,8 +302,8 @@ jobs:
             const fs = require('fs');
 
             // Read coverage data
-            const frontendSummary = JSON.parse(fs.readFileSync('coverage/coverage-frontend/coverage-summary.json', 'utf8'));
-            const backendSummary = JSON.parse(fs.readFileSync('coverage/coverage-backend/coverage-summary.json', 'utf8'));
+            const frontendSummary = JSON.parse(fs.readFileSync('coverage-frontend/coverage-summary.json', 'utf8'));
+            const backendSummary = JSON.parse(fs.readFileSync('coverage-backend/coverage-summary.json', 'utf8'));
 
             const frontendPct = frontendSummary.total.statements.pct;
             const backendPct = backendSummary.total.statements.pct;
