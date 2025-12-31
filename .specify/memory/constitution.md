@@ -132,9 +132,14 @@ User privacy and security are paramount:
 
 ### Branch Creation Process
 1. Sync with main: `git pull origin main`
-2. Verify spec exists: `./specs/<number>/spec.md`
-3. Verify task exists: `./specs/<number>/tasks.md`
-4. Create branch: `git checkout -b spec/X/task/Y-description`
+2. Verify spec exists: `./specs/<number>-<description>/spec.md`
+3. Verify tasks exist: `./specs/<number>-<description>/tasks.md`
+4. Create branch: `git checkout -b <number>-<description>`
+
+**Branch Format**: `<spec-number>-<short-description>`
+- Example: `003-automated-build-test`
+- Spec number must be 3 digits (001, 002, 003, etc.)
+- Description should be kebab-case and descriptive
 
 ### Pre-Commit Checklist
 - [ ] Unit tests pass (`npm test`)
@@ -156,13 +161,47 @@ git log --show-signature -1            # Verify signature
 - Title follows conventional commit format
 - Description includes:
   - Spec reference
-  - Task reference
+  - Task reference (or Phase reference for multi-phase specs)
   - List of changes
   - Testing evidence
   - Screenshots/GIFs for UI changes
 - All automated checks pass
 - Code review completed
 - Approved before merge
+
+### Pull Request Merge Strategy (NON-NEGOTIABLE)
+All pull requests must use **squash merge only**:
+- **Target Branch**: All PRs merge into `main` branch only
+- **Merge Method**: Squash merge (single commit on main per PR)
+- **PR Scope**: Each PR represents a completed Spec or Phase
+- **Incremental Delivery**: Deliver smaller code changes faster
+- **Branch Protection**: GitHub repository must enforce squash-only merges
+
+**Incremental Delivery Process:**
+1. Complete a Spec or Phase with internally-consistent, working code
+2. Create PR from feature branch to main
+3. After squash merge, recreate feature branch for next Phase:
+   ```bash
+   git checkout main && git pull origin main
+   git branch -D <branch-name>
+   git push origin --delete <branch-name>
+   git checkout -b <branch-name>  # Same name, fresh from main
+   ```
+4. Continue with next Phase commits
+5. Create new PR when Phase is complete
+
+**Example: Multi-Phase Spec**
+- Spec 003: Automated Build & Test
+  - PR #1: Phase 4 (Quality Gates) → squash merge to main
+  - Branch recreation from main
+  - PR #2: Phase 5 (Deployment) → squash merge to main
+  - Branch recreation from main
+  - PR #3: Phase 6 (Rollback) → squash merge to main
+
+**Repository Configuration Required:**
+- Branch protection on `main` requiring all status checks
+- Squash merge as the only allowed merge method
+- Delete branch automatically after merge (enabled)
 
 ### Code Review Focus Areas
 - Voice interaction UX and clarity
@@ -248,4 +287,4 @@ All pull requests must include:
 - [ ] Privacy/security reviewed
 - [ ] Performance benchmarks met
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-16 | **Last Amended**: 2025-12-16
+**Version**: 1.1.0 | **Ratified**: 2025-12-16 | **Last Amended**: 2025-12-31
