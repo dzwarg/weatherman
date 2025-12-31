@@ -84,15 +84,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T022 [P] [US2] Create PR quality gate workflow file at `.github/workflows/pr-quality-gate.yml` with pull_request trigger
-- [ ] T023 [P] [US2] Add branch name validation job to PR workflow (must match spec/N/task/N-description format)
-- [ ] T024 [P] [US2] Add deployment status check job using GitHub API to block PR if deployment in progress
-- [ ] T025 [US2] Add CI workflow reuse in PR workflow to run all quality checks
-- [ ] T026 [P] [US2] Add conventional commit validation job to check commit message format
-- [ ] T027 [US2] Add GPG signature verification job to ensure all commits are signed
-- [ ] T028 [US2] Add aggregate coverage calculation job that downloads artifacts and checks 80% threshold
-- [ ] T029 [US2] Add PR comment action that posts coverage summary table to pull request
-- [ ] T030 [US2] Configure GitHub branch protection rules for main branch requiring all status checks
+- [X] T022 [P] [US2] Create PR quality gate workflow file at `.github/workflows/pr-quality-gate.yml` with pull_request trigger
+- [X] T023 [P] [US2] Add branch name validation job to PR workflow (must match spec/N/task/N-description format)
+- [X] T024 [P] [US2] Add deployment status check job using GitHub API to block PR if deployment in progress
+- [X] T025 [US2] Add CI workflow reuse in PR workflow to run all quality checks
+- [X] T026 [P] [US2] Add conventional commit validation job to check commit message format
+- [X] T027 [US2] Add GPG signature verification job to ensure all commits are signed
+- [X] T028 [US2] Add aggregate coverage calculation job that downloads artifacts and checks 80% threshold
+- [X] T029 [US2] Add PR comment action that posts coverage summary table to pull request
+- [X] T030 [US2] Configure GitHub branch protection rules for main branch requiring all status checks
 - [ ] T031 [US2] Test PR workflow by creating a pull request and verifying all gates enforce correctly
 
 **Checkpoint**: At this point, only quality-verified code can reach main branch
