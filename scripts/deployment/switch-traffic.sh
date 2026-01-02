@@ -126,7 +126,7 @@ fi
 echo "Updating deployment state..."
 
 # Mark new environment as active
-cat > "$STATE_DIR/$TARGET_ENV.json" <<EOF
+cat <<EOF | sudo tee "$STATE_DIR/$TARGET_ENV.json" > /dev/null
 {
   "environment": "$TARGET_ENV",
   "status": "active",
@@ -150,7 +150,7 @@ else
   OLD_FRONTEND_DIR="/var/www/weatherman/blue"
 fi
 
-cat > "$STATE_DIR/$OLD_ENV.json" <<EOF
+cat <<EOF | sudo tee "$STATE_DIR/$OLD_ENV.json" > /dev/null
 {
   "environment": "$OLD_ENV",
   "status": "inactive",
