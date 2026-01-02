@@ -28,12 +28,13 @@ function getAllowedOrigins() {
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) {
-      return callback(null, true);
-    }
-
     const allowedOrigins = getAllowedOrigins();
+
+    // Allow requests with no origin (like mobile apps, curl, or same-origin requests)
+    // Return the first allowed origin or '*' for the Access-Control-Allow-Origin header
+    if (!origin) {
+      return callback(null, allowedOrigins[0] || '*');
+    }
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
