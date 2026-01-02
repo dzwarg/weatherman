@@ -3,7 +3,7 @@
 # Switch Traffic Between Blue and Green Environments
 #
 # This script updates the nginx upstream configuration to route traffic
-# to the specified environment (blue or green) and reloads nginx.
+# to the specified environment (blue port 3101 or green port 3102).
 #
 # Prerequisites:
 # - nginx installed and configured
@@ -39,23 +39,27 @@ if [ "$TARGET_ENV" != "blue" ] && [ "$TARGET_ENV" != "green" ]; then
   exit 1
 fi
 
-# Determine target port and frontend directory
+# Determine target nginx port
 if [ "$TARGET_ENV" == "blue" ]; then
-  TARGET_PORT=3001
+  TARGET_NGINX_PORT=3101
+  TARGET_BACKEND_PORT=3001
   FRONTEND_DIR="/var/www/weatherman/blue"
   echo "🔵 Switching traffic to Blue environment"
-  echo "   Backend: port 3001"
+  echo "   Nginx port: 3101"
+  echo "   Backend port: 3001"
   echo "   Frontend: $FRONTEND_DIR"
 else
-  TARGET_PORT=3002
+  TARGET_NGINX_PORT=3102
+  TARGET_BACKEND_PORT=3002
   FRONTEND_DIR="/var/www/weatherman/green"
   echo "🟢 Switching traffic to Green environment"
-  echo "   Backend: port 3002"
+  echo "   Nginx port: 3102"
+  echo "   Backend port: 3002"
   echo "   Frontend: $FRONTEND_DIR"
 fi
 
 # Verify target environment is healthy
-HEALTH_URL="http://localhost:$TARGET_PORT/health"
+HEALTH_URL="http://localhost:$TARGET_NGINX_PORT/api/health"
 echo "Checking health of $TARGET_ENV environment..."
 
 if ! curl -sf "$HEALTH_URL" > /dev/null 2>&1; then
@@ -72,18 +76,11 @@ if [ -f "$NGINX_CONF" ]; then
   sudo cp "$NGINX_CONF" "$NGINX_CONF_BACKUP"
 fi
 
-# Update nginx configuration (backend port and frontend directory)
+# Update nginx configuration (upstream port)
 echo "Updating nginx configuration..."
 
-# Update backend upstream port
-sudo sed -i "s|server localhost:[0-9]\+ max_fails|server localhost:$TARGET_PORT max_fails|g" "$NGINX_CONF"
-
-# Update frontend root directory (all occurrences)
-if [ "$TARGET_ENV" == "blue" ]; then
-  sudo sed -i "s|root /var/www/weatherman/green|root /var/www/weatherman/blue|g" "$NGINX_CONF"
-else
-  sudo sed -i "s|root /var/www/weatherman/blue|root /var/www/weatherman/green|g" "$NGINX_CONF"
-fi
+# Update upstream weatherman_active to point to target nginx port
+sudo sed -i "s|server localhost:[0-9]\+ max_fails|server localhost:$TARGET_NGINX_PORT max_fails|g" "$NGINX_CONF"
 
 # Verify nginx configuration syntax
 echo "Verifying nginx configuration..."
@@ -112,7 +109,7 @@ echo "✅ Nginx reloaded successfully"
 echo "Verifying traffic routing..."
 sleep 2
 
-ACTUAL_RESPONSE=$(curl -sf http://localhost/health 2>&1 || echo "failed")
+ACTUAL_RESPONSE=$(curl -sf http://localhost/api/health 2>&1 || echo "failed")
 if [ "$ACTUAL_RESPONSE" == "failed" ]; then
   echo "⚠️  Warning: Could not verify traffic routing"
 else
@@ -127,7 +124,8 @@ cat > "$STATE_DIR/$TARGET_ENV.json" <<EOF
 {
   "environment": "$TARGET_ENV",
   "status": "active",
-  "backend_port": $TARGET_PORT,
+  "nginx_port": $TARGET_NGINX_PORT,
+  "backend_port": $TARGET_BACKEND_PORT,
   "frontend_dir": "$FRONTEND_DIR",
   "activated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
@@ -136,11 +134,13 @@ EOF
 # Mark old environment as inactive
 if [ "$TARGET_ENV" == "blue" ]; then
   OLD_ENV="green"
-  OLD_PORT=3002
+  OLD_NGINX_PORT=3102
+  OLD_BACKEND_PORT=3002
   OLD_FRONTEND_DIR="/var/www/weatherman/green"
 else
   OLD_ENV="blue"
-  OLD_PORT=3001
+  OLD_NGINX_PORT=3101
+  OLD_BACKEND_PORT=3001
   OLD_FRONTEND_DIR="/var/www/weatherman/blue"
 fi
 
@@ -148,7 +148,8 @@ cat > "$STATE_DIR/$OLD_ENV.json" <<EOF
 {
   "environment": "$OLD_ENV",
   "status": "inactive",
-  "backend_port": $OLD_PORT,
+  "nginx_port": $OLD_NGINX_PORT,
+  "backend_port": $OLD_BACKEND_PORT,
   "frontend_dir": "$OLD_FRONTEND_DIR",
   "deactivated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
@@ -157,13 +158,15 @@ EOF
 echo ""
 echo "✅ Traffic switch complete!"
 echo "Active environment: $TARGET_ENV"
-echo "  Backend port: $TARGET_PORT"
+echo "  Nginx port: $TARGET_NGINX_PORT"
+echo "  Backend port: $TARGET_BACKEND_PORT"
 echo "  Frontend dir: $FRONTEND_DIR"
 echo ""
 echo "Inactive environment: $OLD_ENV"
-echo "  Backend port: $OLD_PORT"
+echo "  Nginx port: $OLD_NGINX_PORT"
+echo "  Backend port: $OLD_BACKEND_PORT"
 echo "  Frontend dir: $OLD_FRONTEND_DIR"
 echo ""
 echo "Monitor traffic:"
-echo "  curl http://localhost/health"
+echo "  curl http://localhost/api/health"
 echo "  tail -f /var/log/nginx/access.log"
