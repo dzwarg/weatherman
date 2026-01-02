@@ -46,7 +46,8 @@ jobs:
         run: |
           # Check nginx upstream configuration to determine active environment
           # Tests run against nginx ports (3101=blue, 3102=green), not backend ports
-          NGINX_CONF="/etc/nginx/sites-enabled/weatherman"
+          # Note: sites-enabled/weatherman is a symlink to sites-available/weatherman
+          NGINX_CONF="/etc/nginx/sites-available/weatherman"
 
           if ! [ -f "$NGINX_CONF" ]; then
             echo "⚠️  Nginx config not found, defaulting to Blue as active"
