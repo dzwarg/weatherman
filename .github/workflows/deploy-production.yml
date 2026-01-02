@@ -318,6 +318,17 @@ jobs:
 
           echo "✅ Deployment state updated - $INACTIVE_ENV is now active"
 
+      # Save PM2 process list for auto-restart on reboot
+      - name: Save PM2 process list
+        run: |
+          echo "💾 Saving PM2 process list for auto-restart on reboot..."
+          npx pm2 save --force
+
+          echo "✅ PM2 process list saved"
+          echo ""
+          echo "Current PM2 processes:"
+          npx pm2 list
+
       # T057: Create GitHub deployment status (success)
       - name: Create GitHub deployment status
         run: |
