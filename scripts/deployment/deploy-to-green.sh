@@ -84,14 +84,6 @@ echo "✅ Node modules copied to deployment directory"
 # Create logs directory in deployment location
 mkdir -p "$BACKEND_DEPLOY_DIR/logs"
 
-# Copy frontend dist to backend directory for SERVE_FRONTEND capability
-echo ""
-echo "Copying frontend dist to backend directory for testing..."
-sudo mkdir -p "$BACKEND_DEPLOY_DIR/frontend"
-sudo cp -r packages/frontend/dist "$BACKEND_DEPLOY_DIR/frontend/"
-sudo chown -R weatherman:weatherman "$BACKEND_DEPLOY_DIR/frontend"
-echo "✅ Frontend dist copied to backend directory"
-
 # Create .env file in deployment directory
 echo ""
 echo "Creating .env file in deployment directory..."
@@ -99,7 +91,6 @@ cat > "$BACKEND_DEPLOY_DIR/.env" << EOF
 NODE_ENV=production
 PORT=$PORT
 ENV_NAME=$ENV_NAME
-SERVE_FRONTEND=true
 WEATHER_API_KEY=$WEATHER_API_KEY
 WEATHER_API_URL=$WEATHER_API_URL
 ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY

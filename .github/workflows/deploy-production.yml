@@ -45,38 +45,39 @@ jobs:
         id: detect
         run: |
           # Check nginx upstream configuration to determine active environment
+          # Tests run against nginx ports (3101=blue, 3102=green), not backend ports
           NGINX_CONF="/etc/nginx/sites-enabled/weatherman"
 
           if ! [ -f "$NGINX_CONF" ]; then
             echo "⚠️  Nginx config not found, defaulting to Blue as active"
             echo "active=blue" >> $GITHUB_OUTPUT
             echo "inactive=green" >> $GITHUB_OUTPUT
-            echo "active_port=3001" >> $GITHUB_OUTPUT
-            echo "inactive_port=3002" >> $GITHUB_OUTPUT
+            echo "active_port=3101" >> $GITHUB_OUTPUT
+            echo "inactive_port=3102" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Extract current upstream port from nginx config (upstream block)
-          ACTIVE_PORT=$(grep -oP 'server\s+localhost:\K\d+' "$NGINX_CONF" | head -1)
+          # Extract current upstream nginx port from config (weatherman_active upstream)
+          ACTIVE_NGINX_PORT=$(grep -oP 'server\s+localhost:\K\d+' "$NGINX_CONF" | head -1)
 
-          if [ "$ACTIVE_PORT" == "3001" ]; then
-            echo "🔵 Blue environment is active (port 3001)"
+          if [ "$ACTIVE_NGINX_PORT" == "3101" ]; then
+            echo "🔵 Blue environment is active (nginx port 3101)"
             echo "active=blue" >> $GITHUB_OUTPUT
             echo "inactive=green" >> $GITHUB_OUTPUT
-            echo "active_port=3001" >> $GITHUB_OUTPUT
-            echo "inactive_port=3002" >> $GITHUB_OUTPUT
-          elif [ "$ACTIVE_PORT" == "3002" ]; then
-            echo "🟢 Green environment is active (port 3002)"
+            echo "active_port=3101" >> $GITHUB_OUTPUT
+            echo "inactive_port=3102" >> $GITHUB_OUTPUT
+          elif [ "$ACTIVE_NGINX_PORT" == "3102" ]; then
+            echo "🟢 Green environment is active (nginx port 3102)"
             echo "active=green" >> $GITHUB_OUTPUT
             echo "inactive=blue" >> $GITHUB_OUTPUT
-            echo "active_port=3002" >> $GITHUB_OUTPUT
-            echo "inactive_port=3001" >> $GITHUB_OUTPUT
+            echo "active_port=3102" >> $GITHUB_OUTPUT
+            echo "inactive_port=3101" >> $GITHUB_OUTPUT
           else
             echo "⚠️  Could not determine active environment, defaulting to Blue"
             echo "active=blue" >> $GITHUB_OUTPUT
             echo "inactive=green" >> $GITHUB_OUTPUT
-            echo "active_port=3001" >> $GITHUB_OUTPUT
-            echo "inactive_port=3002" >> $GITHUB_OUTPUT
+            echo "active_port=3101" >> $GITHUB_OUTPUT
+            echo "inactive_port=3102" >> $GITHUB_OUTPUT
           fi
 
   # T035: Deploy to the inactive environment
