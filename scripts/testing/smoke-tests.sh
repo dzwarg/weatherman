@@ -88,9 +88,12 @@ run_test "Health endpoint JSON" \
 
 check_timeout || exit 1
 
-# Test 3: API recommendations endpoint exists (skip frontend - served by nginx)
-# Note: Frontend static files are served by nginx, not the backend.
-# Testing the root path would fail since backend is API-only.
+# Test 3: Frontend loads (HTTP 200)
+# Note: Backend serves frontend with SERVE_FRONTEND=true for pre-switch testing
+run_test "Frontend loads" \
+  "curl -sf --max-time 5 -o /dev/null -w '%{http_code}' '$BASE_URL/' | grep -q '^200$'"
+
+check_timeout || exit 1
 
 # Test 4: API recommendations endpoint exists
 run_test "Weather recommendations endpoint" \
@@ -98,12 +101,11 @@ run_test "Weather recommendations endpoint" \
 
 check_timeout || exit 1
 
-# Test 5: Skip static assets test - served by nginx, not backend
-# Note: favicon.ico and other static assets are served by nginx from
-# /var/www/weatherman/{blue|green}, not by the backend API server.
+# Test 5: Static assets are accessible
+run_test "Static assets load" \
+  "curl -sf --max-time 5 -o /dev/null -w '%{http_code}' '$BASE_URL/favicon.ico' | grep -qE '^(200|404)$'"
 
-# Skipping static assets test - nginx serves these, not the backend
-# check_timeout || exit 1
+check_timeout || exit 1
 
 # Test 6: CORS headers present for API
 run_test "CORS headers configured" \
