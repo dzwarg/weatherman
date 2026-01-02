@@ -253,7 +253,7 @@ jobs:
           INACTIVE_ENV="${{ needs.detect-environment.outputs.inactive_env }}"
 
           echo "Switching traffic to $INACTIVE_ENV environment..."
-          sudo bash scripts/deployment/switch-traffic.sh "$INACTIVE_ENV"
+          bash scripts/deployment/switch-traffic.sh "$INACTIVE_ENV"
 
       # T054: Nginx reload with verification
       - name: Verify nginx configuration and reload
