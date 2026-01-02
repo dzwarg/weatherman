@@ -20,7 +20,8 @@
 set -e
 
 # Configuration
-NGINX_CONF="/etc/nginx/sites-enabled/weatherman"
+NGINX_CONF_AVAILABLE="/etc/nginx/sites-available/weatherman"
+NGINX_CONF_ENABLED="/etc/nginx/sites-enabled/weatherman"
 BACKUP_DIR="/var/lib/weatherman/backups"
 NGINX_CONF_BACKUP="$BACKUP_DIR/nginx-weatherman.backup.$(date +%Y%m%d-%H%M%S)"
 STATE_DIR="/var/lib/weatherman/state"
@@ -75,25 +76,25 @@ echo "✅ $TARGET_ENV environment is healthy"
 echo "Ensuring backup directory exists..."
 sudo mkdir -p "$BACKUP_DIR"
 
-# Backup current nginx config
-if [ -f "$NGINX_CONF" ]; then
+# Backup current nginx config from sites-available
+if [ -f "$NGINX_CONF_AVAILABLE" ]; then
   echo "Backing up current nginx config..."
-  sudo cp "$NGINX_CONF" "$NGINX_CONF_BACKUP"
+  sudo cp "$NGINX_CONF_AVAILABLE" "$NGINX_CONF_BACKUP"
   echo "✅ Backup created: $NGINX_CONF_BACKUP"
 fi
 
-# Update nginx configuration (upstream port)
+# Update nginx configuration (upstream port) in sites-available
 echo "Updating nginx configuration..."
 
 # Update upstream weatherman_active to point to target nginx port
-sudo sed -i "s|server localhost:[0-9]\+ max_fails|server localhost:$TARGET_NGINX_PORT max_fails|g" "$NGINX_CONF"
+sudo sed -i "s|server localhost:[0-9]\+ max_fails|server localhost:$TARGET_NGINX_PORT max_fails|g" "$NGINX_CONF_AVAILABLE"
 
 # Verify nginx configuration syntax
 echo "Verifying nginx configuration..."
 if ! sudo nginx -t 2>&1 | grep -q "syntax is ok"; then
   echo "❌ Error: Nginx configuration syntax error"
   echo "Restoring backup configuration..."
-  sudo cp "$NGINX_CONF_BACKUP" "$NGINX_CONF"
+  sudo cp "$NGINX_CONF_BACKUP" "$NGINX_CONF_AVAILABLE"
   exit 1
 fi
 
@@ -104,7 +105,7 @@ echo "Reloading nginx..."
 if ! sudo systemctl reload nginx; then
   echo "❌ Error: Failed to reload nginx"
   echo "Restoring backup configuration..."
-  sudo cp "$NGINX_CONF_BACKUP" "$NGINX_CONF"
+  sudo cp "$NGINX_CONF_BACKUP" "$NGINX_CONF_AVAILABLE"
   sudo systemctl reload nginx
   exit 1
 fi

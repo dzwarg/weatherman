@@ -21,14 +21,16 @@ Cmnd_Alias TEST_CMDS = \
     /usr/bin/true
 
 # Nginx configuration management
+# Note: sites-enabled/weatherman is a symlink to sites-available/weatherman
+# We work with the actual file in sites-available
 Cmnd_Alias NGINX_CONFIG = \
     /bin/mkdir -p /var/lib/weatherman/backups, \
     /usr/bin/mkdir -p /var/lib/weatherman/backups, \
-    /bin/cp /etc/nginx/sites-enabled/weatherman /var/lib/weatherman/backups/nginx-weatherman.backup.*, \
-    /usr/bin/cp /etc/nginx/sites-enabled/weatherman /var/lib/weatherman/backups/nginx-weatherman.backup.*, \
-    /bin/cp /var/lib/weatherman/backups/nginx-weatherman.backup.* /etc/nginx/sites-enabled/weatherman, \
-    /usr/bin/cp /var/lib/weatherman/backups/nginx-weatherman.backup.* /etc/nginx/sites-enabled/weatherman, \
-    /bin/sed -i s* /etc/nginx/sites-enabled/weatherman, \
+    /bin/cp /etc/nginx/sites-available/weatherman /var/lib/weatherman/backups/nginx-weatherman.backup.*, \
+    /usr/bin/cp /etc/nginx/sites-available/weatherman /var/lib/weatherman/backups/nginx-weatherman.backup.*, \
+    /bin/cp /var/lib/weatherman/backups/nginx-weatherman.backup.* /etc/nginx/sites-available/weatherman, \
+    /usr/bin/cp /var/lib/weatherman/backups/nginx-weatherman.backup.* /etc/nginx/sites-available/weatherman, \
+    /bin/sed -i s* /etc/nginx/sites-available/weatherman, \
     /usr/sbin/nginx -t, \
     /bin/systemctl reload nginx, \
     /usr/bin/systemctl reload nginx
