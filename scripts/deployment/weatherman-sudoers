@@ -22,8 +22,12 @@ Cmnd_Alias TEST_CMDS = \
 
 # Nginx configuration management
 Cmnd_Alias NGINX_CONFIG = \
-    /bin/cp /etc/nginx/sites-enabled/weatherman /etc/nginx/sites-enabled/weatherman.backup, \
-    /bin/cp /etc/nginx/sites-enabled/weatherman.backup /etc/nginx/sites-enabled/weatherman, \
+    /bin/mkdir -p /var/lib/weatherman/backups, \
+    /usr/bin/mkdir -p /var/lib/weatherman/backups, \
+    /bin/cp /etc/nginx/sites-enabled/weatherman /var/lib/weatherman/backups/nginx-weatherman.backup.*, \
+    /usr/bin/cp /etc/nginx/sites-enabled/weatherman /var/lib/weatherman/backups/nginx-weatherman.backup.*, \
+    /bin/cp /var/lib/weatherman/backups/nginx-weatherman.backup.* /etc/nginx/sites-enabled/weatherman, \
+    /usr/bin/cp /var/lib/weatherman/backups/nginx-weatherman.backup.* /etc/nginx/sites-enabled/weatherman, \
     /bin/sed -i s* /etc/nginx/sites-enabled/weatherman, \
     /usr/sbin/nginx -t, \
     /bin/systemctl reload nginx, \

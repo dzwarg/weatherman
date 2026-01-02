@@ -21,7 +21,8 @@ set -e
 
 # Configuration
 NGINX_CONF="/etc/nginx/sites-enabled/weatherman"
-NGINX_CONF_BACKUP="/etc/nginx/sites-enabled/weatherman.backup"
+BACKUP_DIR="/var/lib/weatherman/backups"
+NGINX_CONF_BACKUP="$BACKUP_DIR/nginx-weatherman.backup.$(date +%Y%m%d-%H%M%S)"
 STATE_DIR="/var/lib/weatherman/state"
 
 # Validate arguments
@@ -70,10 +71,15 @@ fi
 
 echo "✅ $TARGET_ENV environment is healthy"
 
+# Ensure backup directory exists
+echo "Ensuring backup directory exists..."
+sudo mkdir -p "$BACKUP_DIR"
+
 # Backup current nginx config
 if [ -f "$NGINX_CONF" ]; then
   echo "Backing up current nginx config..."
   sudo cp "$NGINX_CONF" "$NGINX_CONF_BACKUP"
+  echo "✅ Backup created: $NGINX_CONF_BACKUP"
 fi
 
 # Update nginx configuration (upstream port)
@@ -120,7 +126,7 @@ fi
 echo "Updating deployment state..."
 
 # Mark new environment as active
-cat > "$STATE_DIR/$TARGET_ENV.json" <<EOF
+cat <<EOF | sudo tee "$STATE_DIR/$TARGET_ENV.json" > /dev/null
 {
   "environment": "$TARGET_ENV",
   "status": "active",
@@ -144,7 +150,7 @@ else
   OLD_FRONTEND_DIR="/var/www/weatherman/blue"
 fi
 
-cat > "$STATE_DIR/$OLD_ENV.json" <<EOF
+cat <<EOF | sudo tee "$STATE_DIR/$OLD_ENV.json" > /dev/null
 {
   "environment": "$OLD_ENV",
   "status": "inactive",
