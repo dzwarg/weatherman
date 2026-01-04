@@ -20,7 +20,7 @@
     "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist"
   },
   "dependencies": {
-    "pm2": "^5.4.3"
+    "pm2": "^6.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
