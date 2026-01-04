@@ -109,9 +109,9 @@ run_phase "Smoke Tests" \
   "true" || exit 1
 
 # Phase 2: Frontend Post-Deployment Tests
-# Note: Run with --config=false to bypass vitest.config.js exclude rules
+# Note: Use dedicated config file without exclude rules
 run_phase "Frontend Integration Tests" \
-  "(cd packages/frontend && BASE_URL=$BASE_URL npx vitest run tests/post-deployment/smoke.test.js --no-coverage --config=false)" \
+  "(cd packages/frontend && BASE_URL=$BASE_URL npx vitest run tests/post-deployment/smoke.test.js --no-coverage --config=vitest.post-deployment.config.js)" \
   "true" || exit 1
 
 # Phase 3: Backend Post-Deployment Tests
