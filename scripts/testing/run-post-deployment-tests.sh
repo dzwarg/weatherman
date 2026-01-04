@@ -109,9 +109,9 @@ run_phase "Smoke Tests" \
   "true" || exit 1
 
 # Phase 2: Frontend Post-Deployment Tests
-# Note: Run with npx vitest directly to bypass the npm test script which includes coverage
+# Note: Run with --config=false to bypass vitest.config.js exclude rules
 run_phase "Frontend Integration Tests" \
-  "(cd packages/frontend && BASE_URL=$BASE_URL npx vitest run tests/post-deployment/smoke.test.js --no-coverage)" \
+  "(cd packages/frontend && BASE_URL=$BASE_URL npx vitest run tests/post-deployment/smoke.test.js --no-coverage --config=false)" \
   "true" || exit 1
 
 # Phase 3: Backend Post-Deployment Tests
