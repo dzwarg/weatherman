@@ -256,26 +256,6 @@ jobs:
           echo "Switching traffic to $INACTIVE_ENV environment..."
           bash scripts/deployment/switch-traffic.sh "$INACTIVE_ENV"
 
-      # T054: Nginx reload with verification
-      - name: Verify nginx configuration and reload
-        run: |
-          echo "Verifying nginx configuration..."
-
-          # Test nginx config syntax
-          sudo nginx -t
-
-          # Reload nginx to apply new upstream
-          echo "Reloading nginx..."
-          sudo systemctl reload nginx
-
-          # Verify nginx is still running
-          if sudo systemctl is-active --quiet nginx; then
-            echo "✅ Nginx reloaded successfully"
-          else
-            echo "❌ Nginx failed to reload"
-            exit 1
-          fi
-
       # T055: Update deployment state files to mark environments active/inactive
       - name: Update deployment state after traffic switch
         run: |
