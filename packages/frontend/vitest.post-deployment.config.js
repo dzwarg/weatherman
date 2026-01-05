@@ -14,6 +14,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    // Explicitly pass through BASE_URL environment variable
+    env: {
+      BASE_URL: process.env.BASE_URL || 'http://localhost:3002',
+    },
     // No exclude rules - allow all tests to run
     // No setupFiles - post-deployment tests don't need browser mocks
   },
