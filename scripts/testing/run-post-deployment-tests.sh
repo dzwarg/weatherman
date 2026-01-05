@@ -115,8 +115,9 @@ run_phase "Frontend Integration Tests" \
   "true" || exit 1
 
 # Phase 3: Backend Post-Deployment Tests
+# Note: Use dedicated config file without exclude rules
 run_phase "Backend Integration Tests" \
-  "BASE_URL=$BASE_URL npm test --workspace=packages/server -- post-deployment/integration.test.js --run" \
+  "(cd packages/server && BASE_URL=$BASE_URL npx vitest run tests/post-deployment/integration.test.js --no-coverage --config=vitest.post-deployment.config.js)" \
   "true" || exit 1
 
 # Phase 4: Performance Baseline Capture

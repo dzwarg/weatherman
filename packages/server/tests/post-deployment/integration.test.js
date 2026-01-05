@@ -35,9 +35,12 @@ describe('Backend Post-Deployment Integration Tests', () => {
 
       const data = await response.json();
       expect(data).toHaveProperty('status');
-      expect(data.status).toBe('ok');
+      // Server returns 'healthy' or 'degraded' based on service availability
+      expect(['healthy', 'degraded']).toContain(data.status);
       expect(data).toHaveProperty('timestamp');
-      expect(data).toHaveProperty('uptime');
+      expect(data).toHaveProperty('services');
+      expect(data.services).toHaveProperty('weatherAPI');
+      expect(data.services).toHaveProperty('claudeAPI');
     }, TIMEOUT);
 
     it('should respond quickly (< 1000ms)', async () => {
