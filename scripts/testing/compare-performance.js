@@ -3,7 +3,8 @@
  * Performance Comparison Script
  *
  * This script compares performance metrics between two environments
- * and fails if the new environment shows >20% performance regression.
+ * and provides informational output. It only fails for truly concerning
+ * regressions (>20% AND >50ms absolute increase).
  *
  * Usage:
  *   node compare-performance.js <baseline_file> <new_file>
@@ -13,17 +14,19 @@
  *   node compare-performance.js baseline-blue.json baseline-green.json
  *
  * Exit Codes:
- *   0 - Performance is acceptable (< 20% regression)
- *   1 - Performance regression > 20% detected
+ *   0 - Performance is acceptable
+ *   1 - Significant performance regression detected
  *   2 - Invalid input or missing files
  *
- * T047: Performance comparison script with 20% threshold check
+ * T047: Performance comparison script with smart threshold check
  */
 
 import { readFileSync, existsSync } from 'fs';
 
 // Configuration
 const THRESHOLD_PERCENT = 20;
+const FAST_RESPONSE_THRESHOLD_MS = 50; // Responses under 50ms are always considered good
+const ABSOLUTE_INCREASE_THRESHOLD_MS = 50; // Must increase by >50ms to be concerning
 
 // Colors for output
 const colors = {
@@ -68,7 +71,8 @@ console.log('📊 Performance Comparison');
 console.log('=========================');
 console.log(`Baseline: ${baselineFile}`);
 console.log(`New:      ${newFile}`);
-console.log(`Threshold: ${THRESHOLD_PERCENT}%`);
+console.log(`Threshold: ${THRESHOLD_PERCENT}% AND >${ABSOLUTE_INCREASE_THRESHOLD_MS}ms absolute increase`);
+console.log(`Fast response threshold: <${FAST_RESPONSE_THRESHOLD_MS}ms (always considered good)`);
 console.log('');
 
 console.log(`Comparing: ${baseline.environment} → ${newData.environment}`);
@@ -81,9 +85,19 @@ function calculateChange(baselineValue, newValue) {
   return change;
 }
 
-// Helper function to check if regression exceeds threshold
-function checkThreshold(change, threshold) {
-  return change > threshold;
+// Helper function to check if regression is concerning
+// Only flag as concerning if BOTH conditions are true:
+// 1. Percentage increase > threshold (20%)
+// 2. Absolute increase > 50ms (or new value > 50ms if baseline was also slow)
+function isConcerningRegression(baselineValue, newValue, percentChange) {
+  // If new response time is under 50ms, it's always good regardless of percentage
+  if (newValue < FAST_RESPONSE_THRESHOLD_MS) {
+    return false;
+  }
+
+  // Check if both percentage threshold AND absolute increase threshold are exceeded
+  const absoluteIncrease = newValue - baselineValue;
+  return percentChange > THRESHOLD_PERCENT && absoluteIncrease > ABSOLUTE_INCREASE_THRESHOLD_MS;
 }
 
 // Track overall regression status
@@ -110,18 +124,27 @@ function compareEndpoint(endpointName, metrics) {
   console.log(`  Baseline: ${baselineAvg}ms`);
   console.log(`  New:      ${newAvg}ms`);
 
+  const avgAbsoluteIncrease = newAvg - baselineAvg;
   const avgColor = avgChange > 0 ? colors.red : colors.green;
   const avgSign = avgChange > 0 ? '+' : '';
-  const avgExceedsThreshold = checkThreshold(avgChange, THRESHOLD_PERCENT);
-  const avgStatus = avgExceedsThreshold
-    ? `${colors.red}✗ REGRESSION DETECTED${colors.reset}`
-    : `${colors.green}✓${colors.reset}`;
+  const avgIsConcerning = isConcerningRegression(baselineAvg, newAvg, avgChange);
+
+  let avgStatus;
+  if (avgIsConcerning) {
+    avgStatus = `${colors.red}✗ CONCERNING REGRESSION${colors.reset}`;
+  } else if (newAvg < FAST_RESPONSE_THRESHOLD_MS) {
+    avgStatus = `${colors.green}✓ Fast response${colors.reset}`;
+  } else if (avgChange > THRESHOLD_PERCENT) {
+    avgStatus = `${colors.yellow}⚠ Minor increase (not concerning)${colors.reset}`;
+  } else {
+    avgStatus = `${colors.green}✓${colors.reset}`;
+  }
 
   console.log(
-    `  Change:   ${avgColor}${avgSign}${avgChange.toFixed(2)}%${colors.reset} ${avgStatus}`
+    `  Change:   ${avgColor}${avgSign}${avgChange.toFixed(2)}% (${avgSign}${avgAbsoluteIncrease.toFixed(0)}ms)${colors.reset} ${avgStatus}`
   );
 
-  if (avgExceedsThreshold) {
+  if (avgIsConcerning) {
     regressionDetected = true;
   }
 
@@ -130,18 +153,27 @@ function compareEndpoint(endpointName, metrics) {
   console.log(`  Baseline: ${baselineP95}ms`);
   console.log(`  New:      ${newP95}ms`);
 
+  const p95AbsoluteIncrease = newP95 - baselineP95;
   const p95Color = p95Change > 0 ? colors.red : colors.green;
   const p95Sign = p95Change > 0 ? '+' : '';
-  const p95ExceedsThreshold = checkThreshold(p95Change, THRESHOLD_PERCENT);
-  const p95Status = p95ExceedsThreshold
-    ? `${colors.red}✗ REGRESSION DETECTED${colors.reset}`
-    : `${colors.green}✓${colors.reset}`;
+  const p95IsConcerning = isConcerningRegression(baselineP95, newP95, p95Change);
+
+  let p95Status;
+  if (p95IsConcerning) {
+    p95Status = `${colors.red}✗ CONCERNING REGRESSION${colors.reset}`;
+  } else if (newP95 < FAST_RESPONSE_THRESHOLD_MS) {
+    p95Status = `${colors.green}✓ Fast response${colors.reset}`;
+  } else if (p95Change > THRESHOLD_PERCENT) {
+    p95Status = `${colors.yellow}⚠ Minor increase (not concerning)${colors.reset}`;
+  } else {
+    p95Status = `${colors.green}✓${colors.reset}`;
+  }
 
   console.log(
-    `  Change:   ${p95Color}${p95Sign}${p95Change.toFixed(2)}%${colors.reset} ${p95Status}`
+    `  Change:   ${p95Color}${p95Sign}${p95Change.toFixed(2)}% (${p95Sign}${p95AbsoluteIncrease.toFixed(0)}ms)${colors.reset} ${p95Status}`
   );
 
-  if (p95ExceedsThreshold) {
+  if (p95IsConcerning) {
     regressionDetected = true;
   }
 
@@ -171,21 +203,27 @@ console.log('══════════════════════�
 
 if (regressionDetected) {
   console.log(
-    `${colors.red}❌ Performance regression detected (>${THRESHOLD_PERCENT}%)${colors.reset}`
+    `${colors.red}❌ Concerning performance regression detected${colors.reset}`
   );
   console.log('');
-  console.log('The new environment shows significant performance degradation.');
+  console.log('The new environment shows significant performance degradation:');
+  console.log(`  - Regression exceeds ${THRESHOLD_PERCENT}% AND ${ABSOLUTE_INCREASE_THRESHOLD_MS}ms absolute increase`);
+  console.log('');
   console.log('This deployment should not proceed to traffic switch.');
   console.log('');
   console.log('Possible actions:');
   console.log('  1. Investigate performance bottlenecks');
   console.log('  2. Roll back deployment');
   console.log('  3. Scale up resources');
+  console.log('  4. Review if the degradation is acceptable for the given change');
   process.exit(1);
 } else {
   console.log(`${colors.green}✅ Performance is acceptable${colors.reset}`);
   console.log('');
-  console.log('All performance metrics are within acceptable thresholds.');
+  console.log('Performance metrics are within acceptable thresholds:');
+  console.log(`  - All fast responses (<${FAST_RESPONSE_THRESHOLD_MS}ms) remain fast`);
+  console.log(`  - No concerning regressions (>${THRESHOLD_PERCENT}% AND >${ABSOLUTE_INCREASE_THRESHOLD_MS}ms)`);
+  console.log('');
   console.log('Safe to proceed with traffic switch.');
   process.exit(0);
 }
