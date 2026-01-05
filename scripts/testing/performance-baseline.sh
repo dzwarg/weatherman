@@ -119,8 +119,9 @@ calculate_stats() {
   local median_index=$((count / 2))
   local median=${sorted[$median_index]}
 
-  # Calculate p95 (95th percentile)
-  local p95_index=$(echo "$count * 0.95 / 1" | bc)
+  # Calculate p95 (95th percentile) using bash arithmetic
+  # Multiply by 95 and divide by 100, rounding down
+  local p95_index=$(( (count * 95) / 100 ))
   local p95=${sorted[$p95_index]}
 
   echo "$avg $median $min $max $p95"

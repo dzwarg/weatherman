@@ -316,15 +316,15 @@ describe('Recommendations API Integration Tests', () => {
     });
 
     it('should include timestamp in response', async () => {
-      // Create a fresh mock with current timestamp
+      const before = new Date().toISOString();
+
+      // Create a fresh mock with current timestamp (after capturing 'before')
       const mockResponseWithTimestamp = {
         ...mockRecommendationResponse,
         createdAt: new Date().toISOString(),
       };
 
       recommendationService.generateRecommendations.mockResolvedValue(mockResponseWithTimestamp);
-
-      const before = new Date().toISOString();
 
       const response = await request(app)
         .post('/api/recommendations')
