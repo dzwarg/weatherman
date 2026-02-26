@@ -35,7 +35,7 @@ export function ProfileCard({ profile, isSelected, onSelect }) {
       marginTop: '12px',
       padding: '6px 12px',
       borderRadius: '12px',
-      backgroundColor: isSelected ? '#2196F3' : '#BDBDBD',
+      backgroundColor: isSelected ? '#2196F3' : '#757575',
       color: 'white',
       fontSize: '12px',
       fontWeight: 'bold',

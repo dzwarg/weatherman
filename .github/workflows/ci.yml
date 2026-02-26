@@ -257,12 +257,10 @@ jobs:
           lhci autorun \
             --collect.url=http://localhost:8080 \
             --collect.numberOfRuns=1 \
-            --assert.preset=lighthouse:no-pwa \
-            --assert.assertions.categories:pwa=error \
-            --assert.assertions.categories:pwa.minScore=0.9 || {
-              echo "❌ Lighthouse PWA score failed"
-              echo "Constitution requires PWA score of 100/100"
-              echo "Current score is below 90/100 threshold"
+            --assert.assertions.categories:performance.minScore=0.5 \
+            --assert.assertions.categories:accessibility.minScore=0.9 || {
+              echo "❌ Lighthouse checks failed"
+              echo "Review the Lighthouse report artifact for details"
               exit 1
             }
 

@@ -10,7 +10,7 @@ set -e
 # Configuration
 FRONTEND_COVERAGE_FILE="packages/frontend/coverage/coverage-summary.json"
 BACKEND_COVERAGE_FILE="packages/server/coverage/coverage-summary.json"
-TREND_FILE="coverage-trend.json"
+export TREND_FILE="coverage-trend.json"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RUN_NUMBER="${GITHUB_RUN_NUMBER:-local}"
 COMMIT_SHA="${GITHUB_SHA:-$(git rev-parse HEAD 2>/dev/null || echo 'unknown')}"

@@ -50,7 +50,7 @@ export function OfflineIndicator() {
       backgroundColor: '#FFF3E0',
       border: '2px solid #FF9800',
       textAlign: 'center',
-      color: '#E65100',
+      color: '#BF360C',
       fontWeight: 'bold',
     },
     checking: {
