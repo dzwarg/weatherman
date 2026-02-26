@@ -257,8 +257,7 @@ jobs:
           lhci autorun \
             --collect.url=http://localhost:8080 \
             --collect.numberOfRuns=1 \
-            --assert.assertions.categories:performance.minScore=0.5 \
-            --assert.assertions.categories:accessibility.minScore=0.9 || {
+            --config=.lighthouserc.json || {
               echo "❌ Lighthouse checks failed"
               echo "Review the Lighthouse report artifact for details"
               exit 1
