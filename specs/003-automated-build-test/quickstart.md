@@ -117,9 +117,56 @@ When you push to a feature branch, the CI workflow automatically runs:
 3. ✅ Run backend tests with coverage
 4. ✅ Build frontend and backend
 5. ✅ Check frontend bundle size (< 300KB)
-6. ✅ Upload coverage reports and build artifacts
+6. ✅ Track coverage trends
+7. ✅ Lighthouse PWA score check (≥90/100)
+8. ✅ Accessibility tests (axe-core WCAG 2.2 AA)
+9. ✅ Upload coverage reports and build artifacts
 
-**Expected Duration**: 5-8 minutes
+**Expected Duration**: 8-12 minutes
+
+**Workflow Configuration Example**:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:  # Manual triggering
+
+jobs:
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: '22'
+
+      - name: Run frontend tests with coverage
+        uses: ./.github/actions/run-tests-with-coverage
+        with:
+          workspace: packages/frontend
+          package-name: frontend
+
+      - name: Check coverage threshold
+        uses: ./.github/actions/check-coverage-threshold
+        with:
+          coverage-file: packages/frontend/coverage/coverage-summary.json
+          threshold: 80
+          package-name: frontend
+```
+
+**Reusable Actions**:
+
+The CI workflow uses custom reusable actions for consistency:
+
+- **`setup-node`**: Checks out code, sets up Node.js with npm cache, installs dependencies
+- **`run-tests-with-coverage`**: Executes tests with coverage and uploads artifacts
+- **`check-coverage-threshold`**: Validates coverage meets 80% threshold
 
 ### Viewing CI Results
 
@@ -178,7 +225,44 @@ gh pr create --base main --head 003-automated-build-test \
 5. ✅ **Aggregate Coverage**: Combined frontend + backend coverage >= 80%
 6. 💬 **Coverage Comment**: Posts coverage summary as PR comment
 
-**Expected Duration**: 6-10 minutes
+**Expected Duration**: 8-12 minutes
+
+**Workflow Configuration Example**:
+
+```yaml
+# .github/workflows/pr-quality-gate.yml
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  validate-branch-name:
+    name: Validate Branch Name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name format
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ ! "$BRANCH_NAME" =~ ^[0-9]{3}-.+ ]]; then
+            echo "::error::Branch name must match: NNN-description"
+            exit 1
+          fi
+
+  check-deployment-status:
+    name: Check Deployment Status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for active deployments
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Check for in_progress deployments
+            // Block merge if deployment is active
+```
 
 ### 3. Review and Merge
 
@@ -212,13 +296,31 @@ If you see "Merge blocked" on your PR, check:
 
 This setup is performed once by a DevOps engineer on the production server.
 
+**Prerequisites**:
+- Ubuntu/Debian Linux server with sudo access
+- Node.js 22+ installed system-wide
+- PM2 installed globally (`npm install -g pm2`)
+- Nginx installed (`sudo apt install nginx`)
+- GitHub repository admin access to generate runner token
+
+**Time Required**: 30-45 minutes
+
 #### 1. Create Dedicated User
 
 ```bash
 # On production server
 sudo useradd -m -s /bin/bash github-runner
 sudo usermod -aG docker github-runner  # If using Docker
-sudo usermod -aG pm2 github-runner     # For PM2 management
+sudo usermod -aG sudo github-runner    # For nginx reload
+
+# Set up passwordless sudo for specific commands
+sudo visudo -f /etc/sudoers.d/github-runner
+# Add these lines:
+# github-runner ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
+# github-runner ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload nginx
+# github-runner ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx
+# github-runner ALL=(ALL) NOPASSWD: /usr/sbin/service nginx reload
+# github-runner ALL=(ALL) NOPASSWD: /usr/bin/pm2 *
 ```
 
 #### 2. Install GitHub Actions Runner
@@ -256,36 +358,123 @@ pm2 startup systemd  # Configure PM2 to start on boot
 
 #### 4. Setup Nginx for Blue-Green Traffic Routing
 
+Nginx is configured to route traffic to either Blue (port 3101) or Green (port 3102) environment.
+
+**Initial Configuration**:
+
 ```bash
 # Create nginx config
 sudo nano /etc/nginx/sites-available/weatherman
+```
 
-# Add upstream configuration (initially pointing to Blue on port 3001)
+**Complete Nginx Configuration** (`/etc/nginx/sites-available/weatherman`):
+
+```nginx
+# Weatherman Blue-Green Deployment Configuration
+# Blue: port 3101 | Green: port 3102
+
+# Upstream backend - modify this line to switch traffic
+# Initially points to Blue (3101)
 upstream backend {
-    server localhost:3001;  # Blue (initial active)
+    server localhost:3101;  # Blue (initial active)
+    # server localhost:3102;  # Green (switch by commenting/uncommenting)
 }
 
 server {
     listen 80;
     server_name weatherman.zwarg.com;
 
+    # API proxy to backend (Blue or Green)
     location /api {
         proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 
+    # Health check endpoint (direct, no proxy)
+    location /health {
+        proxy_pass http://backend/health;
+        access_log off;
+    }
+
+    # Frontend static files
     location / {
         root /home/github-runner/weatherman/packages/frontend/dist;
         try_files $uri /index.html;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
-}
 
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript
+               application/x-javascript application/xml+rss
+               application/json application/javascript;
+}
+```
+
+**Enable Site**:
+
+```bash
 # Enable site
 sudo ln -s /etc/nginx/sites-available/weatherman /etc/nginx/sites-enabled/
+
+# Test configuration
 sudo nginx -t
+
+# Reload nginx
 sudo systemctl reload nginx
+
+# Verify status
+sudo systemctl status nginx
+curl http://localhost/health
+```
+
+**Traffic Switching Mechanism**:
+
+The deployment workflow uses `scripts/deployment/switch-traffic.sh` to automatically update the nginx upstream configuration:
+
+```bash
+#!/bin/bash
+# scripts/deployment/switch-traffic.sh
+# Switches nginx upstream to specified port (Blue: 3101, Green: 3102)
+
+PORT=$1
+CONFIG_FILE="/etc/nginx/sites-available/weatherman"
+
+# Update upstream backend server
+sudo sed -i "s/server localhost:[0-9]\+;/server localhost:${PORT};/" $CONFIG_FILE
+
+# Reload nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**Manual Traffic Switch**:
+
+```bash
+# Switch to Green (port 3102)
+sudo bash scripts/deployment/switch-traffic.sh 3102
+sudo nginx -t && sudo systemctl reload nginx
+
+# Switch to Blue (port 3101)
+sudo bash scripts/deployment/switch-traffic.sh 3101
+sudo nginx -t && sudo systemctl reload nginx
+
+# Verify current configuration
+grep "server localhost" /etc/nginx/sites-available/weatherman
 ```
 
 #### 5. Create Deployment State Directory

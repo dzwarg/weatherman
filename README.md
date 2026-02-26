@@ -1,5 +1,9 @@
 # 🌤️ Weatherman
 
+[![CI](https://github.com/your-org/weatherman/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/weatherman/actions/workflows/ci.yml)
+[![PR Quality Gate](https://github.com/your-org/weatherman/actions/workflows/pr-quality-gate.yml/badge.svg)](https://github.com/your-org/weatherman/actions/workflows/pr-quality-gate.yml)
+[![Deploy Production](https://github.com/your-org/weatherman/actions/workflows/deploy-production.yml/badge.svg)](https://github.com/your-org/weatherman/actions/workflows/deploy-production.yml)
+
 Voice-activated weather clothing advisor PWA for children ages 4-10.
 
 ## Overview

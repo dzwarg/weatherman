@@ -215,6 +215,7 @@ export function Home() {
 
       <OfflineIndicator />
 
+      <main>
       <div style={styles.section}>
         <ProfileSelector
           profiles={allProfiles}
@@ -266,6 +267,7 @@ export function Home() {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }

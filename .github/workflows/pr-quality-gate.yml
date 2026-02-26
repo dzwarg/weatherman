@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
+  workflow_dispatch:  # Allow manual triggering
 
 # Ensure only one workflow runs per PR
 concurrency:
@@ -20,7 +21,6 @@ jobs:
     steps:
       - name: Check branch name format
         run: |
-          BRANCH_NAME="${{ github.head_ref }}"
           echo "Validating branch name: $BRANCH_NAME"
 
           # Branch must match: NNN-feature-description (speckit convention)
@@ -33,6 +33,8 @@ jobs:
           fi
 
           echo "✅ Branch name format is valid"
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
 
   # T024: Deployment status check
   check-deployment-status:
@@ -160,11 +162,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: '22'
-          cache: 'npm'
-      - run: npm ci
       - run: npm run lint
 
   test-frontend:
@@ -173,19 +175,22 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: '22'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm test --workspace=packages/frontend -- --run
-      - name: Upload frontend coverage
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Run frontend tests with coverage
+        uses: ./.github/actions/run-tests-with-coverage
         with:
-          name: frontend-coverage
-          path: packages/frontend/coverage/
-          retention-days: 90
+          workspace: packages/frontend
+          package-name: frontend
+      - name: Check coverage threshold
+        uses: ./.github/actions/check-coverage-threshold
+        with:
+          coverage-file: packages/frontend/coverage/coverage-summary.json
+          threshold: 80
+          package-name: frontend
 
   test-backend:
     name: Test Backend
@@ -193,19 +198,22 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: '22'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm test --workspace=packages/server -- --run
-      - name: Upload backend coverage
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Run backend tests with coverage
+        uses: ./.github/actions/run-tests-with-coverage
         with:
-          name: backend-coverage
-          path: packages/server/coverage/
-          retention-days: 90
+          workspace: packages/server
+          package-name: backend
+      - name: Check coverage threshold
+        uses: ./.github/actions/check-coverage-threshold
+        with:
+          coverage-file: packages/server/coverage/coverage-summary.json
+          threshold: 80
+          package-name: backend
 
   build:
     name: Build Packages
@@ -214,11 +222,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: '22'
-          cache: 'npm'
-      - run: npm ci
       - run: npm run build --workspace=packages/frontend
 
   # T028: Aggregate coverage calculation
@@ -233,13 +241,13 @@ jobs:
       - name: Download frontend coverage
         uses: actions/download-artifact@v4
         with:
-          name: frontend-coverage
+          name: frontend-coverage-${{ github.run_number }}
           path: coverage-frontend
 
       - name: Download backend coverage
         uses: actions/download-artifact@v4
         with:
-          name: backend-coverage
+          name: backend-coverage-${{ github.run_number }}
           path: coverage-backend
 
       - name: Calculate aggregate coverage
@@ -293,14 +301,14 @@ jobs:
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: frontend-coverage
+          name: frontend-coverage-${{ github.run_number }}
           path: coverage-frontend
 
       - name: Download backend coverage
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: backend-coverage
+          name: backend-coverage-${{ github.run_number }}
           path: coverage-backend
 
       - name: List downloaded files (debug)
