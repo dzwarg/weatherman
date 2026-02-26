@@ -212,7 +212,7 @@ jobs:
         with:
           name: coverage-trend-${{ github.run_number }}
           path: coverage-trend.json
-          retention-days: 365  # Keep trend data for 1 year
+          retention-days: 90  # Keep trend data for 1 year
 
   # Job 7: Lighthouse PWA score check (T063)
   lighthouse-pwa:
@@ -274,6 +274,7 @@ jobs:
           name: lighthouse-report-${{ github.run_number }}
           path: .lighthouseci/
           retention-days: 30
+          include-hidden-files: true
 
   # Job 8: Accessibility testing with axe-core (T064)
   accessibility-tests:
@@ -322,6 +323,7 @@ jobs:
           # Run axe with WCAG 2.2 Level AA rules
           axe http://localhost:8081 \
             --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa \
+            --save axe-results.json \
             --exit || {
               echo ""
               echo "❌ Accessibility violations found"

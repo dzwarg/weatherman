@@ -1,5 +1,9 @@
 {
   "ci": {
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    },
     "assert": {
       "assertions": {
         "categories:performance": ["warn", { "minScore": 0.5 }],
