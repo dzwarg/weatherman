@@ -274,6 +274,7 @@ jobs:
           name: lighthouse-report-${{ github.run_number }}
           path: .lighthouseci/
           retention-days: 30
+          include-hidden-files: true
 
   # Job 8: Accessibility testing with axe-core (T064)
   accessibility-tests:
