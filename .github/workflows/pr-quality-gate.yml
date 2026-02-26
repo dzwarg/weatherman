@@ -241,13 +241,13 @@ jobs:
       - name: Download frontend coverage
         uses: actions/download-artifact@v4
         with:
-          name: frontend-coverage
+          name: frontend-coverage-${{ github.run_number }}
           path: coverage-frontend
 
       - name: Download backend coverage
         uses: actions/download-artifact@v4
         with:
-          name: backend-coverage
+          name: backend-coverage-${{ github.run_number }}
           path: coverage-backend
 
       - name: Calculate aggregate coverage
@@ -301,14 +301,14 @@ jobs:
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: frontend-coverage
+          name: frontend-coverage-${{ github.run_number }}
           path: coverage-frontend
 
       - name: Download backend coverage
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: backend-coverage
+          name: backend-coverage-${{ github.run_number }}
           path: coverage-backend
 
       - name: List downloaded files (debug)
