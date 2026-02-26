@@ -92,6 +92,8 @@ jobs:
       name: production
       url: https://weatherman.zwarg.com
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js environment
         uses: ./.github/actions/setup-node
         with:
@@ -205,6 +207,8 @@ jobs:
     timeout-minutes: 15  # T050: 15-minute timeout for post-deployment tests
     needs: [detect-environment, deploy-inactive]
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js environment
         uses: ./.github/actions/setup-node
         with:

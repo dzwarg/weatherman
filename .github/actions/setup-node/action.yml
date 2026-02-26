@@ -27,9 +27,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
     - name: Setup Node.js with npm cache
       id: setup
       uses: actions/setup-node@v4
