@@ -32,7 +32,7 @@
 - [X] T002 Create GitHub Actions reusable actions directory at `.github/actions/`
 - [X] T003 [P] Create deployment scripts directory at `scripts/deployment/`
 - [X] T004 [P] Create testing scripts directory at `scripts/testing/`
-- [X] T005 [P] Create post-deployment test directories at `packages/frontend/tests/post-deployment/` and `packages/backend/tests/post-deployment/`
+- [X] T005 [P] Create post-deployment test directories at `packages/frontend/tests/post-deployment/` and `packages/server/tests/post-deployment/`
 
 ---
 
@@ -43,9 +43,9 @@
 **⚠️ CRITICAL**: No workflow implementation can begin until this phase is complete
 
 - [X] T006 Configure Vitest coverage thresholds (80%) in `packages/frontend/vitest.config.js`
-- [X] T007 Configure Vitest coverage thresholds (80%) in `packages/backend/vitest.config.js`
+- [X] T007 Configure Vitest coverage thresholds (80%) in `packages/server/vitest.config.js`
 - [X] T008 [P] Update frontend package.json with test coverage script: `"test": "vitest --coverage"`
-- [X] T009 [P] Update backend package.json with test coverage script: `"test": "vitest --coverage"`
+- [X] T009 [P] Update server package.json with test coverage script: `"test": "vitest --coverage"`
 - [X] T010 Add ESLint configuration for production code checks (no console.log) in root `eslint.config.js`
 - [X] T011 Create PM2 Blue environment configuration at `pm2.blue.config.js` with port 3001, cluster mode
 - [X] T012 Create PM2 Green environment configuration at `pm2.green.config.js` with port 3002, cluster mode
@@ -65,7 +65,7 @@
 - [X] T013 [P] [US1] Create CI workflow file at `.github/workflows/ci.yml` with push trigger on all branches except main
 - [X] T014 [P] [US1] Add lint job to CI workflow using ubuntu-latest runner with 10-minute timeout
 - [X] T015 [P] [US1] Add frontend test job to CI workflow with coverage reporting and artifact upload
-- [X] T016 [P] [US1] Add backend test job to CI workflow with coverage reporting and artifact upload
+- [X] T016 [P] [US1] Add server test job to CI workflow with coverage reporting and artifact upload
 - [X] T017 [P] [US1] Add build job to CI workflow that depends on lint and test jobs
 - [X] T018 [US1] Add bundle size check to build job (frontend < 300KB per constitution)
 - [X] T019 [US1] Configure job-level timeouts (10 minutes) and workflow-level concurrency in CI workflow
@@ -140,7 +140,7 @@
 - [X] T049 [US4] Add post-deployment-tests job to deploy workflow that runs smoke, integration, and performance tests
 - [X] T050 [US4] Configure 15-minute timeout for post-deployment-tests job
 - [X] T051 [P] [US4] Create frontend post-deployment smoke tests at `packages/frontend/tests/post-deployment/smoke.test.js`
-- [X] T052 [P] [US4] Create backend post-deployment integration tests at `packages/server/tests/post-deployment/integration.test.js`
+- [X] T052 [P] [US4] Create server post-deployment integration tests at `packages/server/tests/post-deployment/integration.test.js`
 - [X] T053 [US4] Add switch-traffic job to deploy workflow that runs only if tests pass
 - [X] T054 [US4] Add nginx reload step in switch-traffic job with verification
 - [X] T055 [US4] Update deployment state files to mark environments active/inactive after traffic switch
@@ -156,19 +156,19 @@
 
 **Purpose**: Enhancements that improve the overall CI/CD system
 
-- [ ] T059 [P] Add workflow status badges to README.md for CI and deployment workflows
-- [ ] T060 [P] Create scheduled comprehensive test workflow at `.github/workflows/scheduled-comprehensive.yml` for nightly runs
-- [ ] T061 [P] Add manual workflow dispatch triggers to all workflows for on-demand execution
-- [ ] T062 [P] Create coverage trend tracking by storing historical coverage data as artifacts
-- [ ] T063 [P] Add Lighthouse PWA score check to CI workflow per constitution requirement
-- [ ] T064 [P] Add accessibility testing (axe-core) to CI workflow per constitution requirement
-- [ ] T065 [P] Create reusable action for Node.js setup at `.github/actions/setup-node/action.yml`
-- [ ] T066 [P] Create reusable action for test execution at `.github/actions/run-tests-with-coverage/action.yml`
-- [ ] T067 [P] Create reusable action for coverage threshold check at `.github/actions/check-coverage-threshold/action.yml`
-- [ ] T068 Update quickstart.md with actual workflow file examples and troubleshooting steps
-- [ ] T069 Document self-hosted runner setup process in quickstart.md production deployment section
-- [ ] T070 Add nginx configuration example to quickstart.md for Blue-Green upstream setup
-- [ ] T071 Validate all workflow YAML files with GitHub Actions linter (actionlint)
+- [X] T059 [P] Add workflow status badges to README.md for CI and deployment workflows
+- [X] T060 [P] Create scheduled comprehensive test workflow at `.github/workflows/scheduled-comprehensive.yml` for nightly runs
+- [X] T061 [P] Add manual workflow dispatch triggers to all workflows for on-demand execution
+- [X] T062 [P] Create coverage trend tracking by storing historical coverage data as artifacts
+- [X] T063 [P] Add Lighthouse PWA score check to CI workflow per constitution requirement
+- [X] T064 [P] Add accessibility testing (axe-core) to CI workflow per constitution requirement
+- [X] T065 [P] Create reusable action for Node.js setup at `.github/actions/setup-node/action.yml`
+- [X] T066 [P] Create reusable action for test execution at `.github/actions/run-tests-with-coverage/action.yml`
+- [X] T067 [P] Create reusable action for coverage threshold check at `.github/actions/check-coverage-threshold/action.yml`
+- [X] T068 Update quickstart.md with actual workflow file examples and troubleshooting steps
+- [X] T069 Document self-hosted runner setup process in quickstart.md production deployment section
+- [X] T070 Add nginx configuration example to quickstart.md for Blue-Green upstream setup
+- [X] T071 Validate all workflow YAML files with GitHub Actions linter (actionlint)
 - [ ] T072 Test complete CI/CD pipeline end-to-end: feature branch → PR → merge → deployment → rollback
 
 ---
@@ -211,7 +211,7 @@
 
 **User Story 1 (T013-T021)**:
 - T013-T017 can run in parallel (different job definitions in same file, but different sections)
-- T014-T016 marked [P]: lint, frontend test, backend test jobs are independent
+- T014-T016 marked [P]: lint, frontend test, server test jobs are independent
 - T018-T020 are enhancements to existing jobs (sequential)
 
 **User Story 2 (T022-T031)**:
@@ -225,7 +225,7 @@
 
 **User Story 4 (T045-T058)**:
 - T045-T047 marked [P]: smoke, performance baseline, and comparison scripts are independent
-- T051-T052 marked [P]: frontend and backend post-deployment tests are independent
+- T051-T052 marked [P]: frontend and server post-deployment tests are independent
 - All test scripts (T045-T047, T051-T052) can be developed in parallel
 
 **Polish Phase (T059-T072)**: All tasks marked [P] can run in parallel
@@ -238,7 +238,7 @@
 # Launch all independent CI job definitions together:
 Task T014 [P]: "Add lint job to CI workflow"
 Task T015 [P]: "Add frontend test job to CI workflow"
-Task T016 [P]: "Add backend test job to CI workflow"
+Task T016 [P]: "Add server test job to CI workflow"
 
 # These jobs are defined in the same file but operate on different code
 # and can be written/tested independently
@@ -254,7 +254,7 @@ Task T045 [P]: "Create smoke test script"
 Task T046 [P]: "Create performance baseline script"
 Task T047 [P]: "Create performance comparison script"
 Task T051 [P]: "Create frontend post-deployment tests"
-Task T052 [P]: "Create backend post-deployment tests"
+Task T052 [P]: "Create server post-deployment tests"
 
 # These scripts are completely independent and can be developed in parallel
 ```

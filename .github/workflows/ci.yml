@@ -18,6 +18,7 @@ on:
       - '.specify/**'
       - 'specs/**'
   workflow_call:  # Allow this workflow to be reused by other workflows
+  workflow_dispatch:  # Allow manual triggering
 
 # Only one CI run per branch at a time, cancel in-progress runs
 concurrency:
@@ -35,17 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js with npm cache
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Check for outdated dependencies
         run: |
@@ -66,17 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js with npm cache
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Run ESLint
         run: npm run lint
@@ -94,30 +81,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js with npm cache
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Run frontend tests with coverage
-        run: npm test --workspace=packages/frontend -- --run
-        # Vitest will fail if coverage < 80% (configured in vitest.config.js)
-        # Note: --coverage is already in package.json test script
-
-      - name: Upload frontend coverage
-        uses: actions/upload-artifact@v4
-        if: always()
+        id: test
+        uses: ./.github/actions/run-tests-with-coverage
         with:
-          name: frontend-coverage-${{ github.run_number }}
-          path: packages/frontend/coverage/
-          retention-days: 90
+          workspace: packages/frontend
+          package-name: frontend
+
+      - name: Check coverage threshold
+        uses: ./.github/actions/check-coverage-threshold
+        with:
+          coverage-file: packages/frontend/coverage/coverage-summary.json
+          threshold: 80
+          package-name: frontend
 
   # Job 4: Test backend/server package
   test-backend:
@@ -125,30 +106,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js with npm cache
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run server tests with coverage
-        run: npm test --workspace=packages/server -- --run
-        # Vitest will fail if coverage < 80% (configured in vitest.config.js)
-        # Note: --coverage is already in package.json test script
-
-      - name: Upload backend coverage
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Run backend tests with coverage
+        id: test
+        uses: ./.github/actions/run-tests-with-coverage
         with:
-          name: backend-coverage-${{ github.run_number }}
-          path: packages/server/coverage/
-          retention-days: 90
+          workspace: packages/server
+          package-name: backend
+
+      - name: Check coverage threshold
+        uses: ./.github/actions/check-coverage-threshold
+        with:
+          coverage-file: packages/server/coverage/coverage-summary.json
+          threshold: 80
+          package-name: backend
 
   # Job 5: Build all packages
   build:
@@ -157,17 +132,10 @@ jobs:
     timeout-minutes: 10
     needs: [lint, test-frontend, test-backend]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js with npm cache
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Build frontend
         run: npm run build --workspace=packages/frontend
@@ -194,6 +162,177 @@ jobs:
             packages/server/dist/
           retention-days: 90
 
+  # Job 6: Track coverage trends (T062)
+  track-coverage-trends:
+    name: Track Coverage Trends
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [test-frontend, test-backend]
+    if: always() && (needs.test-frontend.result == 'success' && needs.test-backend.result == 'success')
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage-${{ github.run_number }}
+          path: packages/frontend/coverage/
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage-${{ github.run_number }}
+          path: packages/server/coverage/
+
+      - name: Track coverage trends
+        run: ./scripts/testing/track-coverage-trends.sh
+        env:
+          TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      - name: Upload coverage trend data
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-trend-${{ github.run_number }}
+          path: coverage-trend.json
+          retention-days: 365  # Keep trend data for 1 year
+
+  # Job 7: Lighthouse PWA score check (T063)
+  lighthouse-pwa:
+    name: Lighthouse PWA Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output-${{ github.run_number }}
+          path: packages/
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Serve production build
+        run: |
+          npx serve packages/frontend/dist -p 8080 &
+          SERVE_PID=$!
+          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
+          # Wait for server to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:8080 > /dev/null; then
+              echo "✅ Server ready"
+              break
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 1
+          done
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun \
+            --collect.url=http://localhost:8080 \
+            --collect.numberOfRuns=1 \
+            --assert.preset=lighthouse:no-pwa \
+            --assert.assertions.categories:pwa=error \
+            --assert.assertions.categories:pwa.minScore=0.9 || {
+              echo "❌ Lighthouse PWA score failed"
+              echo "Constitution requires PWA score of 100/100"
+              echo "Current score is below 90/100 threshold"
+              exit 1
+            }
+
+      - name: Stop server
+        if: always()
+        run: kill ${{ env.SERVE_PID }} || true
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report-${{ github.run_number }}
+          path: .lighthouseci/
+          retention-days: 30
+
+  # Job 8: Accessibility testing with axe-core (T064)
+  accessibility-tests:
+    name: Accessibility Tests (axe-core)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output-${{ github.run_number }}
+          path: packages/
+
+      - name: Install axe-core CLI
+        run: npm install -g @axe-core/cli
+
+      - name: Serve production build
+        run: |
+          npx serve packages/frontend/dist -p 8081 &
+          SERVE_PID=$!
+          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
+          # Wait for server to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:8081 > /dev/null; then
+              echo "✅ Server ready"
+              break
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 1
+          done
+
+      - name: Run axe accessibility tests
+        run: |
+          echo "🔍 Running axe-core accessibility tests..."
+          echo "Constitution requires WCAG 2.2 Level AA compliance"
+          echo ""
+
+          # Run axe with WCAG 2.2 Level AA rules
+          axe http://localhost:8081 \
+            --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa \
+            --exit || {
+              echo ""
+              echo "❌ Accessibility violations found"
+              echo "Constitution requires WCAG 2.2 Level AA compliance"
+              echo "Review the violations above and fix accessibility issues"
+              exit 1
+            }
+
+          echo ""
+          echo "✅ No accessibility violations found"
+          echo "✅ WCAG 2.2 Level AA compliance verified"
+
+      - name: Stop server
+        if: always()
+        run: kill ${{ env.SERVE_PID }} || true
+
+      - name: Upload axe results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: axe-results-${{ github.run_number }}
+          path: axe-results.json
+          retention-days: 30
+
 # Success Criteria (all must pass):
 # - ESLint: 0 errors, 0 warnings
 # - No console.log in production code (packages/*/src)
@@ -201,3 +340,6 @@ jobs:
 # - Backend tests: All pass, coverage >= 80%
 # - Builds: Both packages build successfully
 # - Bundle size: Frontend < 300KB
+# - Coverage trends: Historical data tracked and stored
+# - Lighthouse PWA: Score >= 90/100 (constitution target: 100/100)
+# - Accessibility: WCAG 2.2 Level AA compliance (axe-core)

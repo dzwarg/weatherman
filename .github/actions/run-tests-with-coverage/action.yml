@@ -1,0 +1,101 @@
+name: 'Run Tests with Coverage'
+description: 'Execute tests with coverage reporting and upload results as artifacts'
+author: 'Weatherman Team'
+
+inputs:
+  workspace:
+    description: 'npm workspace to test (e.g., packages/frontend)'
+    required: true
+  package-name:
+    description: 'Package name for artifact (e.g., frontend, backend)'
+    required: true
+  test-command:
+    description: 'Test command to run'
+    required: false
+    default: 'npm test --workspace=${{ inputs.workspace }} -- --run'
+  coverage-path:
+    description: 'Path to coverage output directory'
+    required: false
+    default: '${{ inputs.workspace }}/coverage/'
+  upload-coverage:
+    description: 'Whether to upload coverage artifacts'
+    required: false
+    default: 'true'
+  artifact-retention-days:
+    description: 'Number of days to retain coverage artifacts'
+    required: false
+    default: '90'
+
+outputs:
+  coverage-lines:
+    description: 'Line coverage percentage'
+    value: ${{ steps.extract-coverage.outputs.lines }}
+  coverage-statements:
+    description: 'Statement coverage percentage'
+    value: ${{ steps.extract-coverage.outputs.statements }}
+  coverage-functions:
+    description: 'Function coverage percentage'
+    value: ${{ steps.extract-coverage.outputs.functions }}
+  coverage-branches:
+    description: 'Branch coverage percentage'
+    value: ${{ steps.extract-coverage.outputs.branches }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run tests with coverage
+      shell: bash
+      run: |
+        echo "🧪 Running tests for ${{ inputs.package-name }}..."
+        ${{ inputs.test-command }}
+        echo "✅ Tests completed"
+
+    - name: Extract coverage metrics
+      id: extract-coverage
+      if: always()
+      shell: bash
+      run: |
+        COVERAGE_FILE="${{ inputs.coverage-path }}/coverage-summary.json"
+
+        if [ -f "$COVERAGE_FILE" ]; then
+          echo "📊 Extracting coverage metrics from $COVERAGE_FILE"
+
+          # Use Node.js to parse JSON (more portable than jq)
+          node <<'EOF'
+          const fs = require('fs');
+          const coverage = JSON.parse(fs.readFileSync(process.env.COVERAGE_FILE, 'utf8'));
+          const total = coverage.total;
+
+          console.log(`Lines: ${total.lines.pct}%`);
+          console.log(`Statements: ${total.statements.pct}%`);
+          console.log(`Functions: ${total.functions.pct}%`);
+          console.log(`Branches: ${total.branches.pct}%`);
+
+          // Set outputs
+          const fs2 = require('fs');
+          fs2.appendFileSync(process.env.GITHUB_OUTPUT, `lines=${total.lines.pct}\n`);
+          fs2.appendFileSync(process.env.GITHUB_OUTPUT, `statements=${total.statements.pct}\n`);
+          fs2.appendFileSync(process.env.GITHUB_OUTPUT, `functions=${total.functions.pct}\n`);
+          fs2.appendFileSync(process.env.GITHUB_OUTPUT, `branches=${total.branches.pct}\n`);
+          EOF
+        else
+          echo "⚠️  Coverage file not found: $COVERAGE_FILE"
+          echo "lines=0" >> $GITHUB_OUTPUT
+          echo "statements=0" >> $GITHUB_OUTPUT
+          echo "functions=0" >> $GITHUB_OUTPUT
+          echo "branches=0" >> $GITHUB_OUTPUT
+        fi
+      env:
+        COVERAGE_FILE: ${{ inputs.coverage-path }}/coverage-summary.json
+
+    - name: Upload coverage artifacts
+      if: inputs.upload-coverage == 'true' && always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.package-name }}-coverage-${{ github.run_number }}
+        path: ${{ inputs.coverage-path }}
+        retention-days: ${{ inputs.artifact-retention-days }}
+
+branding:
+  icon: 'check-circle'
+  color: 'blue'

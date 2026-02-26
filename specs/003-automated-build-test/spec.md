@@ -90,18 +90,30 @@ As a quality assurance lead, after the system deploys to the Green environment, 
 
 ### Edge Cases
 
-- What happens when the build server is unavailable or experiencing high load?
-- How does the system handle flaky tests that intermittently fail?
-- What happens when a CI workflow times out after 10 minutes due to extremely long-running tests?
-- How does the system handle concurrent builds from multiple developers?
-- What happens when external dependencies (APIs, databases) are unavailable during testing?
-- How does the system handle workflow configuration errors or invalid workflow files?
-- What happens when builds consume excessive resources (memory, disk space)?
-- What happens when both Blue and Green environments have failed deployments?
-- How does the system handle post-deployment tests that timeout after 15 minutes or hang indefinitely?
-- What happens if developers attempt to merge while a deployment is in progress on Green?
-- How does the system handle rollback if Blue environment becomes unhealthy after Green fails?
-- What happens when traffic switching fails despite post-deployment tests passing?
+- **Q**: What happens when the build server is unavailable or experiencing high load?  
+**A**: The system MUST default to the GitHub Action platform's retry mechanism. All messages about build server availability is handled by the platform.
+- **Q**: How does the system handle flaky tests that intermittently fail?  
+**A**: All tests MUST be written to be deterministic and stable. If a test fails, developers MUST investigate and fix the underlying issue rather than relying on retries.
+- **Q**: What happens when a CI workflow times out after 10 minutes due to extremely long-running tests?  
+**A**: The system MUST mark the workflow as failed and report a timeout error. Developers MUST optimize tests to run within the 10-minute limit.
+- **Q**: How does the system handle concurrent builds from multiple developers?  
+**A**: The system supports the same concurrency model as the GitHub Actions platform, which can handle multiple concurrent workflow executions. If the concurrency limit is reached, additional workflows will be queued until runners are available.
+- **Q**: What happens when external dependencies (APIs, databases) are unavailable during testing?  
+**A**: Tests MUST NOT rely on external dependencies and should use mocks or stubs to simulate interactions. If a test fails due to an external dependency issue, it MUST be treated as a test failure and reported accordingly.
+- **Q**: How does the system handle workflow configuration errors or invalid workflow files?  
+**A**: The GitHub Actions platform will reject invalid workflow files and report configuration errors during workflow parsing. Developers MUST fix any configuration issues before workflows can run successfully.
+- **Q**: What happens when builds consume excessive resources (memory, disk space)?  
+**A**: The system is constrained by the GitHub Actions platform limits. If a workflow exceeds resource limits, it will be terminated and marked as failed with an appropriate error message. Developers MUST optimize builds to stay within resource limits.
+- **Q**: What happens when both Blue and Green environments have failed deployments?
+**A**: The system MUST keep traffic on the last known healthy environment (Blue) and block any new deployments until the issue is resolved. Developers MUST investigate and fix the deployment issues before attempting another deployment.
+- **Q**: How does the system handle post-deployment tests that timeout after 15 minutes or hang indefinitely?
+**A**: The system MUST mark the post-deployment test run as failed if it exceeds the 15-minute timeout and keep traffic on Blue. Developers MUST optimize post-deployment tests to complete within the timeout period.
+- **Q**: What happens if developers attempt to merge while a deployment is in progress on Green?  
+**A**: The system MUST block the merge and display a message indicating that a deployment is currently in progress and to retry after completion. This prevents conflicts between ongoing deployments and new code merges.
+- **Q**: How does the system handle rollback if Blue environment becomes unhealthy after Green fails?
+**A**: The system MUST keep traffic on Blue as long as it remains healthy. If Blue becomes unhealthy, the system MUST block all traffic and alert developers to investigate and resolve the issue before allowing any new deployments or merges.
+- **Q**: What happens when traffic switching fails despite post-deployment tests passing?  
+**A**: The system MUST monitor the traffic switching process and report any failures. If traffic switching fails, the system MUST keep traffic on Blue and alert developers to investigate the issue before attempting another deployment.
 
 ## Requirements *(mandatory)*
 
@@ -114,7 +126,7 @@ As a quality assurance lead, after the system deploys to the Green environment, 
 - **FR-005**: System MUST block pull request merges when required quality checks fail
 - **FR-006**: System MUST calculate and report code coverage metrics for each test run and block pull request merges when coverage falls below 80%
 - **FR-007**: System MUST provide detailed logs for failed builds and tests including error messages and stack traces
-- **FR-008**: System MUST support running different test suites based on branch type (feature vs. main branch)
+- **FR-008**: System MUST support running different test suites based on branch type (feature vs. main branch). Satisfied by the current implementation.
 - **FR-009**: System MUST display build failure notifications in the workflow execution summary within the version control interface (no external notification channels required)
 - **FR-010**: System MUST retain build artifacts and test reports according to the automation platform's default retention policy
 - **FR-011**: System MUST allow manual triggering of workflows with custom parameters

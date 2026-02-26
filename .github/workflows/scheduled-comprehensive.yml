@@ -1,0 +1,110 @@
+# GitHub Actions Workflow: Scheduled Comprehensive Tests
+#
+# Purpose: Run comprehensive test suite on a schedule to catch regressions
+# Trigger: Scheduled (nightly at 2 AM UTC) or manual dispatch
+# Runner: GitHub-hosted (ubuntu-latest)
+# Timeout: 30 minutes (longer than CI to allow for comprehensive checks)
+
+name: Scheduled Comprehensive Tests
+
+on:
+  schedule:
+    # Run nightly at 2:00 AM UTC (9 PM EST / 6 PM PST)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  NODE_VERSION: '22'
+  CACHE_KEY_PREFIX: 'weatherman-v1'
+
+jobs:
+  # Job 1: Run full test suite with comprehensive coverage
+  comprehensive-tests:
+    name: Comprehensive Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run all tests with coverage
+        run: npm test
+
+      - name: Generate comprehensive coverage report
+        run: |
+          echo "📊 Comprehensive Coverage Report"
+          echo "================================="
+          echo ""
+          echo "Frontend Coverage:"
+          cat packages/frontend/coverage/coverage-summary.json | jq '.total'
+          echo ""
+          echo "Backend Coverage:"
+          cat packages/server/coverage/coverage-summary.json | jq '.total'
+
+      - name: Upload combined coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: comprehensive-coverage-${{ github.run_number }}
+          path: |
+            packages/frontend/coverage/
+            packages/server/coverage/
+          retention-days: 90
+
+  # Job 2: Build verification
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: comprehensive-tests
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build all packages
+        run: npm run build
+
+      - name: Verify bundle sizes
+        run: |
+          echo "📦 Bundle Size Report"
+          echo "===================="
+          echo ""
+          echo "Frontend bundle size:"
+          du -sh packages/frontend/dist
+          echo ""
+          echo "Detailed frontend assets:"
+          find packages/frontend/dist -type f -exec ls -lh {} \; | awk '{print $5 "\t" $9}'
+
+  # Job 3: Dependency audit
+  dependency-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Setup Node.js environment
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run npm audit
+        run: |
+          echo "🔒 Running npm audit..."
+          npm audit --audit-level=moderate || echo "⚠️  Vulnerabilities found - review required"
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "📦 Checking for outdated dependencies..."
+          npm outdated || true
+
+# Success Criteria:
+# - All tests pass with 80%+ coverage
+# - All builds complete successfully
+# - Bundle sizes within limits
+# - Security audit shows no high/critical vulnerabilities
