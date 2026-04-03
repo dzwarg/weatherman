@@ -39,13 +39,13 @@
 
 **Route mapping**: See plan.md Phase 2 Route Mapping table.
 
-- [ ] T007 Create `packages/server/netlify/functions/weather-current.js` wrapper for Express route
-- [ ] T008 [P] Create `packages/server/netlify/functions/weather-forecast.js` wrapper for Express route
-- [ ] T009 [P] Create `packages/server/netlify/functions/recommendations.js` wrapper for Express route
-- [ ] T010 [P] Create `packages/server/netlify/functions/health.js` wrapper for Express route
-- [ ] T011 Add CORS headers to all Netlify Functions for Netlify frontend domain
-- [ ] T012 Add error handling with proper status codes to all functions
-- [ ] T013 Verify functions work locally with `netlify dev`
+- [x] T007 Create `packages/server/netlify/functions/weather-current.js` wrapper for Express route
+- [x] T008 [P] Create `packages/server/netlify/functions/weather-forecast.js` wrapper for Express route
+- [x] T009 [P] Create `packages/server/netlify/functions/recommendations.js` wrapper for Express route
+- [x] T010 [P] Create `packages/server/netlify/functions/health.js` wrapper for Express route
+- [x] T011 Add CORS headers to all Netlify Functions for Netlify frontend domain
+- [x] T012 Add error handling with proper status codes to all functions
+- [x] T013 Verify functions work locally with `netlify dev`
 
 **Checkpoint**: Backend adapted - Netlify Functions ready for deployment
 
@@ -183,11 +183,11 @@ Task: "Run npm run build"
 |--------|-------|
 | Total Tasks | 29 |
 | Phase 1 Tasks | 5 (5 complete ✓) |
-| Phase 2 Tasks | 7 |
+| Phase 2 Tasks | 7 (7 complete ✓) |
 | Phase 3 Tasks | 7 |
 | Phase 4 Tasks | 5 |
 | Phase 5 Tasks | 5 |
-| **Completed** | **5** |
+| **Completed** | **12** |
 
 ### Task Count by User Story
 
@@ -228,3 +228,14 @@ Task: "Run npm run build"
   - Publish directory: `packages/frontend/dist` (monorepo structure requires full path)
   - Functions directory: `packages/server/netlify/functions`
   - Commit: `b78eebb` (GPG-signed)
+- **T007-T010 complete**: Created Netlify function wrappers for Express routes
+  - `weather-current.js` - GET current weather (POST /api/weather/current)
+  - `weather-forecast.js` - GET forecast (POST /api/weather/forecast)
+  - `recommendations.js` - GET/POST recommendations (supports GET profiles, POST generate)
+  - `health.js` - Health check endpoint (GET /api/health)
+  - All functions include CORS headers and proper error handling
+- **T011-T013 complete**: Added CORS headers, error handling, and verified with `netlify dev`
+  - All functions use ES module exports (`export const handler`)
+  - CORS headers configured for cross-origin requests
+  - Error handling returns proper HTTP status codes (400, 405, 500)
+  - Verified all functions work locally: health, recommendations, weather-current, weather-forecast
