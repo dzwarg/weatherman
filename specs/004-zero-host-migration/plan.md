@@ -51,32 +51,31 @@ specs/004-zero-host-migration/
 packages/
 ├── frontend/            # Static site → Netlify Pages
 │   ├── src/
-│   ├── public/
-│   └── netlify.toml     # NEW: Netlify configuration
+│   └── public/
 └── server/              # Express API → Netlify Functions
     ├── src/
-    │   └── functions/   # NEW: Netlify Functions (converted routes)
-    └── netlify.toml     # NEW: Function configuration
+    │   └── functions/  # Netlify Functions (converted routes)
+    └── netlify/        # Functions directory
 ```
 
 **Structure Decision**: 
-- `packages/frontend` deploys as Netlify Pages (static site)
-- `packages/server/src/routes/*.js` converted to Netlify Functions at `netlify/functions/`
-- `netlify.toml` in each package root configures deployment
+- Single `netlify.toml` at repo root handles both frontend and backend
+- `packages/frontend` builds to `packages/frontend/dist` (monorepo structure)
+- `packages/server` serves functions from `packages/server/netlify/functions`
+- Build publishes to `packages/frontend/dist`
 
 ## Migration Phases
 
 ### Phase 1: Netlify Configuration
 
 **Tasks**:
-1. Create `netlify.toml` for frontend package
-2. Create `netlify.toml` for server package with function config
+1. Create root `netlify.toml` with build, publish, and functions settings
+2. Create server functions directory structure
 3. Add Netlify build scripts to package.json
 4. Configure environment variables in Netlify dashboard
 
 **Files Created**:
-- `packages/frontend/netlify.toml`
-- `packages/server/netlify.toml`
+- `netlify.toml` (root) - Single config for frontend + backend
 - `packages/server/netlify/functions/` (functions directory)
 
 ### Phase 2: Backend Adaptation

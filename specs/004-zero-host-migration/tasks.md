@@ -19,14 +19,15 @@
 
 **Purpose**: Create Netlify configuration files and directory structure
 
-- [x] T001 Create `packages/frontend/netlify.toml` with build and publish settings
-- [x] T002 Create `packages/server/netlify.toml` with function directory configuration
-- [x] T003 [P] Create `packages/server/netlify/functions/` directory for Netlify Functions
-- [x] T004 [P] Install `@netlify/cli` as dev dependency in server package
-- [x] T005 [P] Configure Netlify site for frontend (connect GitHub repo, set build command, publish directory)
-- [x] T006 [P] Configure Netlify site for server functions (set functions directory)
+- [x] T001 Create root `netlify.toml` with build, publish, and functions settings
+- [x] T002 Create `packages/server/netlify/functions/` directory for Netlify Functions
+- [x] T003 [P] Install `@netlify/cli` as dev dependency in server package
+- [x] T004 [P] Configure Netlify site (connect GitHub repo, set build command, publish directory)
+- [x] T005 [P] Configure Netlify site functions directory
 
-**Progress**: 6/6 Phase 1 tasks complete ✓
+**Note**: Single `netlify.toml` at repo root handles both frontend and backend. Publish path must be `packages/frontend/dist` (monorepo structure).
+
+**Progress**: 5/5 Phase 1 tasks complete ✓
 
 ---
 
@@ -180,14 +181,13 @@ Task: "Run npm run build"
 
 | Metric | Value |
 |--------|-------|
-| Total Tasks | 31 |
-| Phase 1 Tasks | 6 (6 complete ✓) |
+| Total Tasks | 29 |
+| Phase 1 Tasks | 5 (5 complete ✓) |
 | Phase 2 Tasks | 7 |
 | Phase 3 Tasks | 7 |
 | Phase 4 Tasks | 5 |
-| Phase 5 Tasks | 6 |
-| Parallelizable Tasks | 10 |
-| **Completed** | **6** |
+| Phase 5 Tasks | 5 |
+| **Completed** | **5** |
 
 ### Task Count by User Story
 
@@ -219,10 +219,12 @@ Task: "Run npm run build"
 
 ### 2026-04-03
 - **T001-T004 complete**: Created Netlify configuration files and directory structure
-  - Added `packages/frontend/netlify.toml` with build/publish settings
-  - Added `packages/server/netlify.toml` with functions directory config
+  - Added root `netlify.toml` with build/publish/functions settings
   - Added `packages/server/netlify/functions/.gitkeep` placeholder
   - Added `@netlify/cli` as dev dependency in server package
   - Commit: `f43715f` (GPG-signed)
-- **T005 complete**: Configured Netlify site for frontend (connected GitHub repo, set build/publish directory)
-- **T006 complete**: Configured Netlify site for server functions (set functions directory)
+- **T004-T005 complete**: Configured Netlify site for frontend (connected GitHub repo, set build/publish directory)
+  - Build command: `npm run build`
+  - Publish directory: `packages/frontend/dist` (monorepo structure requires full path)
+  - Functions directory: `packages/server/netlify/functions`
+  - Commit: `b78eebb` (GPG-signed)
