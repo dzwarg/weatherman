@@ -19,12 +19,14 @@
 
 **Purpose**: Create Netlify configuration files and directory structure
 
-- [ ] T001 Create `packages/frontend/netlify.toml` with build and publish settings
-- [ ] T002 Create `packages/server/netlify.toml` with function directory configuration
-- [ ] T003 [P] Create `packages/server/netlify/functions/` directory for Netlify Functions
-- [ ] T004 [P] Install `@netlify/cli` as dev dependency in server package
+- [x] T001 Create `packages/frontend/netlify.toml` with build and publish settings
+- [x] T002 Create `packages/server/netlify.toml` with function directory configuration
+- [x] T003 [P] Create `packages/server/netlify/functions/` directory for Netlify Functions
+- [x] T004 [P] Install `@netlify/cli` as dev dependency in server package
 - [ ] T005 [P] Configure Netlify site for frontend (connect GitHub repo, set build command, publish directory)
 - [ ] T006 [P] Configure Netlify site for server functions (set functions directory)
+
+**Progress**: 4/6 Phase 1 tasks complete ✓
 
 ---
 
@@ -179,12 +181,13 @@ Task: "Run npm run build"
 | Metric | Value |
 |--------|-------|
 | Total Tasks | 31 |
-| Phase 1 Tasks | 6 |
+| Phase 1 Tasks | 6 (4 complete ✓) |
 | Phase 2 Tasks | 7 |
 | Phase 3 Tasks | 7 |
 | Phase 4 Tasks | 5 |
 | Phase 5 Tasks | 6 |
 | Parallelizable Tasks | 10 |
+| **Completed** | **4** |
 
 ### Task Count by User Story
 
@@ -209,3 +212,15 @@ Task: "Run npm run build"
 - Each user story should be independently completable and testable
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
+
+---
+
+## Changelog
+
+### 2026-04-03
+- **T001-T004 complete**: Created Netlify configuration files and directory structure
+  - Added `packages/frontend/netlify.toml` with build/publish settings
+  - Added `packages/server/netlify.toml` with functions directory config
+  - Added `packages/server/netlify/functions/.gitkeep` placeholder
+  - Added `@netlify/cli` as dev dependency in server package
+  - Commit: `f43715f` (GPG-signed)

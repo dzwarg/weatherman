@@ -270,6 +270,17 @@ test(outfit): add recommendation unit tests
 chore(deps): update React to 18.3.0
 ```
 
+### Task Status Rule
+
+**Before creating any git commit, you MUST update the task status** in `specs/<spec-name>/tasks.md`:
+
+1. Mark completed tasks with `[x]` in their checkbox
+2. Update the "Progress" line for the phase if one exists
+3. Update the "Completed" count in the Summary table
+4. Add a changelog entry documenting what was done and the commit hash
+
+This ensures the task board always reflects current progress.
+
 ---
 
 ## Key Technical Details

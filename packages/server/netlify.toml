@@ -1,0 +1,11 @@
+[build]
+  command = "echo 'No build step for serverless functions'"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_VERSION = "9"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
