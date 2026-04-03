@@ -1,0 +1,211 @@
+# Tasks: 004-zero-host-migration
+
+**Input**: Design documents from `specs/004-zero-host-migration/`
+**Prerequisites**: plan.md, spec.md, research.md, quickstart.md
+
+**Tests**: Not requested - verification via existing test suite during Phase 5
+
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2)
+- Include exact file paths in descriptions
+
+---
+
+## Phase 1: Setup (Netlify Configuration)
+
+**Purpose**: Create Netlify configuration files and directory structure
+
+- [ ] T001 Create `packages/frontend/netlify.toml` with build and publish settings
+- [ ] T002 Create `packages/server/netlify.toml` with function directory configuration
+- [ ] T003 [P] Create `packages/server/netlify/functions/` directory for Netlify Functions
+- [ ] T004 [P] Install `@netlify/cli` as dev dependency in server package
+- [ ] T005 [P] Configure Netlify site for frontend (connect GitHub repo, set build command, publish directory)
+- [ ] T006 [P] Configure Netlify site for server functions (set functions directory)
+
+---
+
+## Phase 2: Foundational (Backend Adaptation)
+
+**Purpose**: Convert Express.js routes to Netlify Functions - blocks User Story 1
+
+**⚠️ CRITICAL**: Complete before User Story 1 implementation
+
+**Route mapping**: See plan.md Phase 2 Route Mapping table.
+
+- [ ] T007 Create `packages/server/netlify/functions/weather-current.js` wrapper for Express route
+- [ ] T008 [P] Create `packages/server/netlify/functions/weather-forecast.js` wrapper for Express route
+- [ ] T009 [P] Create `packages/server/netlify/functions/recommendations.js` wrapper for Express route
+- [ ] T010 [P] Create `packages/server/netlify/functions/health.js` wrapper for Express route
+- [ ] T011 Add CORS headers to all Netlify Functions for Netlify frontend domain
+- [ ] T012 Add error handling with proper status codes to all functions
+- [ ] T013 Verify functions work locally with `netlify dev`
+
+**Checkpoint**: Backend adapted - Netlify Functions ready for deployment
+
+---
+
+## Phase 3: User Story 1 - Zero-Host Migration (Priority: P1) 🎯 MVP
+
+**Goal**: Deploy frontend and backend to Netlify zero-host platform
+
+**Independent Test**: All API endpoints return correct data on Netlify deployment
+
+### Implementation
+
+- [ ] T014 [US1] Verify `netlify.toml` environment variable documentation in ./quickstart.md is accurate
+- [ ] T015 [US1] Add environment variables in Netlify dashboard:
+  - `OPENWEATHERMAP_API_KEY`
+  - `NODE_VERSION=22`
+  - `RATE_LIMIT_WINDOW_MS`
+  - `RATE_LIMIT_MAX_REQUESTS`
+- [ ] T016 [US1] Configure custom domain and HTTPS (optional)
+- [ ] T017 [US1] Update frontend API base URL to point to Netlify functions
+- [ ] T018 [US1] Test all API endpoints on Netlify deployment
+- [ ] T019 [US1] Verify PWA functionality (offline, install) on Netlify
+- [ ] T020 [US1] Configure GitHub Actions workflow for Netlify deployment in `.github/workflows/`
+
+**Checkpoint**: At this point, User Story 1 should be fully functional - MVP complete
+
+---
+
+## Phase 4: User Story 2 - CI/CD Integration (Priority: P2)
+
+**Goal**: Implement automated deployment pipeline for zero-host environment
+
+**Independent Test**: Deployment pipeline triggers on code push; rollback restores previous version
+
+### Implementation
+
+- [ ] T021 [US2] Add `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` to GitHub repository secrets
+- [ ] T022 [US2] Configure branch deploys (preview URLs for PRs)
+- [ ] T023 [US2] Configure production deployment on push to main branch
+- [ ] T024 [US2] Document rollback procedure in quickstart.md
+- [ ] T025 [US2] Test deployment pipeline with a dummy commit
+
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
+
+---
+
+## Phase 5: Polish & Cross-Cutting Concerns
+
+**Purpose**: Verification and cleanup
+
+- [ ] T026 [P] Run existing test suite (`npm test`) and verify all tests pass
+- [ ] T027 [P] Verify lint passes (`npm run lint`) with no errors
+- [ ] T028 [P] Verify production build succeeds (`npm run build`)
+- [ ] T029 Manual smoke test of all API endpoints on Netlify
+- [ ] T030 Update quickstart.md with final deployment URLs and rollback instructions
+- [ ] T031 Verify observability (Netlify analytics active and accessible)
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Phase 1 (Setup)**: No dependencies - can start immediately
+- **Phase 2 (Foundational)**: Depends on Phase 1 - BLOCKS User Story 1
+- **Phase 3 (User Story 1)**: Depends on Phase 2
+- **Phase 4 (User Story 2)**: Can start after Phase 2, independent of Phase 3
+- **Phase 5 (Polish)**: Depends on User Stories 1 and 2
+
+### User Story Dependencies
+
+- **User Story 1 (P1)**: Can start after Phase 2 complete - core migration
+- **User Story 2 (P2)**: Can start after Phase 2 complete - CI/CD pipeline
+
+### Within Each User Story
+
+- Configuration before implementation
+- Individual functions before integration
+- Story complete before moving to polish phase
+
+### Parallel Opportunities
+
+- T007-T010: All Netlify function wrappers can be created in parallel
+- T005-T006: Netlify site configuration can proceed in parallel
+- T026-T028: All verification tasks can run in parallel
+
+---
+
+## Parallel Examples
+
+### Backend Function Creation (Phase 2)
+
+```bash
+# These four functions can be created in parallel:
+Task: "Create packages/server/netlify/functions/weather-current.js wrapper"
+Task: "Create packages/server/netlify/functions/weather-forecast.js wrapper"
+Task: "Create packages/server/netlify/functions/recommendations.js wrapper"
+Task: "Create packages/server/netlify/functions/health.js wrapper"
+```
+
+### Verification Tasks (Phase 5)
+
+```bash
+# These three verification tasks can run in parallel:
+Task: "Run npm test"
+Task: "Run npm run lint"
+Task: "Run npm run build"
+```
+
+---
+
+## Implementation Strategy
+
+### MVP First (User Story 1 Only)
+
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Foundational (CRITICAL - blocks all stories)
+3. Complete Phase 3: User Story 1
+4. **STOP and VALIDATE**: Test User Story 1 independently
+5. Deploy/demo if ready
+
+### Incremental Delivery
+
+1. Complete Setup + Foundational → Foundation ready
+2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
+3. Add User Story 2 → Test independently → Deploy/Demo
+4. Add Phase 5 Polish → Final verification
+
+---
+
+## Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Tasks | 31 |
+| Phase 1 Tasks | 6 |
+| Phase 2 Tasks | 7 |
+| Phase 3 Tasks | 7 |
+| Phase 4 Tasks | 5 |
+| Phase 5 Tasks | 6 |
+| Parallelizable Tasks | 10 |
+
+### Task Count by User Story
+
+- **User Story 1 (P1)**: T014-T020 (7 tasks) - Core migration
+- **User Story 2 (P2)**: T021-T025 (5 tasks) - CI/CD pipeline
+
+### Suggested MVP Scope
+
+**User Story 1 only** - Deploy to Netlify with manual verification. CI/CD can follow as User Story 2.
+
+### Independent Test Criteria
+
+- **User Story 1**: All 4 API endpoints return correct data on Netlify deployment
+- **User Story 2**: PR triggers preview deployment; merge to main triggers production deployment
+
+---
+
+## Notes
+
+- [P] tasks = different files, no dependencies
+- [Story] label maps task to specific user story for traceability
+- Each user story should be independently completable and testable
+- Commit after each task or logical group
+- Stop at any checkpoint to validate story independently
