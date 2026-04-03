@@ -23,10 +23,10 @@
 - [x] T002 Create `packages/server/netlify.toml` with function directory configuration
 - [x] T003 [P] Create `packages/server/netlify/functions/` directory for Netlify Functions
 - [x] T004 [P] Install `@netlify/cli` as dev dependency in server package
-- [ ] T005 [P] Configure Netlify site for frontend (connect GitHub repo, set build command, publish directory)
-- [ ] T006 [P] Configure Netlify site for server functions (set functions directory)
+- [x] T005 [P] Configure Netlify site for frontend (connect GitHub repo, set build command, publish directory)
+- [x] T006 [P] Configure Netlify site for server functions (set functions directory)
 
-**Progress**: 4/6 Phase 1 tasks complete ✓
+**Progress**: 6/6 Phase 1 tasks complete ✓
 
 ---
 
@@ -181,13 +181,13 @@ Task: "Run npm run build"
 | Metric | Value |
 |--------|-------|
 | Total Tasks | 31 |
-| Phase 1 Tasks | 6 (4 complete ✓) |
+| Phase 1 Tasks | 6 (6 complete ✓) |
 | Phase 2 Tasks | 7 |
 | Phase 3 Tasks | 7 |
 | Phase 4 Tasks | 5 |
 | Phase 5 Tasks | 6 |
 | Parallelizable Tasks | 10 |
-| **Completed** | **4** |
+| **Completed** | **6** |
 
 ### Task Count by User Story
 
@@ -224,3 +224,5 @@ Task: "Run npm run build"
   - Added `packages/server/netlify/functions/.gitkeep` placeholder
   - Added `@netlify/cli` as dev dependency in server package
   - Commit: `f43715f` (GPG-signed)
+- **T005 complete**: Configured Netlify site for frontend (connected GitHub repo, set build/publish directory)
+- **T006 complete**: Configured Netlify site for server functions (set functions directory)
