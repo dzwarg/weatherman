@@ -66,9 +66,9 @@
   - `FRONTEND_URL` (optional)
 - [x] T016 [US1] Configure custom domain and HTTPS (optional)
 - [x] T017 [US1] Update frontend API base URL to point to Netlify functions
-- [ ] T018 [US1] Test all API endpoints on Netlify deployment
+- [x] T018 [US1] Test all API endpoints on Netlify deployment
 - [ ] T019 [US1] Verify PWA functionality (offline, install) on Netlify
-- [ ] T020 [US1] Configure GitHub Actions workflow for Netlify deployment in `.github/workflows/`
+- [x] T020 [US1] **REMOVED**: Netlify deploys on every git change automatically - no GitHub Actions workflow needed
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - MVP complete
 
