@@ -67,7 +67,7 @@
 - [x] T016 [US1] Configure custom domain and HTTPS (optional)
 - [x] T017 [US1] Update frontend API base URL to point to Netlify functions
 - [x] T018 [US1] Test all API endpoints on Netlify deployment
-- [ ] T019 [US1] Verify PWA functionality (offline, install) on Netlify
+- [x] T019 [US1] Verify PWA functionality (offline, install) on Netlify
 - [x] T020 [US1] **REMOVED**: Netlify deploys on every git change automatically - no GitHub Actions workflow needed
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - MVP complete
@@ -238,7 +238,13 @@ Task: "Run npm run build"
   - CORS headers configured for cross-origin requests
   - Error handling returns proper HTTP status codes (400, 405, 500)
   - Verified all functions work locally: health, recommendations, weather-current, weather-forecast
-- **T014 complete**: Updated quickstart.md with accurate environment variable documentation
+- **T019 complete**: Verified PWA functionality for Netlify deployment
+  - VitePWA plugin configured with Workbox for service worker generation
+  - Service worker (`sw.js`) generated in dist/ with precache for 16 assets
+  - Offline.html exists for offline fallback
+  - Runtime caching configured for API endpoints (NetworkFirst)
+  - PWA manifest configured with icons (192x192, 512x512, maskable variants)
+  - Build verified: `npm run build` generates sw.js and workbox files
   - Fixed: `OPENWEATHERMAP_API_KEY` → `WEATHER_API_KEY`
   - Added: `ANTHROPIC_API_KEY` (required for Claude integration)
   - Added: CLI authentication section with `NETLIFY_TOKEN`

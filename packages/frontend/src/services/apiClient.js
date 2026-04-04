@@ -150,7 +150,7 @@ class APIClient {
    * @returns {Promise<Object>} Weather data
    */
   async getCurrentWeather(lat, lon, units = 'imperial') {
-    return this.post('/weather/current', { lat, lon, units });
+    return this.post('/weather-current', { lat, lon, units });
   }
 
   /**
@@ -161,7 +161,7 @@ class APIClient {
    * @returns {Promise<Object>} Forecast data
    */
   async getWeatherForecast(lat, lon, units = 'imperial') {
-    return this.post('/weather/forecast', { lat, lon, units });
+    return this.post('/weather-forecast', { lat, lon, units });
   }
 
   /**
