@@ -26,6 +26,22 @@ function getAllowedOrigins() {
   return allowedOriginsEnv.split(',').map((origin) => origin.trim());
 }
 
+/**
+ * Check if an origin matches allowed origins, supporting wildcards
+ * @param {string} requestOrigin - The origin from the request
+ * @param {string[]} allowedOrigins - Array of allowed origins (may contain wildcards)
+ * @returns {boolean} - Whether the origin is allowed
+ */
+function isOriginAllowed(requestOrigin, allowedOrigins) {
+  return allowedOrigins.some((origin) => {
+    if (origin.includes('*')) {
+      const regex = new RegExp('^' + origin.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$', 'i');
+      return regex.test(requestOrigin);
+    }
+    return origin === requestOrigin;
+  });
+}
+
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = getAllowedOrigins();
@@ -36,7 +52,7 @@ const corsOptions = {
       return callback(null, allowedOrigins[0] || '*');
     }
 
-    if (allowedOrigins.includes(origin)) {
+    if (isOriginAllowed(origin, allowedOrigins)) {
       return callback(null, true);
     }
 

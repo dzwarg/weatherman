@@ -44,10 +44,29 @@ In Netlify dashboard → Site settings → Environment variables:
 
 | Variable | Value |
 |----------|-------|
-| `OPENWEATHERMAP_API_KEY` | Your API key |
+| `WEATHER_API_KEY` | OpenWeatherMap API key |
+| `ANTHROPIC_API_KEY` | Anthropic API key for Claude |
 | `NODE_VERSION` | `22` |
+| `FRONTEND_URL` | Your Netlify site URL (optional, defaults to `https://weatherman.app`) |
 
-## Step 4: Deploy
+**Note**: Rate limits are hardcoded in the application (15 min window: 100 weather requests, 500 recommendation requests) and cannot be configured via environment variables.
+
+## Step 4: CLI Authentication (Optional)
+
+For CLI deployments, authenticate with Netlify:
+
+```bash
+# Option A: Interactive login (opens browser)
+netlify login
+
+# Option B: Using API token (for CI/CD)
+# Set NETLIFY_TOKEN environment variable
+export NETLIFY_TOKEN="your-netlify-api-token"
+```
+
+To create an API token: Netlify dashboard → User settings → OAuth → Personal access tokens.
+
+## Step 5: Deploy
 
 ### Option A: Git Push (Automatic)
 
@@ -56,16 +75,19 @@ Every push to `main` triggers deployment automatically.
 ### Option B: CLI Deploy
 
 ```bash
-# Frontend
-cd packages/frontend
-netlify deploy --prod --dir=dist
-
-# Server
-cd packages/server
-netlify deploy --prod --functions=netlify/functions
+# From repo root (netlify.toml handles both frontend and functions)
+netlify deploy --prod
 ```
 
-## Step 5: Local Development
+## Step 6: Frontend API Configuration
+
+The frontend must point to the Netlify functions endpoint. Set in Netlify dashboard or `.env`:
+
+```
+VITE_API_BASE_URL=https://[site-name].netlify.app/.netlify/functions
+```
+
+## Step 7: Local Development
 
 ```bash
 # Install dependencies
@@ -74,7 +96,7 @@ npm install
 # Start local dev server with function emulation
 npm run dev
 
-# Or use netlify dev
+# Or use netlify dev (requires NETLIFY_TOKEN for function access)
 netlify dev
 ```
 

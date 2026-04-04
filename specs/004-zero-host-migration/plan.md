@@ -149,7 +149,7 @@ exports.handler = async (event, context) => {
 ### Environment Variables
 
 Required Netlify environment variables:
-- `OPENWEATHERMAP_API_KEY` - Weather API key
+- `WEATHER_API_KEY` - Weather API key
 - `RATE_LIMIT_WINDOW_MS` - Rate limiting window
 - `RATE_LIMIT_MAX_REQUESTS` - Max requests per window
 

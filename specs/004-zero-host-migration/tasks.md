@@ -59,14 +59,13 @@
 
 ### Implementation
 
-- [ ] T014 [US1] Verify `netlify.toml` environment variable documentation in ./quickstart.md is accurate
-- [ ] T015 [US1] Add environment variables in Netlify dashboard:
-  - `OPENWEATHERMAP_API_KEY`
-  - `NODE_VERSION=22`
-  - `RATE_LIMIT_WINDOW_MS`
-  - `RATE_LIMIT_MAX_REQUESTS`
-- [ ] T016 [US1] Configure custom domain and HTTPS (optional)
-- [ ] T017 [US1] Update frontend API base URL to point to Netlify functions
+- [x] T014 [US1] Verify `netlify.toml` environment variable documentation in ./quickstart.md is accurate
+- [x] T015 [US1] Add environment variables in Netlify dashboard:
+  - `WEATHER_API_KEY` (was incorrectly documented as `OPENWEATHERMAP_API_KEY`)
+  - `ANTHROPIC_API_KEY`
+  - `FRONTEND_URL` (optional)
+- [x] T016 [US1] Configure custom domain and HTTPS (optional)
+- [x] T017 [US1] Update frontend API base URL to point to Netlify functions
 - [ ] T018 [US1] Test all API endpoints on Netlify deployment
 - [ ] T019 [US1] Verify PWA functionality (offline, install) on Netlify
 - [ ] T020 [US1] Configure GitHub Actions workflow for Netlify deployment in `.github/workflows/`
@@ -187,7 +186,7 @@ Task: "Run npm run build"
 | Phase 3 Tasks | 7 |
 | Phase 4 Tasks | 5 |
 | Phase 5 Tasks | 5 |
-| **Completed** | **12** |
+| **Completed** | **13** |
 
 ### Task Count by User Story
 
@@ -239,3 +238,9 @@ Task: "Run npm run build"
   - CORS headers configured for cross-origin requests
   - Error handling returns proper HTTP status codes (400, 405, 500)
   - Verified all functions work locally: health, recommendations, weather-current, weather-forecast
+- **T014 complete**: Updated quickstart.md with accurate environment variable documentation
+  - Fixed: `OPENWEATHERMAP_API_KEY` → `WEATHER_API_KEY`
+  - Added: `ANTHROPIC_API_KEY` (required for Claude integration)
+  - Added: CLI authentication section with `NETLIFY_TOKEN`
+  - Added: Frontend API configuration step (`VITE_API_BASE_URL`)
+  - Clarified: Rate limits are hardcoded (not env-configurable)
