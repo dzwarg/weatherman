@@ -35,8 +35,8 @@ describe('claudeService', () => {
   describe('generateClothingAdvice', () => {
     const mockRequest = {
       profile: {
-        id: '4yo-girl',
-        age: 4,
+        id: '5yo-girl',
+        age: 5,
         gender: 'girl',
       },
       weather: {
@@ -113,7 +113,7 @@ describe('claudeService', () => {
 
       const callArgs = mockCreate.mock.calls[0][0];
       const systemText = callArgs.system[0].text;
-      expect(systemText).toContain('4');
+      expect(systemText).toContain('5');
       expect(systemText).toContain('girl');
     });
 
@@ -147,8 +147,8 @@ describe('claudeService', () => {
     it('should handle missing optional fields', async () => {
       const minimalRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl',
         },
         weather: {
@@ -213,8 +213,8 @@ describe('claudeService', () => {
   describe('buildPrompt', () => {
     const mockRequest = {
       profile: {
-        id: '4yo-girl',
-        age: 4,
+        id: '5yo-girl',
+        age: 5,
         gender: 'girl',
       },
       weather: {
@@ -240,7 +240,7 @@ describe('claudeService', () => {
 
     it('should include age-appropriate language style in system', () => {
       const result = buildPrompt(mockRequest);
-      expect(result.system).toContain('4');
+      expect(result.system).toContain('5');
       expect(result.system).toContain('girl');
       expect(result.system).toContain('simple, fun, and easy to understand');
     });
@@ -266,11 +266,11 @@ describe('claudeService', () => {
     it('should handle different age groups', () => {
       const olderChild = {
         ...mockRequest,
-        profile: { id: '10yo-boy', age: 10, gender: 'boy' },
+        profile: { id: '11yo-boy', age: 11, gender: 'boy' },
       };
 
       const result = buildPrompt(olderChild);
-      expect(result.system).toContain('10');
+      expect(result.system).toContain('11');
       expect(result.system).toContain('boy');
       expect(result.system).toContain('straightforward');
     });

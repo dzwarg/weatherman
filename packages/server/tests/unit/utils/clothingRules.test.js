@@ -5,7 +5,7 @@ describe('clothingRules (fallback)', () => {
   describe('getClothingRecommendations', () => {
     it('should recommend warm clothing for cold weather', () => {
       const result = getClothingRecommendations({
-        profile: { id: '4yo-girl', age: 4, gender: 'girl' },
+        profile: { id: '5yo-girl', age: 5, gender: 'girl' },
         weather: {
           temperature: 30,
           feelsLike: 25,
@@ -25,7 +25,7 @@ describe('clothingRules (fallback)', () => {
 
     it('should recommend light clothing for hot weather', () => {
       const result = getClothingRecommendations({
-        profile: { id: '10yo-boy', age: 10, gender: 'boy' },
+        profile: { id: '11yo-boy', age: 11, gender: 'boy' },
         weather: {
           temperature: 85,
           feelsLike: 88,
@@ -45,7 +45,7 @@ describe('clothingRules (fallback)', () => {
 
     it('should recommend rain gear for rainy weather', () => {
       const result = getClothingRecommendations({
-        profile: { id: '7yo-boy', age: 7, gender: 'boy' },
+        profile: { id: '8yo-boy', age: 8, gender: 'boy' },
         weather: {
           temperature: 55,
           feelsLike: 52,
@@ -70,7 +70,7 @@ describe('clothingRules (fallback)', () => {
 
     it('should include age-appropriate language for 4yo', () => {
       const result = getClothingRecommendations({
-        profile: { id: '4yo-girl', age: 4, gender: 'girl' },
+        profile: { id: '5yo-girl', age: 5, gender: 'girl' },
         weather: {
           temperature: 60,
           feelsLike: 58,
@@ -97,12 +97,12 @@ describe('clothingRules (fallback)', () => {
       };
 
       const girl4yo = getClothingRecommendations({
-        profile: { id: '4yo-girl', age: 4, gender: 'girl' },
+        profile: { id: '5yo-girl', age: 5, gender: 'girl' },
         weather,
       });
 
       const boy10yo = getClothingRecommendations({
-        profile: { id: '10yo-boy', age: 10, gender: 'boy' },
+        profile: { id: '11yo-boy', age: 11, gender: 'boy' },
         weather,
       });
 
@@ -112,7 +112,7 @@ describe('clothingRules (fallback)', () => {
 
     it('should always return required fields', () => {
       const result = getClothingRecommendations({
-        profile: { id: '7yo-boy', age: 7, gender: 'boy' },
+        profile: { id: '8yo-boy', age: 8, gender: 'boy' },
         weather: {
           temperature: 70,
           feelsLike: 70,

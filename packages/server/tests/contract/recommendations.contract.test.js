@@ -61,8 +61,8 @@ describe('Recommendations API Contract Tests', () => {
     it('should match OpenAPI schema for valid request', async () => {
       const validRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         },
         weather: {
@@ -93,7 +93,7 @@ describe('Recommendations API Contract Tests', () => {
       expect(response.body).toHaveProperty('confidence');
 
       // Verify profileId matches request
-      expect(response.body.profileId).toBe('4yo-girl');
+      expect(response.body.profileId).toBe('5yo-girl');
 
       // Verify recommendations structure (matches claudeService.js format)
       const recs = response.body.recommendations;
@@ -136,7 +136,7 @@ describe('Recommendations API Contract Tests', () => {
     it('should handle 7-year-old boy profile', async () => {
       const validRequest = {
         profile: {
-          id: '7yo-boy',
+          id: '8yo-boy',
           age: 7,
           gender: 'boy'
         },
@@ -158,14 +158,14 @@ describe('Recommendations API Contract Tests', () => {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(response.body.profileId).toBe('7yo-boy');
+      expect(response.body.profileId).toBe('8yo-boy');
       expect(response.body).toHaveProperty('recommendations');
     });
 
     it('should handle 10-year-old boy profile', async () => {
       const validRequest = {
         profile: {
-          id: '10yo-boy',
+          id: '11yo-boy',
           age: 10,
           gender: 'boy'
         },
@@ -187,7 +187,7 @@ describe('Recommendations API Contract Tests', () => {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(response.body.profileId).toBe('10yo-boy');
+      expect(response.body.profileId).toBe('11yo-boy');
       expect(response.body).toHaveProperty('recommendations');
     });
 
@@ -268,8 +268,8 @@ describe('Recommendations API Contract Tests', () => {
     it('should return 400 for missing weather', async () => {
       const invalidRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         }
       };
@@ -286,8 +286,8 @@ describe('Recommendations API Contract Tests', () => {
     it('should handle optional prompt field', async () => {
       const requestWithoutPrompt = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         },
         weather: {
@@ -312,7 +312,7 @@ describe('Recommendations API Contract Tests', () => {
     it('should handle optional timeframe field', async () => {
       const requestWithoutTimeframe = {
         profile: {
-          id: '7yo-boy',
+          id: '8yo-boy',
           age: 7,
           gender: 'boy'
         },
@@ -339,8 +339,8 @@ describe('Recommendations API Contract Tests', () => {
     it('should handle extreme cold weather', async () => {
       const coldWeatherRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         },
         weather: {
@@ -369,7 +369,7 @@ describe('Recommendations API Contract Tests', () => {
     it('should handle extreme hot weather', async () => {
       const hotWeatherRequest = {
         profile: {
-          id: '10yo-boy',
+          id: '11yo-boy',
           age: 10,
           gender: 'boy'
         },
@@ -398,7 +398,7 @@ describe('Recommendations API Contract Tests', () => {
     it('should handle high precipitation probability', async () => {
       const rainyRequest = {
         profile: {
-          id: '7yo-boy',
+          id: '8yo-boy',
           age: 7,
           gender: 'boy'
         },
@@ -427,8 +427,8 @@ describe('Recommendations API Contract Tests', () => {
     it('should include spoken response for voice output', async () => {
       const validRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         },
         weather: {
@@ -458,7 +458,7 @@ describe('Recommendations API Contract Tests', () => {
     it('should return non-empty recommendations for normal weather', async () => {
       const request_data = {
         profile: {
-          id: '7yo-boy',
+          id: '8yo-boy',
           age: 7,
           gender: 'boy'
         },
@@ -493,8 +493,8 @@ describe('Recommendations API Contract Tests', () => {
     it('should use appropriate vocabulary for age 4', async () => {
       const request_data = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         },
         weather: {
@@ -520,12 +520,12 @@ describe('Recommendations API Contract Tests', () => {
     });
 
     it('should generate recommendations for different profiles', async () => {
-      // Note: Available profiles are 4yo-girl, 7yo-boy, 10yo-boy
+      // Note: Available profiles are 5yo-girl, 8yo-boy, 11yo-boy
       // Can't perfectly test same-age gender differentiation with current profiles
       const girlRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl'
         },
         weather: {
@@ -540,8 +540,8 @@ describe('Recommendations API Contract Tests', () => {
 
       const boyRequest = {
         profile: {
-          id: '7yo-boy',
-          age: 7,
+          id: '8yo-boy',
+          age: 8,
           gender: 'boy'
         },
         weather: girlRequest.weather
@@ -559,9 +559,9 @@ describe('Recommendations API Contract Tests', () => {
 
       // Both should succeed and have valid recommendation structure
       expect(girlResponse.body).toHaveProperty('recommendations');
-      expect(girlResponse.body.profileId).toBe('4yo-girl');
+      expect(girlResponse.body.profileId).toBe('5yo-girl');
       expect(boyResponse.body).toHaveProperty('recommendations');
-      expect(boyResponse.body.profileId).toBe('7yo-boy');
+      expect(boyResponse.body.profileId).toBe('8yo-boy');
 
       // Both should have spoken responses appropriate for their age
       expect(girlResponse.body.spokenResponse).toBeTruthy();

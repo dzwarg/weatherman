@@ -29,9 +29,9 @@ export const CLAUDE_SETTINGS = {
 
 // User profiles
 export const USER_PROFILES = [
-  { id: '4yo-girl', age: 4, gender: 'girl', description: '4 year old girl - simple clothing, easy fasteners' },
-  { id: '7yo-boy', age: 7, gender: 'boy', description: '7 year old boy - moderate complexity' },
-  { id: '10yo-boy', age: 10, gender: 'boy', description: '10 year old boy - more complex clothing options' },
+  { id: '5yo-girl', age: 5, gender: 'girl', description: '5 year old girl - simple clothing, easy fasteners' },
+  { id: '8yo-boy', age: 8, gender: 'boy', description: '8 year old boy - moderate complexity' },
+  { id: '11yo-boy', age: 11, gender: 'boy', description: '11 year old boy - more complex clothing options' },
 ];
 
 export default {

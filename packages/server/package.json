@@ -30,6 +30,8 @@
     "@vitest/coverage-v8": "^2.1.5",
     "eslint": "^9.15.0",
     "jest-openapi": "^0.14.2",
+    "netlify": "^24.9.0",
+    "netlify-cli": "^24.9.0",
     "openapi-validator-middleware": "^3.2.6",
     "supertest": "^6.3.4",
     "vitest": "^2.1.5"

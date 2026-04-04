@@ -78,3 +78,7 @@ yarn.lock
 # IndexedDB (for testing)
 *.indexeddb
 logs/
+
+# Netlify
+.netlify/
+packages/server/.netlify/

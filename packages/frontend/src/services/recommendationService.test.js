@@ -274,7 +274,7 @@ describe('recommendationService', () => {
       expect(true).toBe(true);
     });
 
-    it('should return mock for 4yo-girl in cold rainy weather when enabled', () => {
+    it('should return mock for 5yo-girl in cold rainy weather when enabled', () => {
       // Mock the environment variable
       const originalEnv = import.meta.env.VITE_USE_MOCK_OLLAMA;
       import.meta.env.VITE_USE_MOCK_OLLAMA = 'true';
@@ -290,22 +290,22 @@ describe('recommendationService', () => {
       };
 
       const girlProfile = {
-        id: '4yo-girl',
-        age: 4,
+        id: '5yo-girl',
+        age: 5,
         gender: 'girl',
       };
 
       const result = recommendationService.getMockOllamaResponse(coldRainyWeather, girlProfile);
 
       expect(result).toBeDefined();
-      expect(result.profileId).toBe('4yo-girl');
+      expect(result.profileId).toBe('5yo-girl');
       expect(result.weatherData.temperature).toBe(35);
 
       // Restore
       import.meta.env.VITE_USE_MOCK_OLLAMA = originalEnv;
     });
 
-    it('should return mock for 7yo-boy in moderate weather when enabled', () => {
+    it('should return mock for 8yo-boy in moderate weather when enabled', () => {
       // Mock the environment variable
       const originalEnv = import.meta.env.VITE_USE_MOCK_OLLAMA;
       import.meta.env.VITE_USE_MOCK_OLLAMA = 'true';
@@ -320,21 +320,21 @@ describe('recommendationService', () => {
       };
 
       const boyProfile = {
-        id: '7yo-boy',
-        age: 7,
+        id: '8yo-boy',
+        age: 8,
         gender: 'boy',
       };
 
       const result = recommendationService.getMockOllamaResponse(moderateWeather, boyProfile);
 
       expect(result).toBeDefined();
-      expect(result.profileId).toBe('7yo-boy');
+      expect(result.profileId).toBe('8yo-boy');
 
       // Restore
       import.meta.env.VITE_USE_MOCK_OLLAMA = originalEnv;
     });
 
-    it('should return mock for 10yo-boy in hot weather when enabled', () => {
+    it('should return mock for 11yo-boy in hot weather when enabled', () => {
       // Mock the environment variable
       const originalEnv = import.meta.env.VITE_USE_MOCK_OLLAMA;
       import.meta.env.VITE_USE_MOCK_OLLAMA = 'true';
@@ -349,15 +349,15 @@ describe('recommendationService', () => {
       };
 
       const boyProfile = {
-        id: '10yo-boy',
-        age: 10,
+        id: '11yo-boy',
+        age: 11,
         gender: 'boy',
       };
 
       const result = recommendationService.getMockOllamaResponse(hotWeather, boyProfile);
 
       expect(result).toBeDefined();
-      expect(result.profileId).toBe('10yo-boy');
+      expect(result.profileId).toBe('11yo-boy');
 
       // Restore
       import.meta.env.VITE_USE_MOCK_OLLAMA = originalEnv;
