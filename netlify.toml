@@ -7,13 +7,13 @@
   NODE_VERSION = "22"
   NPM_VERSION = "9"
 
-[[context.production]]
+[context.production]
   branch = "main"
 
-[[context.deploy-preview]]
+[context.deploy-preview]
   branch = "!main"
 
-[[context.branch-deploy]]
+[context.branch-deploy]
   branch = "{branch}"
 
 [[redirects]]
