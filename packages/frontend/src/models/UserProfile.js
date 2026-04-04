@@ -80,27 +80,27 @@ export class UserProfile {
 // Predefined profiles (IDs match server format)
 export const PREDEFINED_PROFILES = [
   {
-    id: '4yo-girl',
-    age: 4,
+    id: '5yo-girl',
+    age: 5,
     gender: 'girl',
     complexityLevel: 'simple',
     vocabularyStyle: 'girl-typical',
-    displayName: '4 year old girl',
+    displayName: '5 year old girl',
   },
   {
-    id: '7yo-boy',
-    age: 7,
+    id: '8yo-boy',
+    age: 8,
     gender: 'boy',
     complexityLevel: 'moderate',
     vocabularyStyle: 'boy-typical',
-    displayName: '7 year old boy',
+    displayName: '8 year old boy',
   },
   {
-    id: '10yo-boy',
-    age: 10,
+    id: '11yo-boy',
+    age: 11,
     gender: 'boy',
     complexityLevel: 'complex',
     vocabularyStyle: 'boy-typical',
-    displayName: '10 year old boy',
+    displayName: '11 year old boy',
   },
 ];

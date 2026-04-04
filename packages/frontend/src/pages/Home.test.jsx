@@ -28,10 +28,10 @@ vi.mock('../utils/voiceUtils');
 describe('Home', () => {
   const mockProfiles = [
     {
-      id: '7yo-boy',
-      age: 7,
+      id: '8yo-boy',
+      age: 8,
       gender: 'boy',
-      displayName: '7 year old boy',
+      displayName: '8 year old boy',
       complexityLevel: 'moderate',
       vocabularyStyle: 'boy-typical',
     },

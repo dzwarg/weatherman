@@ -14,7 +14,7 @@ describe('VoiceQuery', () => {
       timeReference: 'today',
       location: null,
     },
-    profileId: '7yo-boy',
+    profileId: '8yo-boy',
   };
 
   describe('constructor', () => {

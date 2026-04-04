@@ -9,9 +9,9 @@ import { ProfileCard } from './ProfileCard';
 
 describe('ProfileCard', () => {
   const mockProfile = {
-    id: '7yo-boy',
-    displayName: '7-year-old boy',
-    age: 7,
+    id: '8yo-boy',
+    displayName: '8-year-old boy',
+    age: 8,
     gender: 'boy',
     vocabularyStyle: 'moderate',
     complexityLevel: 'moderate',
@@ -21,8 +21,8 @@ describe('ProfileCard', () => {
     const onSelect = vi.fn();
     render(<ProfileCard profile={mockProfile} isSelected={false} onSelect={onSelect} />);
 
-    expect(screen.getByText('7-year-old boy')).toBeInTheDocument();
-    expect(screen.getByText(/Age 7/)).toBeInTheDocument();
+    expect(screen.getByText('8-year-old boy')).toBeInTheDocument();
+    expect(screen.getByText(/Age 8/)).toBeInTheDocument();
     expect(screen.getAllByText(/boy/)[0]).toBeInTheDocument();
   });
 
@@ -61,7 +61,7 @@ describe('ProfileCard', () => {
   it('should display correct icon for girl', () => {
     const girlProfile = {
       ...mockProfile,
-      id: '4yo-girl',
+      id: '5yo-girl',
       gender: 'girl',
     };
 
