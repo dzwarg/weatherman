@@ -135,9 +135,28 @@ First request after inactivity may take 1-2 seconds. Use keep-alive pings if lat
 - **Metrics**: Netlify dashboard → Analytics
 - **Logs**: `netlify functions:invoke [name] --log`
 
-## Rollback
+## Deployment Types
+
+Netlify automatically handles all deployments via the GitHub app:
+
+| Type | Trigger | URL |
+|------|---------|-----|
+| **Production** | Push to `main` | `*.netlify.app` |
+| **Deploy Preview** | PR opened/updated | `deploy-preview-*.netlify.app` |
+| **Branch Deploy** | Push to any other branch | `branch-name--*.netlify.app` |
+
+### Branch Deploys
+
+Branch deploys are automatically enabled. Each branch push creates a deploy with a unique URL. To disable branch deploys for a specific branch, add it to the `deploy-notifications` setting or configure in Netlify dashboard.
+
+### Rollback
 
 In Netlify dashboard:
 1. Deploys → History
 2. Select previous working deployment
 3. Click "Publish deploy"
+
+Or use the Netlify CLI:
+```bash
+netlify deploys:restore --id [deploy-id]
+```

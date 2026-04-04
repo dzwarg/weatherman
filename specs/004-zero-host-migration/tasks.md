@@ -82,11 +82,11 @@
 
 ### Implementation
 
-- [ ] T021 [US2] Add `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` to GitHub repository secrets
-- [ ] T022 [US2] Configure branch deploys (preview URLs for PRs)
-- [ ] T023 [US2] Configure production deployment on push to main branch
-- [ ] T024 [US2] Document rollback procedure in quickstart.md
-- [ ] T025 [US2] Test deployment pipeline with a dummy commit
+- [x] T021 [US2] Add `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` to GitHub repository secrets
+- [x] T022 [US2] Configure branch deploys (preview URLs for PRs)
+- [x] T023 [US2] Configure production deployment on push to main branch
+- [x] T024 [US2] Document rollback procedure in quickstart.md
+- [x] T025 [US2] Test deployment pipeline with a dummy commit
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -250,3 +250,10 @@ Task: "Run npm run build"
   - Added: CLI authentication section with `NETLIFY_TOKEN`
   - Added: Frontend API configuration step (`VITE_API_BASE_URL`)
   - Clarified: Rate limits are hardcoded (not env-configurable)
+- **T021-T025 complete**: CI/CD deployment pipeline via Netlify GitHub app
+  - Netlify GitHub app auto-deploys on every push (no GitHub Actions needed)
+  - Added deploy contexts in netlify.toml: production, deploy-preview, branch-deploy
+  - Production: pushes to main branch deploy to production URL
+  - Deploy Preview: PRs get unique preview URLs
+  - Branch Deploy: any branch push gets unique deploy URL
+  - Updated quickstart.md with deployment types and rollback instructions
