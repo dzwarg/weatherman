@@ -10,7 +10,7 @@ import { config } from '../config/env.js';
  * Get allowed origins based on environment
  * Supports comma-separated list of origins in production
  */
-function getAllowedOrigins() {
+export function getAllowedOrigins() {
   if (config.nodeEnv === 'development') {
     return [
       'http://localhost:5173',
@@ -32,7 +32,7 @@ function getAllowedOrigins() {
  * @param {string[]} allowedOrigins - Array of allowed origins (may contain wildcards)
  * @returns {boolean} - Whether the origin is allowed
  */
-function isOriginAllowed(requestOrigin, allowedOrigins) {
+export function isOriginAllowed(requestOrigin, allowedOrigins) {
   return allowedOrigins.some((origin) => {
     if (origin.includes('*')) {
       const regex = new RegExp('^' + origin.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$', 'i');
