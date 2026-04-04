@@ -82,8 +82,8 @@ export const mockOllamaResponse = {
 
 export const mockRecommendationRequest = {
   profile: {
-    id: '4yo-girl',
-    age: 4,
+    id: '5yo-girl',
+    age: 5,
     gender: 'girl',
   },
   weather: {
@@ -100,7 +100,7 @@ export const mockRecommendationRequest = {
 
 export const mockRecommendationResponse = {
   id: 'test-recommendation-id',
-  profileId: '4yo-girl',
+  profileId: '5yo-girl',
   weatherData: {
     temperature: 35,
     feelsLike: 28,

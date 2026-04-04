@@ -4,8 +4,8 @@ import { validateRecommendationRequest } from '../../../src/validators/recommend
 describe('recommendationValidator', () => {
   const validRequest = {
     profile: {
-      id: '4yo-girl',
-      age: 4,
+      id: '5yo-girl',
+      age: 5,
       gender: 'girl',
     },
     weather: {
@@ -39,7 +39,7 @@ describe('recommendationValidator', () => {
     it('should require profile ID', () => {
       const request = {
         ...validRequest,
-        profile: { age: 4, gender: 'girl' },
+        profile: { age: 5, gender: 'girl' },
       };
       const result = validateRecommendationRequest(request);
 
@@ -61,7 +61,7 @@ describe('recommendationValidator', () => {
     });
 
     it('should accept all valid profile IDs', () => {
-      const validIds = ['4yo-girl', '7yo-boy', '10yo-boy'];
+      const validIds = ['5yo-girl', '8yo-boy', '11yo-boy'];
 
       for (const id of validIds) {
         const request = {
@@ -77,7 +77,7 @@ describe('recommendationValidator', () => {
     it('should require profile age', () => {
       const request = {
         ...validRequest,
-        profile: { id: '4yo-girl', gender: 'girl' },
+        profile: { id: '5yo-girl', gender: 'girl' },
       };
       const result = validateRecommendationRequest(request);
 
@@ -88,7 +88,7 @@ describe('recommendationValidator', () => {
     it('should validate age is a number', () => {
       const request = {
         ...validRequest,
-        profile: { ...validRequest.profile, age: '4' },
+        profile: { ...validRequest.profile, age: '5' },
       };
       const result = validateRecommendationRequest(request);
 
@@ -99,7 +99,7 @@ describe('recommendationValidator', () => {
     it('should require profile gender', () => {
       const request = {
         ...validRequest,
-        profile: { id: '4yo-girl', age: 4 },
+        profile: { id: '5yo-girl', age: 5 },
       };
       const result = validateRecommendationRequest(request);
 
@@ -287,7 +287,7 @@ describe('recommendationValidator', () => {
   describe('multiple errors', () => {
     it('should return all validation errors', () => {
       const badRequest = {
-        profile: { id: 'invalid', age: '4', gender: 'other' },
+        profile: { id: 'invalid', age: '5', gender: 'other' },
         weather: { temperature: 'hot', conditions: null },
         prompt: 123,
         timeframe: 'invalid',
@@ -318,8 +318,8 @@ describe('recommendationValidator', () => {
     it('should validate complete request with all optional fields', () => {
       const completeRequest = {
         profile: {
-          id: '7yo-boy',
-          age: 7,
+          id: '8yo-boy',
+          age: 8,
           gender: 'boy',
         },
         weather: {
@@ -343,8 +343,8 @@ describe('recommendationValidator', () => {
     it('should validate minimal valid request', () => {
       const minimalRequest = {
         profile: {
-          id: '4yo-girl',
-          age: 4,
+          id: '5yo-girl',
+          age: 5,
           gender: 'girl',
         },
         weather: {

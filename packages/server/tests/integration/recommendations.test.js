@@ -224,9 +224,9 @@ describe('Recommendations API Integration Tests', () => {
 
     it('should return different recommendations for different profiles', async () => {
       const profiles = [
-        { id: '4yo-girl', age: 4, gender: 'girl' },
-        { id: '7yo-boy', age: 7, gender: 'boy' },
-        { id: '10yo-boy', age: 10, gender: 'boy' },
+        { id: '5yo-girl', age: 5, gender: 'girl' },
+        { id: '8yo-boy', age: 8, gender: 'boy' },
+        { id: '11yo-boy', age: 11, gender: 'boy' },
       ];
 
       const responses = [];
@@ -253,9 +253,9 @@ describe('Recommendations API Integration Tests', () => {
 
       // Verify each profile got a response
       expect(responses).toHaveLength(3);
-      expect(responses[0].profileId).toBe('4yo-girl');
-      expect(responses[1].profileId).toBe('7yo-boy');
-      expect(responses[2].profileId).toBe('10yo-boy');
+      expect(responses[0].profileId).toBe('5yo-girl');
+      expect(responses[1].profileId).toBe('8yo-boy');
+      expect(responses[2].profileId).toBe('11yo-boy');
 
       // Verify different IDs
       const ids = responses.map(r => r.id);
@@ -273,8 +273,8 @@ describe('Recommendations API Integration Tests', () => {
       };
 
       const profiles = [
-        { id: '4yo-girl', age: 4, gender: 'girl' },
-        { id: '7yo-boy', age: 7, gender: 'boy' },
+        { id: '5yo-girl', age: 5, gender: 'girl' },
+        { id: '8yo-boy', age: 8, gender: 'boy' },
       ];
 
       for (const profile of profiles) {
@@ -370,9 +370,9 @@ describe('Recommendations API Integration Tests', () => {
 
       const profileIds = response.body.profiles.map(p => p.id);
 
-      expect(profileIds).toContain('4yo-girl');
-      expect(profileIds).toContain('7yo-boy');
-      expect(profileIds).toContain('10yo-boy');
+      expect(profileIds).toContain('5yo-girl');
+      expect(profileIds).toContain('8yo-boy');
+      expect(profileIds).toContain('11yo-boy');
     });
 
     it('should return profiles with correct structure', async () => {

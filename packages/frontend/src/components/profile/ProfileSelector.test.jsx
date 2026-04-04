@@ -63,9 +63,9 @@ describe('ProfileSelector', () => {
         />
       );
 
-      expect(screen.getByText('4 year old girl')).toBeInTheDocument();
-      expect(screen.getByText('7 year old boy')).toBeInTheDocument();
-      expect(screen.getByText('10 year old boy')).toBeInTheDocument();
+      expect(screen.getByText('5 year old girl')).toBeInTheDocument();
+      expect(screen.getByText('8 year old boy')).toBeInTheDocument();
+      expect(screen.getByText('11 year old boy')).toBeInTheDocument();
     });
 
     it('should render with active profile', () => {
@@ -77,7 +77,7 @@ describe('ProfileSelector', () => {
         />
       );
 
-      const selectedCard = screen.getByText('7 year old boy').closest('div');
+      const selectedCard = screen.getByText('8 year old boy').closest('div');
       expect(selectedCard).toBeInTheDocument();
     });
 
@@ -127,11 +127,11 @@ describe('ProfileSelector', () => {
       );
 
       // Select first profile
-      await user.click(screen.getByText('4 year old girl'));
+      await user.click(screen.getByText('5 year old girl'));
       expect(mockOnSelectProfile).toHaveBeenCalledWith(mockProfiles[0].id);
 
       // Select second profile
-      await user.click(screen.getByText('7 year old boy'));
+      await user.click(screen.getByText('8 year old boy'));
       expect(mockOnSelectProfile).toHaveBeenCalledWith(mockProfiles[1].id);
 
       expect(mockOnSelectProfile).toHaveBeenCalledTimes(2);

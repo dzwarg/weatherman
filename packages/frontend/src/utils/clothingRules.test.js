@@ -168,8 +168,8 @@ describe('clothingRules', () => {
       };
 
       const profile = {
-        id: 'child-4yo-girl',
-        age: 4,
+        id: 'child-5yo-girl',
+        age: 5,
         gender: 'girl',
         vocabularyStyle: 'simple',
         complexityLevel: 'simple',
@@ -193,8 +193,8 @@ describe('clothingRules', () => {
       };
 
       const profile = {
-        id: 'child-10yo-boy',
-        age: 10,
+        id: 'child-11yo-boy',
+        age: 11,
         gender: 'boy',
         vocabularyStyle: 'moderate',
         complexityLevel: 'complex',
@@ -218,15 +218,15 @@ describe('clothingRules', () => {
       };
 
       const simpleProfile = {
-        id: 'child-4yo-girl',
-        age: 4,
+        id: 'child-5yo-girl',
+        age: 5,
         vocabularyStyle: 'simple',
         complexityLevel: 'simple',
       };
 
       const complexProfile = {
-        id: 'child-10yo-boy',
-        age: 10,
+        id: 'child-11yo-boy',
+        age: 11,
         vocabularyStyle: 'moderate',
         complexityLevel: 'complex',
       };

@@ -24,7 +24,7 @@ describe('VoiceQuery', () => {
       expect(query.rawTranscript).toBe('what should I wear today');
       expect(query.parsedIntent).toBe('clothing_advice');
       expect(query.recognitionConfidence).toBe(0.95);
-      expect(query.profileId).toBe('7yo-boy');
+      expect(query.profileId).toBe('8yo-boy');
       expect(query.id).toBeDefined();
       expect(query.timestamp).toBeDefined();
     });

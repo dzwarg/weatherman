@@ -45,10 +45,10 @@ describe('ProfileCard', () => {
     const onSelect = vi.fn();
     render(<ProfileCard profile={mockProfile} isSelected={false} onSelect={onSelect} />);
 
-    const card = screen.getByText('7-year-old boy').closest('div');
+    const card = screen.getByText('8-year-old boy').closest('div');
     await user.click(card);
 
-    expect(onSelect).toHaveBeenCalledWith('7yo-boy');
+    expect(onSelect).toHaveBeenCalledWith('8yo-boy');
   });
 
   it('should display correct icon for boy', () => {

@@ -41,7 +41,7 @@ act(() => {
     });
 
     expect(result.current.activeProfile.id).toBe('8yo-boy');
-    expect(result.current.activeProfile.age).toBe(7);
+    expect(result.current.activeProfile.age).toBe(8);
     expect(result.current.hasProfile).toBe(true);
   });
 
