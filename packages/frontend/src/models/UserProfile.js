@@ -27,12 +27,12 @@ export class UserProfile {
   }
 
   validate() {
-    const validIds = ['4yo-girl', '7yo-boy', '10yo-boy'];
+    const validIds = ['5yo-girl', '8yo-boy', '11yo-boy'];
     if (!validIds.includes(this.id)) {
       throw new Error(`Invalid profile ID. Must be one of: ${validIds.join(', ')}`);
     }
 
-    const validAges = [4, 7, 10];
+    const validAges = [5, 8, 11];
     if (!validAges.includes(this.age)) {
       throw new Error(`Invalid age. Must be one of: ${validAges.join(', ')}`);
     }
@@ -48,7 +48,7 @@ export class UserProfile {
     }
 
     // Validate complexity level matches age
-    const expectedComplexity = this.age === 4 ? 'simple' : this.age === 7 ? 'moderate' : 'complex';
+    const expectedComplexity = this.age === 5 ? 'simple' : this.age === 8 ? 'moderate' : 'complex';
     if (this.complexityLevel !== expectedComplexity) {
       throw new Error(`Complexity level "${this.complexityLevel}" doesn't match age ${this.age}`);
     }
