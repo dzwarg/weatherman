@@ -55,7 +55,7 @@ describe('useVoiceRecognition', () => {
       expect(result.current.isListening).toBe(false);
       expect(result.current.isWaitingForWakeWord).toBe(false);
       expect(result.current.isSupported).toBe(true);
-      expect(result.current.error).toBeNull();
+      expect(result.current.voiceError).toBeNull();
       expect(result.current.lastQuery).toBeNull();
     });
 
@@ -65,6 +65,14 @@ describe('useVoiceRecognition', () => {
       const { result } = renderHook(() => useVoiceRecognition());
 
       expect(result.current.isSupported).toBe(false);
+    });
+
+    it('sets not-supported error on mount when speech APIs unavailable', () => {
+      voiceService.isSupported.mockReturnValue(false);
+
+      const { result } = renderHook(() => useVoiceRecognition());
+
+      expect(result.current.voiceError).toEqual({ code: 'not-supported', isPermanent: true });
     });
   });
 
@@ -77,7 +85,7 @@ describe('useVoiceRecognition', () => {
       });
 
       expect(result.current.isWaitingForWakeWord).toBe(true);
-      expect(result.current.error).toBeNull();
+      expect(result.current.voiceError).toBeNull();
       expect(voiceService.startWakeWordDetection).toHaveBeenCalled();
     });
 
@@ -90,7 +98,7 @@ describe('useVoiceRecognition', () => {
         result.current.startWakeWordDetection();
       });
 
-      expect(result.current.error).toBe('Voice recognition is not supported in this browser');
+      expect(result.current.voiceError).toEqual({ code: 'not-supported', isPermanent: true });
       expect(result.current.isWaitingForWakeWord).toBe(false);
     });
 
@@ -103,7 +111,6 @@ describe('useVoiceRecognition', () => {
 
       expect(result.current.isWaitingForWakeWord).toBe(true);
 
-      // Simulate wake word detection
       act(() => {
         wakeWordCallback();
       });
@@ -120,12 +127,10 @@ describe('useVoiceRecognition', () => {
         result.current.startWakeWordDetection();
       });
 
-      // Wake word detected
       act(() => {
         wakeWordCallback();
       });
 
-      // Query recognized
       act(() => {
         listeningCallback({ transcript: 'what should I wear', confidence: 0.9 });
       });
@@ -138,28 +143,22 @@ describe('useVoiceRecognition', () => {
     it('should restart wake word detection after query', () => {
       const { result } = renderHook(() => useVoiceRecognition());
 
-      const _startWakeWordSpy = vi.spyOn(result.current, 'startWakeWordDetection');
-
       act(() => {
         result.current.startWakeWordDetection();
       });
 
-      // Wake word detected
       act(() => {
         wakeWordCallback();
       });
 
-      // Query recognized
       act(() => {
         listeningCallback({ transcript: 'test', confidence: 0.9 });
       });
 
-      // Advance timer past the 15 second delay for wake word restart
       act(() => {
         vi.advanceTimersByTime(15000);
       });
 
-      // Note: The callback is stored, so we check if startWakeWordDetection was called
       expect(voiceService.startWakeWordDetection).toHaveBeenCalledTimes(2);
     });
 
@@ -171,10 +170,10 @@ describe('useVoiceRecognition', () => {
       });
 
       act(() => {
-        wakeWordErrorCallback(new Error('Wake word error'));
+        wakeWordErrorCallback('not-allowed');
       });
 
-      expect(result.current.error).toBe('Wake word error');
+      expect(result.current.voiceError).toEqual({ code: 'not-allowed', isPermanent: false });
       expect(result.current.isWaitingForWakeWord).toBe(false);
     });
 
@@ -185,17 +184,15 @@ describe('useVoiceRecognition', () => {
         result.current.startWakeWordDetection();
       });
 
-      // Wake word detected
       act(() => {
         wakeWordCallback();
       });
 
-      // Listening error
       act(() => {
-        listeningErrorCallback(new Error('Recognition error'));
+        listeningErrorCallback('network');
       });
 
-      expect(result.current.error).toBe('Recognition error');
+      expect(result.current.voiceError).toEqual({ code: 'network', isPermanent: false });
       expect(result.current.isListening).toBe(false);
     });
   });
@@ -209,7 +206,7 @@ describe('useVoiceRecognition', () => {
       });
 
       expect(result.current.isListening).toBe(true);
-      expect(result.current.error).toBeNull();
+      expect(result.current.voiceError).toBeNull();
       expect(voiceService.startListening).toHaveBeenCalled();
     });
 
@@ -222,7 +219,7 @@ describe('useVoiceRecognition', () => {
         result.current.startManualListening();
       });
 
-      expect(result.current.error).toBe('Voice recognition is not supported in this browser');
+      expect(result.current.voiceError).toEqual({ code: 'not-supported', isPermanent: true });
       expect(result.current.isListening).toBe(false);
     });
 
@@ -250,10 +247,10 @@ describe('useVoiceRecognition', () => {
       });
 
       act(() => {
-        listeningErrorCallback(new Error('Manual error'));
+        listeningErrorCallback('audio-capture');
       });
 
-      expect(result.current.error).toBe('Manual error');
+      expect(result.current.voiceError).toEqual({ code: 'audio-capture', isPermanent: false });
       expect(result.current.isListening).toBe(false);
     });
   });
@@ -314,6 +311,28 @@ describe('useVoiceRecognition', () => {
     });
   });
 
+  describe('clearError', () => {
+    it('should clear voiceError state', () => {
+      const { result } = renderHook(() => useVoiceRecognition());
+
+      act(() => {
+        result.current.startWakeWordDetection();
+      });
+
+      act(() => {
+        wakeWordErrorCallback('network');
+      });
+
+      expect(result.current.voiceError).not.toBeNull();
+
+      act(() => {
+        result.current.clearError();
+      });
+
+      expect(result.current.voiceError).toBeNull();
+    });
+  });
+
   describe('cleanup', () => {
     it('should cleanup on unmount', () => {
       const { unmount } = renderHook(() => useVoiceRecognition());
@@ -324,8 +343,8 @@ describe('useVoiceRecognition', () => {
     });
   });
 
-  describe('error messages', () => {
-    it('should use default error message when error has no message', () => {
+  describe('structured error state', () => {
+    it('sets voiceError.code for service error codes', () => {
       const { result } = renderHook(() => useVoiceRecognition());
 
       act(() => {
@@ -333,31 +352,131 @@ describe('useVoiceRecognition', () => {
       });
 
       act(() => {
-        wakeWordErrorCallback(new Error());
+        wakeWordErrorCallback('no-speech');
       });
 
-      expect(result.current.error).toBe('Wake word detection error');
+      expect(result.current.voiceError?.code).toBe('no-speech');
+      expect(result.current.voiceError?.isPermanent).toBe(false);
     });
 
-    it('should clear error on successful operation', () => {
+    it('first not-allowed error is isPermanent: false', () => {
       const { result } = renderHook(() => useVoiceRecognition());
 
       act(() => {
-        result.current.startManualListening();
+        result.current.startWakeWordDetection();
       });
 
       act(() => {
-        listeningErrorCallback(new Error('Error'));
+        wakeWordErrorCallback('not-allowed');
       });
 
-      expect(result.current.error).toBe('Error');
+      expect(result.current.voiceError).toEqual({ code: 'not-allowed', isPermanent: false });
+    });
 
-      // Start again successfully
+    it('consecutive not-allowed errors set isPermanent: true', () => {
+      const { result } = renderHook(() => useVoiceRecognition());
+
       act(() => {
-        result.current.startManualListening();
+        result.current.startWakeWordDetection();
       });
 
-      expect(result.current.error).toBeNull();
+      act(() => {
+        wakeWordErrorCallback('not-allowed');
+      });
+
+      act(() => {
+        result.current.clearError();
+        result.current.startWakeWordDetection();
+      });
+
+      act(() => {
+        wakeWordErrorCallback('not-allowed');
+      });
+
+      expect(result.current.voiceError).toEqual({ code: 'not-allowed', isPermanent: true });
+    });
+
+    it('clears voiceError on new startWakeWordDetection', () => {
+      const { result } = renderHook(() => useVoiceRecognition());
+
+      act(() => {
+        result.current.startWakeWordDetection();
+      });
+
+      act(() => {
+        wakeWordErrorCallback('network');
+      });
+
+      expect(result.current.voiceError).not.toBeNull();
+
+      act(() => {
+        result.current.startWakeWordDetection();
+      });
+
+      expect(result.current.voiceError).toBeNull();
+    });
+
+    it('ignores aborted errors silently', () => {
+      const { result } = renderHook(() => useVoiceRecognition());
+
+      act(() => {
+        result.current.startWakeWordDetection();
+      });
+
+      act(() => {
+        wakeWordErrorCallback('aborted');
+      });
+
+      expect(result.current.voiceError).toBeNull();
+    });
+  });
+
+  describe('background recovery (visibilitychange / pageshow)', () => {
+    it('resumes wake word detection 800ms after returning from background', () => {
+      const { result } = renderHook(() => useVoiceRecognition());
+
+      act(() => {
+        result.current.startWakeWordDetection();
+      });
+
+      expect(voiceService.startWakeWordDetection).toHaveBeenCalledTimes(1);
+
+      // Simulate going to background then returning
+      act(() => {
+        Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+
+      // Should not restart immediately
+      expect(voiceService.startWakeWordDetection).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+
+      expect(voiceService.startWakeWordDetection).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not resume if not waiting for wake word', () => {
+      renderHook(() => useVoiceRecognition());
+
+      // Do NOT start wake word detection
+      act(() => {
+        Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+        document.dispatchEvent(new Event('visibilitychange'));
+        vi.advanceTimersByTime(800);
+      });
+
+      expect(voiceService.startWakeWordDetection).not.toHaveBeenCalled();
+    });
+
+    it('removes event listeners on unmount', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+      const { unmount } = renderHook(() => useVoiceRecognition());
+
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
     });
   });
 });

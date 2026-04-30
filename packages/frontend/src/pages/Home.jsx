@@ -16,6 +16,7 @@ import { useOfflineStatus } from '../hooks/useOfflineStatus.js';
 import recommendationService from '../services/recommendationService.js';
 import apiClient from '../services/apiClient.js';
 import { OfflineIndicator } from '../components/OfflineIndicator.jsx';
+import { VoiceErrorToast } from '../components/VoiceErrorToast.jsx';
 import { isQueryInScope, getOutOfScopeMessage } from '../utils/voiceUtils.js';
 
 export function Home() {
@@ -23,7 +24,8 @@ export function Home() {
   const {
     isListening,
     isWaitingForWakeWord,
-    error: voiceError,
+    voiceError,
+    clearError,
     lastQuery,
     startWakeWordDetection,
     stopListening,
@@ -237,12 +239,11 @@ export function Home() {
             </div>
           </div>
 
-          {(isListening || voiceState !== 'idle' || voiceError) && (
+          {(isListening || voiceState !== 'idle') && (
             <div style={styles.section}>
               <VoiceFeedback
                 state={voiceState}
                 message={feedbackMessage}
-                error={voiceError}
               />
             </div>
           )}
@@ -268,6 +269,7 @@ export function Home() {
         </div>
       )}
       </main>
+      <VoiceErrorToast error={voiceError} onDismiss={clearError} />
     </div>
   );
 }

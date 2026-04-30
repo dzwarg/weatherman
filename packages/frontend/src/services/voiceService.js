@@ -6,6 +6,14 @@
 import { VOICE_CONFIG, WAKE_PHRASE } from '../utils/constants.js';
 import { containsWakePhrase } from '../utils/voiceUtils.js';
 
+function isIOS() {
+  if (/iPhone|iPod/.test(navigator.userAgent)) return true;
+  if (/iPad/.test(navigator.userAgent)) return true;
+  // iPadOS 13+ reports as "Macintosh" — detect via touch points
+  if (navigator.maxTouchPoints > 2 && /Mac/.test(navigator.platform)) return true;
+  return false;
+}
+
 class VoiceService {
   constructor() {
     // Check browser support
@@ -52,6 +60,63 @@ class VoiceService {
   }
 
   /**
+   * Set up wake word detection handlers on recognition instance
+   * @private
+   */
+  _setupWakeWordHandlers() {
+    if (!this.recognition) return;
+
+    this.recognition.onresult = (event) => {
+      const results = event.results;
+      const lastResult = results[results.length - 1];
+      const transcript = lastResult[0].transcript;
+
+      if (!this.isSpeaking && containsWakePhrase(transcript)) {
+        console.log('Wake word detected:', transcript);
+        if (this.onWakeWordDetected) {
+          this.onWakeWordDetected(transcript);
+        }
+      }
+    };
+
+    this.recognition.onerror = (event) => {
+      console.error('Wake word detection error:', event.error);
+      if (this.onError) {
+        this.onError(event.error);
+      }
+    };
+
+    this.recognition.onend = () => {
+      if (this.isListening && !this.isRestarting) {
+        this.isRestarting = true;
+        const restartDelay = isIOS() ? 1000 : 300;
+        setTimeout(() => {
+          if (this.isListening && this.recognition) {
+            try {
+              this.recognition.start();
+            } catch (error) {
+              console.warn('Wake word restart failed:', error.message);
+              if (isIOS()) {
+                try {
+                  this.recognition = this.initRecognition();
+                  this._setupWakeWordHandlers();
+                  this.recognition.start();
+                } catch (retryError) {
+                  console.error('Failed to reinitialize recognition:', retryError);
+                  this.isListening = false;
+                }
+              } else {
+                this.isListening = false;
+              }
+            }
+          }
+          this.isRestarting = false;
+        }, restartDelay);
+      }
+    };
+  }
+
+  /**
    * Start listening for wake word
    * @param {Function} onWakeWordDetected - Callback when wake word detected
    * @param {Function} onError - Error callback
@@ -78,8 +143,7 @@ class VoiceService {
       const lastResult = results[results.length - 1];
       const transcript = lastResult[0].transcript;
 
-      // Check for wake phrase
-      if (containsWakePhrase(transcript)) {
+      if (!this.isSpeaking && containsWakePhrase(transcript)) {
         console.log('Wake word detected:', transcript);
         if (this.onWakeWordDetected) {
           this.onWakeWordDetected(transcript);
@@ -89,17 +153,6 @@ class VoiceService {
 
     this.recognition.onerror = (event) => {
       console.error('Wake word detection error:', event.error);
-
-      // Handle microphone permission errors
-      if (event.error === 'not-allowed' || event.error === 'audio-capture') {
-        const message =
-          event.error === 'not-allowed'
-            ? 'Microphone access was denied. Please enable it in your browser settings.'
-            : 'I need permission to use your microphone. Please allow microphone access.';
-
-        this.speak(message, { rate: 0.9, pitch: 1.1 });
-      }
-
       if (this.onError) {
         this.onError(event.error);
       }
@@ -109,19 +162,31 @@ class VoiceService {
       // Restart if still should be listening
       if (this.isListening && !this.isRestarting) {
         this.isRestarting = true;
-        // Add delay to ensure recognition has fully stopped
+        // iOS needs longer delay and proper state reset for restart
+        const restartDelay = isIOS() ? 1000 : 300;
         setTimeout(() => {
-          if (this.isListening) {
+          if (this.isListening && this.recognition) {
             try {
               this.recognition.start();
-            } catch {
-              // Silently skip restart errors - user can manually restart
-              console.log('Recognition restart skipped, please restart manually');
-              this.isListening = false;
+            } catch (error) {
+              console.warn('Wake word restart failed:', error.message);
+              // On iOS, try reinitializing recognition for fresh start
+              if (isIOS()) {
+                try {
+                  this.recognition = this.initRecognition();
+                  this._setupWakeWordHandlers();
+                  this.recognition.start();
+                } catch (retryError) {
+                  console.error('Failed to reinitialize recognition:', retryError);
+                  this.isListening = false;
+                }
+              } else {
+                this.isListening = false;
+              }
             }
           }
           this.isRestarting = false;
-        }, 300);
+        }, restartDelay);
       }
     };
 
@@ -183,22 +248,6 @@ class VoiceService {
 
     this.recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
-
-      // Provide spoken guidance for common errors
-      const errorMessages = {
-        'no-speech': "I didn't hear anything. Please try saying the wake phrase again.",
-        'audio-capture': 'I need permission to use your microphone. Please allow microphone access.',
-        'not-allowed': 'Microphone access was denied. Please enable it in your browser settings.',
-        'network': "I'm having trouble with the network. Please check your connection.",
-        'aborted': 'Speech recognition was stopped. You can try again.',
-      };
-
-      const spokenMessage = errorMessages[event.error] ||
-        "I'm having trouble understanding. Please try again.";
-
-      // Speak the error message
-      this.speak(spokenMessage, { rate: 0.9, pitch: 1.1 });
-
       if (this.onError) {
         this.onError(event.error);
       }
@@ -257,18 +306,16 @@ class VoiceService {
       const voices = this.SpeechSynthesis.getVoices();
       if (voices.length === 0) {
         console.log('[Speech] Voices not loaded yet, waiting...');
-        // Wait for voices to load
-        this.SpeechSynthesis.onvoiceschanged = () => {
-          console.log('[Speech] Voices loaded, proceeding...');
+        let hasStarted = false;
+        const proceed = () => {
+          if (hasStarted) return;
+          hasStarted = true;
+          this.SpeechSynthesis.onvoiceschanged = null;
+          clearTimeout(timeoutId);
           this._speakWithCancellation(text, options, resolve, reject);
         };
-        // Also try after a timeout in case event doesn't fire
-        setTimeout(() => {
-          if (this.SpeechSynthesis.getVoices().length === 0) {
-            console.warn('[Speech] No voices loaded after waiting, trying anyway...');
-          }
-          this._speakWithCancellation(text, options, resolve, reject);
-        }, 100);
+        this.SpeechSynthesis.onvoiceschanged = proceed;
+        const timeoutId = setTimeout(proceed, 100);
         return;
       }
 
@@ -325,7 +372,10 @@ class VoiceService {
         console.log('[Speech] Selected default voice:', voices[0].name);
       }
     } else {
-      console.warn('[Speech] No voices available! Speech may not work.');
+      console.warn('[Speech] No voices available.');
+      if (this.onError) this.onError('no-voices');
+      resolve();
+      return;
     }
 
     utterance.onstart = () => {
