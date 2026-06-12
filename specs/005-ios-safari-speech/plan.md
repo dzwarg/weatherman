@@ -5,7 +5,7 @@
 
 ## Summary
 
-Fix five silent failure modes in the Web Speech API implementation that prevent reliable voice interaction on iOS Safari and macOS Safari. The changes are confined entirely to the frontend voice layer (`voiceService.js`, `useVoiceRecognition.js`, and a new toast feedback component). No server changes, no new dependencies, no data storage changes.
+Fix five silent failure modes in the Web Speech API implementation that prevent reliable voice interaction on iOS Safari and macOS Safari. The changes are confined entirely to the frontend voice layer.
 
 ## Technical Context
 
@@ -17,6 +17,10 @@ Fix five silent failure modes in the Web Speech API implementation that prevent 
 **Performance Goals**: Wake word detection ready within 3 seconds of iOS session end; error toast visible within 1 second; zero duplicate speech per trigger  
 **Constraints**: Web Speech API callbacks from `onerror` do not carry iOS gesture context — audio must not be the sole feedback channel for error states; no third-party voice services permitted  
 **Scale/Scope**: Client-side only; 3 files modified, 1 component added, ~4 new test files
+
+### Wake Word Recognition
+
+iOS speech recognition wakes on a **single word** only, not a phrase. The wake word must be **"ready"**.
 
 ## Constitution Check
 
@@ -81,16 +85,16 @@ isIOS(): /iPhone|iPod/.test(UA) OR (maxTouchPoints > 2 AND /iPad/.test(UA)) OR (
 Both occurrences at lines 151 and 159 must use the new helper.
 
 **1.2 — Restore all handlers after iOS recovery** (FR-002, FR-007, FR-008)  
-`_setupWakeWordHandlers()` currently sets only `onresult` and `onerror`. Add `onend` handler to it so the iOS reinitialization path (which calls `_setupWakeWordHandlers`) also restores the restart loop. This is the primary cause of wake detection permanently stopping after one recovery attempt.
+`_setupWakeWordHandlers()` currently sets only `onresult` and `onerror`. Add `onend` handler to it so the iOS reinitialization path (which calls `_setupWakeWordHandlers`) also restores the restart logic.
 
 **1.3 — Prevent double-speak on voice load** (FR-005, SC-005)  
-Introduce a `hasStarted` guard flag inside `speak()`. Both the `onvoiceschanged` listener and the 100ms timeout must check and set this flag before calling `_speakWithCancellation`. Clear the listener with `onvoiceschanged = null` and `clearTimeout` once the guard fires.
+Introduce a `hasStarted` guard flag inside `speak()`. Both the `onvoiceschanged` listener and the 100ms timeout must check and set this flag before calling `_speakWithCancellation`. Clear the flag when synthesis is complete (via `onend`).
 
 **1.4 — Ignore wake phrase during active speech** (FR-009)  
 In the `onresult` handler inside `startWakeWordDetection`, gate the `containsWakePhrase` check behind `!this.isSpeaking`.
 
 **1.5 — Empty voices toast** (FR-010)  
-In `_startSpeech`, when `voices.length === 0`, emit an error event to the registered `onError` handler (with a distinct error code `no-voices`) instead of silently continuing. The hook and UI layer will display the toast (implemented in Phase 2).
+In `_startSpeech`, when `voices.length === 0`, emit an error event to the registered `onError` handler (with a distinct error code `no-voices`) instead of silently continuing. The hook and UI layer will render the appropriate message.
 
 ### Phase 2 — Visual Feedback Layer
 
@@ -118,7 +122,7 @@ When `voiceService.isSupported()` returns false at mount time, set `voiceError` 
 ### Phase 3 — Background Recovery
 
 **3.1 — Auto-resume on foreground** (FR-011, SC-001)  
-In `useVoiceRecognition`, add a `visibilitychange` listener (and `pageshow` for PWA installed mode) at mount. When the document becomes visible again and `isWaitingForWakeWord` was true, wait 800ms (iOS audio system recovery time) then call `startWakeWordDetection()`. Tear down the listener on unmount.
+In `useVoiceRecognition`, add a `visibilitychange` listener (and `pageshow` for PWA installed mode) at mount. When the document becomes visible again and `isWaitingForWakeWord` was true, wait 800ms then call `startWakeWordDetection()` to resume listening. Stop listening when visibility changes to hidden.
 
 ### Phase 4 — Tests
 
