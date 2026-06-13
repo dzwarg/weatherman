@@ -111,7 +111,21 @@
 
 - [x] T020 [P] Run ESLint and production build in `packages/frontend` (`npm run lint && npm run build`); confirm zero lint errors and successful build
 
-- [ ] T021 Execute all 8 manual test scenarios from `specs/005-ios-safari-speech/quickstart.md`; mark each item complete; record any failures as issues before closing the feature
+- [ ] T021 Change `WAKE_PHRASE` constant in `packages/frontend/src/utils/constants.js` from `'good morning weatherbot'` to `'ready'` (lowercase, single word, matching the iOS wake word constraint from spec)
+
+- [ ] T022 [P] Update `packages/frontend/src/utils/voiceUtils.test.js` — replace all occurrences of `'good morning weatherbot'` in test assertions with `'ready'` (wake phrase detection tests, `removeWakePhrase` tests)
+
+- [ ] T023 [P] Update `packages/frontend/src/services/voiceService.test.js` — replace all occurrences of `'good morning weatherbot'` in test transcripts with `'ready'`
+
+- [ ] T024 [P] Update `packages/frontend/src/components/voice/WakeWordDetector.test.jsx` — replace `'good morning weatherbot'` with `'ready'` in test assertions (UI text checks on lines 67, 83)
+
+- [ ] T025 [P] Update E2E test files in `packages/frontend/tests/e2e/` — replace `'good morning weatherbot'` and `'weatherbot'` wake word references with `'ready'` in `voice-workflow.test.js`, `voice-workflow.spec.js`, and `README.md`
+
+- [ ] T026 Run full test suite with coverage in `packages/frontend` (`npm run test:coverage`); confirm all tests pass after wake word change
+
+- [ ] T027 [P] Run ESLint and production build in `packages/frontend` (`npm run lint && npm run build`); confirm zero failures
+
+- [ ] T028 Execute all 8 manual test scenarios from `specs/005-ios-safari-speech/quickstart.md`; mark each item complete; record any failures as issues before closing the feature
 
 ---
 
@@ -124,7 +138,7 @@
 - **US1 (Phase 3)**: Depends on Phase 2 — T003 and T004 are parallelizable with each other; T005/T006 are parallelizable with T003/T004
 - **US2 (Phase 4)**: Depends on Phase 2 only — T007/T008/T009/T010 are all parallelizable; T011 depends on T007–T010; T012 depends on T011; T013 depends on T012
 - **US3 (Phase 5)**: Depends on T011/T012 (structured error state and toast component from US2)
-- **Polish (Final)**: Depends on all story phases complete
+- **Polish (Final)**: Depends on all story phases complete; T021 (wake word constant change) must complete before T022–T025 (test file updates); T022–T025 are fully parallelizable; T026–T027 depend on T021–T025
 
 ### User Story Dependencies
 
@@ -176,7 +190,8 @@ Task T016: "Hook error state tests"     ← after T011
 2. T003–T006 → **US1 complete** → Demo: reliable wake word detection on iPhone/iPad
 3. T007–T016 → **US2 complete** → Demo: spoken responses + visible error feedback
 4. T017–T018 → **US3 complete** → Demo: graceful degradation on unsupported browsers
-5. T019–T021 → Polish + validation → PR ready
+5. T019–T020 → Polish + validation (original)
+6. T021–T028 → Wake word change + re-validation → PR ready
 
 ---
 
@@ -189,5 +204,6 @@ Task T016: "Hook error state tests"     ← after T011
 | Phase 3: US1 | T003–T006 | US1 | T004, T005, T006 parallel after T003 |
 | Phase 4: US2 | T007–T016 | US2 | T007–T010 fully parallel; T014–T016 parallel after deps |
 | Phase 5: US3 | T017–T018 | US3 | T018 parallel |
-| Polish | T019–T021 | — | T020 parallel |
-| **Total** | **21 tasks** | | |
+| Polish (original) | T019–T020 | — | T020 parallel |
+| Polish (wake word) | T021–T028 | — | T022–T025 fully parallel |
+| **Total** | **28 tasks** | | |
