@@ -171,7 +171,7 @@ test.describe('Voice Weather Clothing Workflow', () => {
     await page.evaluate(() => {
       if (window.voiceService) {
         if (typeof window.voiceService.onWakeWordDetected === 'function') {
-          window.voiceService.onWakeWordDetected('weatherbot');
+          window.voiceService.onWakeWordDetected('ready what should I wear');
         }
         if (typeof window.voiceService.onResult === 'function') {
           window.voiceService.onResult({

@@ -48,10 +48,10 @@ Add your API key to `packages/server/.env`:
 ```env
 # Claude API Configuration
 ANTHROPIC_API_KEY=sk-ant-api03-your_actual_key_here
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 ```
 
-**Note**: The model parameter is optional and defaults to `claude-3-5-sonnet-20241022`
+**Note**: The model parameter is optional and defaults to `claude-sonnet-4-6`
 
 ### 4. Verify Configuration
 
@@ -146,7 +146,7 @@ Notice `"source": "claude"` and `"confidence": 0.95` indicating AI-powered recom
 ### Recommended: Claude 3.5 Sonnet (Default)
 
 ```env
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 ```
 
 **Pros:**
@@ -158,7 +158,7 @@ CLAUDE_MODEL=claude-3-5-sonnet-20241022
 ### Alternative: Claude 3 Haiku (Faster)
 
 ```env
-CLAUDE_MODEL=claude-3-haiku-20240307
+CLAUDE_MODEL=claude-haiku-4-6
 ```
 
 **Pros:**
@@ -268,11 +268,11 @@ npm run dev:server
 **Solution**: Check model name in `.env`:
 ```env
 # Correct format
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 
 # Common mistakes
-CLAUDE_MODEL=claude-3.5-sonnet  # ❌ Missing date
-CLAUDE_MODEL=sonnet  # ❌ Missing prefix
+CLAUDE_MODEL=claude-sonnet-4-6-20260612  # ❌ Extra date
+CLAUDE_MODEL=claude-sonnet  # ❌ Missing version
 ```
 
 ### Slow Response Times
@@ -331,7 +331,7 @@ This protects your API key from abuse.
 ```env
 # .env.development
 ANTHROPIC_API_KEY=sk-ant-api03-dev-key-here
-CLAUDE_MODEL=claude-3-haiku-20240307  # Faster, cheaper
+CLAUDE_MODEL=claude-haiku-4-5-20251001  # Faster, cheaper
 ```
 
 ### Production Setup
@@ -339,7 +339,7 @@ CLAUDE_MODEL=claude-3-haiku-20240307  # Faster, cheaper
 ```env
 # .env.production
 ANTHROPIC_API_KEY=sk-ant-api03-prod-key-here
-CLAUDE_MODEL=claude-3-5-sonnet-20241022  # Better quality
+CLAUDE_MODEL=claude-sonnet-4-6  # Better quality
 ```
 
 ## Monitoring
@@ -381,7 +381,7 @@ If Claude API causes issues, simply remove or comment out the API key:
 ```env
 # Claude API Configuration (disabled)
 # ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 ```
 
 The server will automatically detect missing API key and use rule-based recommendations. No code changes required.

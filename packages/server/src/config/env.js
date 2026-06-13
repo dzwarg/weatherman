@@ -27,7 +27,7 @@ export const config = {
   weatherApiKey: process.env.WEATHER_API_KEY,
   weatherApiUrl: process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5',
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-  claudeModel: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
+  claudeModel: process.env.CLAUDE_MODEL || 'claude-sonnet-4-6',
 };
 
 export default config;

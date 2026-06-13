@@ -222,7 +222,7 @@ WEATHER_API_KEY=your_openweather_key
 
 # Optional (Claude API)
 ANTHROPIC_API_KEY=sk-ant-api03-...
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 ```
 
 ### Frontend (packages/frontend/.env.development)

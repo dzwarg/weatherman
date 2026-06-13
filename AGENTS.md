@@ -281,6 +281,18 @@ chore(deps): update React to 18.3.0
 
 This ensures the task board always reflects current progress.
 
+### Version Bump Rule
+
+**Every commit that changes source code, tests, or configuration MUST increment the version** in `packages/<package>/package.json` using `npm version <type>` (or manual edit). Use the appropriate semver bump:
+
+- `patch` — bug fixes, test updates, refactors, docs
+- `minor` — new features, non-breaking changes
+- `major` — breaking API or behavior changes
+
+For spec-based work, also update `specs/<spec-name>/tasks.md` to record the new version in the changelog.
+
+Version must be bumped **before** committing, so the commit includes the version change alongside the code.
+
 ---
 
 ## Key Technical Details

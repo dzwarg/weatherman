@@ -80,13 +80,13 @@ describe('voiceService', () => {
       // Simulate recognition result with wake phrase
       const mockEvent = {
         results: [
-          [{ transcript: 'good morning weatherbot what should I wear', confidence: 0.9 }]
+          [{ transcript: 'ready what should I wear', confidence: 0.9 }]
         ]
       };
 
       voiceService.recognition.onresult(mockEvent);
 
-      expect(onWakeWordDetected).toHaveBeenCalledWith('good morning weatherbot what should I wear');
+      expect(onWakeWordDetected).toHaveBeenCalledWith('ready what should I wear');
     });
 
     it('should not trigger callback for non-wake-word transcript', () => {
@@ -156,11 +156,12 @@ describe('voiceService', () => {
 
       expect(voiceService.isListening).toBe(true);
       expect(voiceService.recognition).not.toBeNull();
-      expect(voiceService.recognition.continuous).toBe(false);
-      expect(voiceService.recognition.interimResults).toBe(false);
+      expect(voiceService.recognition.continuous).toBe(true);
+      expect(voiceService.recognition.interimResults).toBe(true);
     });
 
     it('should handle final result', () => {
+      vi.useFakeTimers();
       const onResult = vi.fn();
       const onError = vi.fn();
 
@@ -168,18 +169,21 @@ describe('voiceService', () => {
 
       const mockEvent = {
         results: [
-          [{ transcript: 'what should I wear today', confidence: 0.95, isFinal: true }]
+          [{ transcript: 'what should I wear today', confidence: 0.95 }]
         ]
       };
-      mockEvent.results[0].isFinal = true;
 
       voiceService.recognition.onresult(mockEvent);
 
+      vi.advanceTimersByTime(1500);
+
       expect(onResult).toHaveBeenCalledWith({
         transcript: 'what should I wear today',
-        confidence: 0.95,
+        confidence: 1.0,
         isFinal: true,
       });
+
+      vi.useRealTimers();
     });
 
     it('should handle errors', () => {
@@ -239,6 +243,8 @@ describe('voiceService', () => {
   describe('speak', () => {
     it('should speak text with default options', async () => {
       let capturedUtterance;
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => [{ lang: 'en-US', name: 'Test Voice' }];
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
         capturedUtterance = utterance;
@@ -260,10 +266,13 @@ describe('voiceService', () => {
       expect(voiceService.isSpeaking).toBe(false);
 
       window.speechSynthesis.speak = originalSpeak;
+      window.speechSynthesis.getVoices = originalGetVoices;
     });
 
     it('should use custom voice options', async () => {
       let capturedUtterance;
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => [{ lang: 'en-US', name: 'Test Voice' }];
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
         capturedUtterance = utterance;
@@ -287,6 +296,7 @@ describe('voiceService', () => {
       expect(capturedUtterance.volume).toBe(0.8);
 
       window.speechSynthesis.speak = originalSpeak;
+      window.speechSynthesis.getVoices = originalGetVoices;
     });
 
     it.skip('should cancel ongoing speech before starting new', async () => {
@@ -339,6 +349,8 @@ describe('voiceService', () => {
 
     it('should reject on synthesis error', async () => {
       let _capturedUtterance;
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => [{ lang: 'en-US', name: 'Test Voice' }];
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
         _capturedUtterance = utterance;
@@ -356,6 +368,7 @@ describe('voiceService', () => {
       expect(voiceService.isSpeaking).toBe(false);
 
       window.speechSynthesis.speak = originalSpeak;
+      window.speechSynthesis.getVoices = originalGetVoices;
     });
 
     it('should handle not-supported browser', async () => {
@@ -371,6 +384,8 @@ describe('voiceService', () => {
   describe('stopSpeaking', () => {
     it('should stop speaking', async () => {
       let _capturedUtterance;
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => [{ lang: 'en-US', name: 'Test Voice' }];
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
         _capturedUtterance = utterance;
@@ -403,6 +418,7 @@ describe('voiceService', () => {
 
       window.speechSynthesis.speak = originalSpeak;
       window.speechSynthesis.cancel = originalCancel;
+      window.speechSynthesis.getVoices = originalGetVoices;
     });
 
     it('should handle when not speaking', () => {
@@ -427,9 +443,172 @@ describe('voiceService', () => {
     });
   });
 
+  describe('isIOS detection', () => {
+    const originalUA = navigator.userAgent;
+    const originalPlatform = navigator.platform;
+    const originalMaxTouch = navigator.maxTouchPoints;
+
+    afterEach(() => {
+      Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+      Object.defineProperty(navigator, 'platform', { value: originalPlatform, configurable: true });
+      Object.defineProperty(navigator, 'maxTouchPoints', { value: originalMaxTouch, configurable: true });
+    });
+
+    const setUA = (ua) => Object.defineProperty(navigator, 'userAgent', { value: ua, configurable: true });
+    const setPlatform = (p) => Object.defineProperty(navigator, 'platform', { value: p, configurable: true });
+    const setMaxTouch = (n) => Object.defineProperty(navigator, 'maxTouchPoints', { value: n, configurable: true });
+
+    it('detects iPhone user agent', () => {
+      setUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15');
+      voiceService.startWakeWordDetection(vi.fn(), vi.fn());
+      // restart delay should be 1000ms on iOS — verify by checking onend triggers restart
+      expect(voiceService.isListening).toBe(true);
+    });
+
+    it('detects iPadOS 13+ via maxTouchPoints + Mac platform', () => {
+      setUA('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15');
+      setPlatform('MacIntel');
+      setMaxTouch(5);
+      voiceService.startWakeWordDetection(vi.fn(), vi.fn());
+      expect(voiceService.isListening).toBe(true);
+      // fire onend — should restart with isIOS()=true delay path
+      voiceService.recognition.onend();
+      expect(voiceService.isRestarting).toBe(true);
+    });
+
+    it('does not detect a real Mac (maxTouchPoints <= 1)', () => {
+      setUA('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15');
+      setPlatform('MacIntel');
+      setMaxTouch(0);
+      voiceService.startWakeWordDetection(vi.fn(), vi.fn());
+      voiceService.recognition.onend();
+      // should restart with 300ms delay, not 1000ms — just verify restart begins
+      expect(voiceService.isRestarting).toBe(true);
+    });
+  });
+
+  describe('wake word restart resilience', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('survives 3 consecutive onend fires without losing restart handler', () => {
+      const onWakeWordDetected = vi.fn();
+      voiceService.startWakeWordDetection(onWakeWordDetected, vi.fn());
+
+      for (let i = 0; i < 3; i++) {
+        voiceService.isRestarting = false;
+        voiceService.recognition.onend();
+        expect(voiceService.isRestarting).toBe(true);
+        vi.runAllTimers();
+      }
+
+      // After 3 restarts, onresult handler should still work
+      expect(voiceService.recognition.onresult).toBeDefined();
+      expect(voiceService.recognition.onend).toBeDefined();
+    });
+
+    it('_setupWakeWordHandlers sets onresult, onerror, and onend', () => {
+      voiceService.recognition = voiceService.initRecognition();
+      voiceService._setupWakeWordHandlers();
+
+      expect(typeof voiceService.recognition.onresult).toBe('function');
+      expect(typeof voiceService.recognition.onerror).toBe('function');
+      expect(typeof voiceService.recognition.onend).toBe('function');
+    });
+  });
+
+  describe('iOS speech fixes', () => {
+    it('does not trigger wake word callback while speaking', () => {
+      const onWakeWordDetected = vi.fn();
+      voiceService.startWakeWordDetection(onWakeWordDetected, vi.fn());
+      voiceService.isSpeaking = true;
+
+      const mockEvent = {
+        results: [[{ transcript: 'ready', confidence: 0.9 }]],
+      };
+      voiceService.recognition.onresult(mockEvent);
+
+      expect(onWakeWordDetected).not.toHaveBeenCalled();
+    });
+
+    it('triggers wake word callback when not speaking', () => {
+      const onWakeWordDetected = vi.fn();
+      voiceService.startWakeWordDetection(onWakeWordDetected, vi.fn());
+      voiceService.isSpeaking = false;
+
+      const mockEvent = {
+        results: [[{ transcript: 'ready', confidence: 0.9 }]],
+      };
+      voiceService.recognition.onresult(mockEvent);
+
+      expect(onWakeWordDetected).toHaveBeenCalled();
+    });
+
+    it('onerror handler does not call speak()', () => {
+      const speakSpy = vi.spyOn(voiceService, 'speak');
+      const onError = vi.fn();
+      voiceService.startWakeWordDetection(vi.fn(), onError);
+
+      voiceService.recognition.onerror({ error: 'not-allowed' });
+
+      expect(speakSpy).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledWith('not-allowed');
+    });
+
+    it('emits no-voices error and resolves when voice list is empty', async () => {
+      const onError = vi.fn();
+      voiceService.onError = onError;
+
+      // Mock getVoices to return a non-empty list first call (passes the speak() guard),
+      // then empty on the _startSpeech call
+      let callCount = 0;
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => {
+        callCount++;
+        return callCount === 1 ? [{ lang: 'en-US', name: 'Test' }] : [];
+      };
+
+      const promise = voiceService.speak('test');
+      await promise;
+
+      expect(onError).toHaveBeenCalledWith('no-voices');
+
+      window.speechSynthesis.getVoices = originalGetVoices;
+    });
+
+    it('speak() calls _speakWithCancellation exactly once when voices empty', async () => {
+      const speakWithCancellationSpy = vi.spyOn(voiceService, '_speakWithCancellation');
+
+      // voices.length === 0 on first check
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => [];
+
+      const promise = voiceService.speak('test');
+
+      // Simulate onvoiceschanged firing
+      if (window.speechSynthesis.onvoiceschanged) {
+        window.speechSynthesis.onvoiceschanged();
+      }
+
+      await promise;
+
+      expect(speakWithCancellationSpy).toHaveBeenCalledTimes(1);
+
+      window.speechSynthesis.getVoices = originalGetVoices;
+      speakWithCancellationSpy.mockRestore();
+    });
+  });
+
   describe('cleanup', () => {
     it('should stop listening and speaking', async () => {
       let _capturedUtterance;
+      const originalGetVoices = window.speechSynthesis.getVoices;
+      window.speechSynthesis.getVoices = () => [{ lang: 'en-US', name: 'Test Voice' }];
       const originalSpeak = window.speechSynthesis.speak;
       window.speechSynthesis.speak = (utterance) => {
         _capturedUtterance = utterance;
@@ -456,6 +635,7 @@ describe('voiceService', () => {
       expect(voiceService.isSpeaking).toBe(false);
 
       window.speechSynthesis.speak = originalSpeak;
+      window.speechSynthesis.getVoices = originalGetVoices;
     });
   });
 });

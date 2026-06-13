@@ -94,7 +94,7 @@ ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 
 ```env
 # packages/server/.env
-CLAUDE_MODEL=claude-3-5-sonnet-20241022  # Default model
+CLAUDE_MODEL=claude-sonnet-4-6  # Default model
 ```
 
 ## Getting Your API Key

@@ -107,7 +107,8 @@ describe('Home', () => {
     useVoiceRecognition.mockReturnValue({
       isListening: false,
       isWaitingForWakeWord: false,
-      error: null,
+      voiceError: null,
+        clearError: vi.fn(),
       lastQuery: null,
       startWakeWordDetection: mockStartWakeWordDetection,
       stopListening: mockStopListening,
@@ -199,7 +200,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: true,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: null,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -217,7 +219,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: 'Microphone not available',
+        voiceError: { code: 'audio-capture', isPermanent: false },
+        clearError: vi.fn(),
         lastQuery: null,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -226,7 +229,7 @@ describe('Home', () => {
 
       render(<Home />);
 
-      expect(screen.getByText('Microphone not available')).toBeInTheDocument();
+      expect(screen.getByRole('alert')).toHaveTextContent('microphone');
     });
   });
 
@@ -256,7 +259,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -297,7 +301,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -333,7 +338,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -367,7 +373,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -395,7 +402,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -438,7 +446,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: true,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: null,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -473,7 +482,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,
@@ -514,7 +524,8 @@ describe('Home', () => {
       useVoiceRecognition.mockReturnValue({
         isListening: false,
         isWaitingForWakeWord: false,
-        error: null,
+        voiceError: null,
+        clearError: vi.fn(),
         lastQuery: mockQuery,
         startWakeWordDetection: mockStartWakeWordDetection,
         stopListening: mockStopListening,

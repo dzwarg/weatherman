@@ -174,7 +174,7 @@ OLLAMA_MODEL=llama2
 
 # ADDED (Claude API)
 ANTHROPIC_API_KEY=sk-ant-api03-...
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 ```
 
 **Setup Process (Breaking):**
