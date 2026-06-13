@@ -127,6 +127,10 @@
 
 - [ ] T028 Execute all 8 manual test scenarios from `specs/005-ios-safari-speech/quickstart.md`; mark each item complete; record any failures as issues before closing the feature
 
+- [x] T029 Fix `startListening()` in `packages/frontend/src/services/voiceService.js` to use `continuous: true` + `interimResults: true` + 1500ms silence timeout for finalization — iOS fires single-word results; the old `continuous: false` + `interimResults: false` design captured only the first word
+
+- [x] T030 [P] Update `packages/frontend/src/services/voiceService.test.js` — update `should start listening for query` to assert `continuous: true` and `interimResults: true`; update `should handle final result` to simulate silence timeout with `vi.useFakeTimers()` and `vi.advanceTimersByTime(1500)`
+
 ---
 
 ## Dependencies & Execution Order
@@ -191,7 +195,7 @@ Task T016: "Hook error state tests"     ← after T011
 3. T007–T016 → **US2 complete** → Demo: spoken responses + visible error feedback
 4. T017–T018 → **US3 complete** → Demo: graceful degradation on unsupported browsers
 5. T019–T020 → Polish + validation (original)
-6. T021–T028 → Wake word change + re-validation → PR ready
+6. T021–T030 → Wake word change + query listening fix + re-validation → PR ready
 
 ---
 
@@ -205,5 +209,15 @@ Task T016: "Hook error state tests"     ← after T011
 | Phase 4: US2 | T007–T016 | US2 | T007–T010 fully parallel; T014–T016 parallel after deps |
 | Phase 5: US3 | T017–T018 | US3 | T018 parallel |
 | Polish (original) | T019–T020 | — | T020 parallel |
-| Polish (wake word) | T021–T028 | — | T022–T025 fully parallel |
-| **Total** | **28 tasks** | | |
+| Polish (wake word) | T021–T030 | — | T022–T025, T030 fully parallel |
+| **Total** | **30 tasks** | | |
+
+---
+
+## Changelog
+
+| Date | Commit | Task | Description |
+|------|--------|------|-------------|
+| 2026-06-13 | `a34d784` | T001–T020 | Full iOS/Safari speech compatibility (US1, US2, US3, original polish) |
+| 2026-06-13 | `ee4e9dd` | T021–T027 | Change wake word from 'good morning weatherbot' to 'ready'; update all tests; re-validate |
+| 2026-06-13 | (pending) | T029–T030 | Fix `startListening()` to use `continuous: true` + silence timer for iOS multi-word query capture; update tests |

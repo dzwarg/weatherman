@@ -221,32 +221,42 @@ class VoiceService {
     }
 
     this.recognition = this.initRecognition();
-    this.recognition.continuous = false; // Stop after one result
-    this.recognition.interimResults = false; // Only final results
+    this.recognition.continuous = true;  // iOS fires single words — keep session alive
+    this.recognition.interimResults = true;
     this.onResult = onResult;
     this.onError = onError;
+
+    let silenceTimer = null;
+    let accumulatedTranscript = '';
+    let didFinalize = false;
+
+    const finalizeQuery = () => {
+      if (didFinalize) return;
+      didFinalize = true;
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        silenceTimer = null;
+      }
+      const transcript = accumulatedTranscript.trim();
+      if (transcript && this.onResult) {
+        console.log('Voice query received:', transcript);
+        this.onResult({ transcript, confidence: 1.0, isFinal: true });
+      }
+      accumulatedTranscript = '';
+      this.stopListening();
+    };
 
     this.recognition.onresult = (event) => {
       const results = event.results;
       const lastResult = results[results.length - 1];
+      accumulatedTranscript = lastResult[0].transcript;
 
-      if (lastResult.isFinal) {
-        const transcript = lastResult[0].transcript;
-        const confidence = lastResult[0].confidence;
-
-        console.log('Voice query received:', transcript, 'confidence:', confidence);
-
-        if (this.onResult) {
-          this.onResult({
-            transcript,
-            confidence,
-            isFinal: true,
-          });
-        }
-      }
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(finalizeQuery, 1500);
     };
 
     this.recognition.onerror = (event) => {
+      if (silenceTimer) clearTimeout(silenceTimer);
       console.error('Speech recognition error:', event.error);
       if (this.onError) {
         this.onError(event.error);
@@ -255,6 +265,7 @@ class VoiceService {
 
     this.recognition.onend = () => {
       this.isListening = false;
+      finalizeQuery();
       if (this.onEnd) {
         this.onEnd();
       }

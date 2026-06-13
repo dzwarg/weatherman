@@ -156,11 +156,12 @@ describe('voiceService', () => {
 
       expect(voiceService.isListening).toBe(true);
       expect(voiceService.recognition).not.toBeNull();
-      expect(voiceService.recognition.continuous).toBe(false);
-      expect(voiceService.recognition.interimResults).toBe(false);
+      expect(voiceService.recognition.continuous).toBe(true);
+      expect(voiceService.recognition.interimResults).toBe(true);
     });
 
     it('should handle final result', () => {
+      vi.useFakeTimers();
       const onResult = vi.fn();
       const onError = vi.fn();
 
@@ -168,18 +169,21 @@ describe('voiceService', () => {
 
       const mockEvent = {
         results: [
-          [{ transcript: 'what should I wear today', confidence: 0.95, isFinal: true }]
+          [{ transcript: 'what should I wear today', confidence: 0.95 }]
         ]
       };
-      mockEvent.results[0].isFinal = true;
 
       voiceService.recognition.onresult(mockEvent);
 
+      vi.advanceTimersByTime(1500);
+
       expect(onResult).toHaveBeenCalledWith({
         transcript: 'what should I wear today',
-        confidence: 0.95,
+        confidence: 1.0,
         isFinal: true,
       });
+
+      vi.useRealTimers();
     });
 
     it('should handle errors', () => {
