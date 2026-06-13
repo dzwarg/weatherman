@@ -80,13 +80,13 @@ describe('voiceService', () => {
       // Simulate recognition result with wake phrase
       const mockEvent = {
         results: [
-          [{ transcript: 'good morning weatherbot what should I wear', confidence: 0.9 }]
+          [{ transcript: 'ready what should I wear', confidence: 0.9 }]
         ]
       };
 
       voiceService.recognition.onresult(mockEvent);
 
-      expect(onWakeWordDetected).toHaveBeenCalledWith('good morning weatherbot what should I wear');
+      expect(onWakeWordDetected).toHaveBeenCalledWith('ready what should I wear');
     });
 
     it('should not trigger callback for non-wake-word transcript', () => {
@@ -525,7 +525,7 @@ describe('voiceService', () => {
       voiceService.isSpeaking = true;
 
       const mockEvent = {
-        results: [[{ transcript: 'good morning weatherbot', confidence: 0.9 }]],
+        results: [[{ transcript: 'ready', confidence: 0.9 }]],
       };
       voiceService.recognition.onresult(mockEvent);
 
@@ -538,7 +538,7 @@ describe('voiceService', () => {
       voiceService.isSpeaking = false;
 
       const mockEvent = {
-        results: [[{ transcript: 'good morning weatherbot', confidence: 0.9 }]],
+        results: [[{ transcript: 'ready', confidence: 0.9 }]],
       };
       voiceService.recognition.onresult(mockEvent);
 

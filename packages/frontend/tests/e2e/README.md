@@ -31,7 +31,7 @@ npm run test:e2e --workspace=@weatherman/frontend
 Tests the complete voice interaction workflow:
 
 1. **Profile Selection** - User selects age/gender profile
-2. **Wake Word Detection** - "Good morning weatherbot" triggers listening
+2. **Wake Word Detection** - "Ready" triggers listening
 3. **Voice Query** - User asks "What should I wear today?"
 4. **Server Integration** - API calls to weather and recommendations endpoints
 5. **Recommendation Display** - Clothing suggestions shown with weather data

@@ -3,8 +3,8 @@
  * Central configuration for the Weatherman application
  */
 
-// Wake phrase for voice activation
-export const WAKE_PHRASE = 'good morning weatherbot';
+// Wake word for voice activation (single word for iOS compatibility)
+export const WAKE_PHRASE = 'ready';
 
 // Predefined user profiles
 // Note: IDs match server format (4yo-girl, 7yo-boy, 10yo-boy)

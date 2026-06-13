@@ -45,7 +45,7 @@ test.describe('Voice Weather Clothing Workflow', () => {
       // to inject speech recognition events
       await page.evaluate(() => {
         const event = new CustomEvent('speechrecognition', {
-          detail: { transcript: 'good morning weatherbot', confidence: 0.9 }
+          detail: { transcript: 'ready what should I wear', confidence: 0.9 }
         });
         window.dispatchEvent(event);
       });

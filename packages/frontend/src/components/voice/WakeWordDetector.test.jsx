@@ -64,7 +64,7 @@ describe('WakeWordDetector', () => {
       );
 
       expect(screen.getByText('Waiting for wake phrase')).toBeInTheDocument();
-      expect(screen.getByText(/Say "good morning weatherbot" to start/)).toBeInTheDocument();
+      expect(screen.getByText(/Say "ready" to start/)).toBeInTheDocument();
       expect(screen.getByText('👂')).toBeInTheDocument();
       expect(screen.getByText('Stop')).toBeInTheDocument();
     });
@@ -80,7 +80,7 @@ describe('WakeWordDetector', () => {
       );
 
       // Should show wake phrase twice - once in subtitle and once prominently
-      const wakePhrasesElements = screen.getAllByText(/good morning weatherbot/i);
+      const wakePhrasesElements = screen.getAllByText(/ready/i);
       expect(wakePhrasesElements.length).toBeGreaterThan(0);
     });
 

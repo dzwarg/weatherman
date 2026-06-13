@@ -17,9 +17,9 @@ import {
 describe('voiceUtils', () => {
   describe('containsWakePhrase', () => {
     it('should detect wake phrase in transcript', () => {
-      expect(containsWakePhrase('good morning weatherbot')).toBe(true);
-      expect(containsWakePhrase('Good morning weatherbot')).toBe(true);
-      expect(containsWakePhrase('hey good morning weatherbot')).toBe(true);
+      expect(containsWakePhrase('ready')).toBe(true);
+      expect(containsWakePhrase('Ready')).toBe(true);
+      expect(containsWakePhrase('hey ready')).toBe(true);
     });
 
     it('should return false for transcripts without wake phrase', () => {
@@ -30,12 +30,12 @@ describe('voiceUtils', () => {
 
   describe('removeWakePhrase', () => {
     it('should remove wake phrase from transcript', () => {
-      const result = removeWakePhrase('good morning weatherbot what should I wear');
+      const result = removeWakePhrase('ready what should I wear');
       expect(result).toBe('what should I wear');
     });
 
     it('should trim whitespace', () => {
-      const result = removeWakePhrase('good morning weatherbot   what should I wear');
+      const result = removeWakePhrase('ready   what should I wear');
       expect(result).toBe('what should I wear');
     });
   });

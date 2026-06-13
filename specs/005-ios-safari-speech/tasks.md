@@ -111,19 +111,19 @@
 
 - [x] T020 [P] Run ESLint and production build in `packages/frontend` (`npm run lint && npm run build`); confirm zero lint errors and successful build
 
-- [ ] T021 Change `WAKE_PHRASE` constant in `packages/frontend/src/utils/constants.js` from `'good morning weatherbot'` to `'ready'` (lowercase, single word, matching the iOS wake word constraint from spec)
+- [x] T021 Change `WAKE_PHRASE` constant in `packages/frontend/src/utils/constants.js` from `'good morning weatherbot'` to `'ready'` (lowercase, single word, matching the iOS wake word constraint from spec)
 
-- [ ] T022 [P] Update `packages/frontend/src/utils/voiceUtils.test.js` — replace all occurrences of `'good morning weatherbot'` in test assertions with `'ready'` (wake phrase detection tests, `removeWakePhrase` tests)
+- [x] T022 [P] Update `packages/frontend/src/utils/voiceUtils.test.js` — replace all occurrences of `'good morning weatherbot'` in test assertions with `'ready'` (wake phrase detection tests, `removeWakePhrase` tests)
 
-- [ ] T023 [P] Update `packages/frontend/src/services/voiceService.test.js` — replace all occurrences of `'good morning weatherbot'` in test transcripts with `'ready'`
+- [x] T023 [P] Update `packages/frontend/src/services/voiceService.test.js` — replace all occurrences of `'good morning weatherbot'` in test transcripts with `'ready'`
 
-- [ ] T024 [P] Update `packages/frontend/src/components/voice/WakeWordDetector.test.jsx` — replace `'good morning weatherbot'` with `'ready'` in test assertions (UI text checks on lines 67, 83)
+- [x] T024 [P] Update `packages/frontend/src/components/voice/WakeWordDetector.test.jsx` — replace `'good morning weatherbot'` with `'ready'` in test assertions (UI text checks on lines 67, 83)
 
-- [ ] T025 [P] Update E2E test files in `packages/frontend/tests/e2e/` — replace `'good morning weatherbot'` and `'weatherbot'` wake word references with `'ready'` in `voice-workflow.test.js`, `voice-workflow.spec.js`, and `README.md`
+- [x] T025 [P] Update E2E test files in `packages/frontend/tests/e2e/` — replace `'good morning weatherbot'` and `'weatherbot'` wake word references with `'ready'` in `voice-workflow.test.js`, `voice-workflow.spec.js`, and `README.md`
 
-- [ ] T026 Run full test suite with coverage in `packages/frontend` (`npm run test:coverage`); confirm all tests pass after wake word change
+- [x] T026 Run full test suite with coverage in `packages/frontend` (`npm run test:coverage`); confirm all tests pass after wake word change
 
-- [ ] T027 [P] Run ESLint and production build in `packages/frontend` (`npm run lint && npm run build`); confirm zero failures
+- [x] T027 [P] Run ESLint and production build in `packages/frontend` (`npm run lint && npm run build`); confirm zero failures
 
 - [ ] T028 Execute all 8 manual test scenarios from `specs/005-ios-safari-speech/quickstart.md`; mark each item complete; record any failures as issues before closing the feature
 
