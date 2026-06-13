@@ -220,4 +220,4 @@ Task T016: "Hook error state tests"     ← after T011
 |------|--------|------|-------------|
 | 2026-06-13 | `a34d784` | T001–T020 | Full iOS/Safari speech compatibility (US1, US2, US3, original polish) |
 | 2026-06-13 | `ee4e9dd` | T021–T027 | Change wake word from 'good morning weatherbot' to 'ready'; update all tests; re-validate |
-| 2026-06-13 | (pending) | T029–T030 | Fix `startListening()` to use `continuous: true` + silence timer for iOS multi-word query capture; update tests |
+| 2026-06-13 | `fa8c992` | T029–T030 | Fix `startListening()` to use `continuous: true` + silence timer for iOS multi-word query capture; update tests |

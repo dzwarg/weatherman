@@ -22,7 +22,7 @@ export const TIMEOUTS = {
 
 // Claude API settings
 export const CLAUDE_SETTINGS = {
-  model: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
+  model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-6',
   maxTokens: 1024,
   temperature: 0.7,
 };

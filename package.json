@@ -1,6 +1,6 @@
 {
   "name": "weatherman",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Voice-activated weather clothing advisor PWA for children ages 4-10",
   "private": true,
   "workspaces": [

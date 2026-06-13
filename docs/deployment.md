@@ -158,7 +158,7 @@ WEATHER_API_URL=https://api.openweathermap.org/data/2.5
 
 # Claude API (optional - falls back to rule-based)
 ANTHROPIC_API_KEY=sk-ant-api03-your_key_here
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-sonnet-4-6
 
 # CORS Configuration
 ALLOWED_ORIGINS=https://weatherman.app,https://www.weatherman.app

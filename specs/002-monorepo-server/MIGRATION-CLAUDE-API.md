@@ -58,7 +58,7 @@ This document outlines the migration from local Ollama service to Claude API (An
 1. **`packages/server/.env.example`**
    - Replace Ollama variables with Claude variables
    - Add example: `ANTHROPIC_API_KEY=sk-ant-...`
-   - Add optional: `CLAUDE_MODEL=claude-3-5-sonnet-20241022`
+   - Add optional: `CLAUDE_MODEL=claude-sonnet-4-6`
 
 2. **`packages/server/package.json`**
    - Add dependency: `@anthropic-ai/sdk`
@@ -225,7 +225,7 @@ OLLAMA_MODEL=mistral:latest
 ### After (Claude API)
 ```bash
 ANTHROPIC_API_KEY=sk-ant-api03-...
-CLAUDE_MODEL=claude-3-5-sonnet-20241022  # optional, with default
+CLAUDE_MODEL=claude-sonnet-4-6  # optional, with default
 ```
 
 ## Testing Strategy
